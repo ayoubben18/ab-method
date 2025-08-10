@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/ayoubben18/ab-method/compare/v1.1.1...v1.1.2) (2025-08-10)
+
+
+### Bug Fixes
+
+* create-mission now properly loads utils files before creating missions ([6d84217](https://github.com/ayoubben18/ab-method/commit/6d8421775fb70d83d4c7411ca8896ad526b96083))
+
 ## [1.1.1](https://github.com/ayoubben18/ab-method/compare/v1.1.0...v1.1.1) (2025-08-10)
 
 
