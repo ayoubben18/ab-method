@@ -22,7 +22,17 @@ From progress tracker, find the next uncompleted mission and determine its type:
 - **Frontend Mission** → Will use `.ab-method/utils/frontend-mission.md`
 - **Planning Mission** → Will use `.ab-method/utils/planning-mission.md`
 
-### 4. Create Mission Document
+### 4. Load Utils File and Gather Context
+**CRITICAL: Read the appropriate utils file FIRST to understand what context is needed:**
+
+1. **Read the relevant utils file** (backend-mission.md, frontend-mission.md, or planning-mission.md)
+2. **Check `.ab-method/structure/index.yaml`** to find where architecture docs are located
+3. **Based on the utils file guidance**, read the architecture files that are relevant for this mission type:
+   - The utils file will specify which architecture docs to load
+   - Use paths from index.yaml, don't hardcode them
+   - Gather patterns, tech stack, and existing implementations as specified by utils
+
+### 5. Create Mission Document
 Create `mission-N-[description].md` in task folder with initial structure:
 ```markdown
 # Mission N: [Description]
@@ -62,36 +72,36 @@ Wait for user confirmation before continuing.
 
 ### 6. Execute Mission Based on Type
 
-#### For Backend Mission:
-Load `.ab-method/utils/backend-mission.md` which will:
-- Guide architecture analysis
-- Read from architecture docs (delegated to utils)
-- Coordinate backend-architect and backend-developer agents
+**Use the context gathered in Step 4 to guide agent deployment:**
 
+#### For Backend Mission:
 **Phase 1: Architecture (backend-architect agent)**
-- Utils file handles reading architecture docs
-- Agent creates architecture plan
+Deploy with context gathered from utils file:
+- Provide architecture patterns loaded in Step 4
+- Include tech stack information
+- Share existing endpoints and services
+- Agent creates detailed architecture plan
 - Updates mission document
 
 **Phase 2: Implementation (backend-developer agent)**
+Deploy with architecture plan:
 - Reads architecture plan from mission doc
-- Implements changes
+- Implements changes following patterns
 - Updates progress continuously
 
 #### For Frontend Mission:
-Load `.ab-method/utils/frontend-mission.md` which will:
-- Guide UX/component analysis
-- Read from architecture docs (delegated to utils)
-- Coordinate UX expert and frontend-developer agents
-
 **Phase 1: Architecture (UX expert agent)**
-- Utils file handles reading architecture docs
+Deploy with context gathered from utils file:
+- Provide component patterns loaded in Step 4
+- Include design system/styling approach
+- Share backend types if available
 - Agent creates frontend plan
 - Updates mission document
 
 **Phase 2: Implementation (frontend-developer agent)**
+Deploy with architecture plan:
 - Reads architecture plan from mission doc
-- Implements components
+- Implements components following patterns
 - Updates progress continuously
 
 ### 7. Update Progress Throughout
@@ -141,10 +151,16 @@ When mission is fully complete:
 1. User: "Create next mission"
 2. System: "Which task are we creating a mission for?"
 3. User: "todo-table"
-4. System: Creates mission doc with brainstormed status
-5. System: "Please validate to proceed"
-6. User: "Validated"
-7. System: Executes mission using appropriate utils file
+4. System: 
+   - Reads progress-tracker.md to identify next mission (e.g., "Backend API")
+   - Reads `.ab-method/utils/backend-mission.md` to understand what context is needed
+   - Checks `.ab-method/structure/index.yaml` for architecture doc paths
+   - Reads relevant architecture docs as specified by utils file
+   - Gathers patterns, tech stack, existing code structure
+5. System: Creates mission doc with all gathered context and brainstormed status
+6. System: "Please validate to proceed"
+7. User: "Validated"
+8. System: Deploys agents with the pre-gathered context
 
 ## Remember
 - Always ask for task name if not provided
