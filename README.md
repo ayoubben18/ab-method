@@ -38,6 +38,10 @@ The AB Method is an incremental task management system designed specifically for
 ## 🏗️ System Architecture
 
 ```
+.claude/
+└── commands/
+    └── ab-master.md    # Entry point slash command
+
 .ab-method/
 ├── core/                     # Core workflow files
 │   ├── analyze-project.md    # Project analysis orchestrator
@@ -56,10 +60,7 @@ The AB Method is an incremental task management system designed specifically for
 │
 ├── structure/               # Configuration
 │   └── index.yaml          # Paths and structure configuration
-│
-└── .claude/
-    └── commands/
-        └── ab-master.md    # Entry point slash command
+
 
 docs/
 └── architecture/           # Generated architecture docs
