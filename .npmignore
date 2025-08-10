@@ -1,0 +1,21 @@
+# Source files not needed in npm package
+.github/
+docs/
+tasks/
+
+# Config files
+.gitignore
+.releaserc.json
+
+# Development files
+*.log
+node_modules/
+.DS_Store
+
+# Keep only essential files
+# cli.js
+# .ab-method/
+# .claude/
+# README.md
+# LICENSE
+# package.json
