@@ -1,3 +1,17 @@
+# 1.0.0 (2025-08-10)
+
+
+### Bug Fixes
+
+* add package-lock.json for GitHub Actions ([5714b48](https://github.com/ayoubben18/ab-method/commit/5714b48b1397ae11e5a7df3fd21b108973b0b138))
+* remove npm publishing configuration ([bc2d806](https://github.com/ayoubben18/ab-method/commit/bc2d806b1d58c646c2347bbe37fe59fec91909da))
+* update repository URL in package.json ([45e40d8](https://github.com/ayoubben18/ab-method/commit/45e40d8ee1c07fb0a3bd2ccc00bc89478d4f9ecb))
+
+
+### Features
+
+* first boilerplate ([c733974](https://github.com/ayoubben18/ab-method/commit/c7339740d222751b8f7d3c8854dd608b92b3132e))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
