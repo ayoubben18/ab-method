@@ -2,6 +2,27 @@
 
 > A revolutionary approach to software development that transforms problems into focused, incremental missions using Claude Code's specialized subagents.
 
+## 🎯 Quick Installation
+
+Install AB Method in your project with a single command:
+
+```bash
+npx ab-method
+```
+
+This will:
+- ✅ Install all AB Method workflows in `.ab-method/`
+- ✅ Add the `/ab-master` command to Claude Code
+- ✅ Create necessary directories (`docs/architecture/`, `tasks/`)
+- ✅ Set up or update `CLAUDE.md` with instructions
+
+After installation, just open Claude Code and run:
+```bash
+/ab-master
+```
+
+That's it! You're ready to start using the AB Method.
+
 ## 📋 Table of Contents
 - [Overview](#overview)
 - [Core Philosophy](#core-philosophy)
