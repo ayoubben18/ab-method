@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/ayoubben18/ab-method/compare/v1.1.0...v1.1.1) (2025-08-10)
+
+
+### Bug Fixes
+
+* analyze-project now creates all 6 architecture files and tasks in docs/tasks ([cfbdd0d](https://github.com/ayoubben18/ab-method/commit/cfbdd0d6284a589a500aeb6e3fadb794d77cbde5))
+
 # [1.1.0](https://github.com/ayoubben18/ab-method/compare/v1.0.0...v1.1.0) (2025-08-10)
 
 
