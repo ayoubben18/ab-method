@@ -10,15 +10,19 @@ Prompt the user with:
 ```
 Project Architecture Analysis
 =============================
-I will deploy 2 specialized subagents to analyze your project in parallel:
+I will deploy 6 specialized subagents to analyze your project in parallel:
 
 1. Frontend Expert Agent - Will analyze client-side architecture, components, and patterns
 2. Backend Architect Agent - Will analyze server-side architecture, APIs, and services
+3. Tech Stack Analyzer - Will document all technologies, frameworks, and tools
+4. Entry Points Mapper - Will map application entry points and startup flow
+5. External Services Analyzer - Will identify third-party integrations and APIs
+6. Constraints Documenter - Will capture technical limitations and architectural decisions
 
 These agents will work simultaneously to create comprehensive architecture documentation.
 
-Would you like to proceed with both analyses, or prefer to analyze only one part?
-- [1] Full Analysis (both agents in parallel)
+Would you like to proceed with the full analysis, or prefer to analyze only specific parts?
+- [1] Full Analysis (all 6 agents in parallel)
 - [2] Frontend Only
 - [3] Backend Only
 ```
@@ -26,7 +30,7 @@ Would you like to proceed with both analyses, or prefer to analyze only one part
 ### 2. Deploy Agents Based on Choice
 
 #### Option 1: Full Analysis (Parallel Execution)
-Deploy both agents simultaneously using Task tool:
+Deploy all agents simultaneously using Task tool:
 
 ```
 Agents to deploy in parallel:
@@ -37,6 +41,22 @@ Agents to deploy in parallel:
 2. Task: "Analyze Backend Architecture"  
    - subagent_type: "backend-architect"
    - prompt: "Analyze the backend architecture following the workflow in .ab-method/core/analyze-backend.md. Check .ab-method/structure/index.yaml for output paths and create comprehensive backend-patterns.md documentation."
+
+3. Task: "Analyze Tech Stack"
+   - subagent_type: "backend-architect"
+   - prompt: "Analyze the project's technology stack and create docs/architecture/tech-stack.md. Document all languages, frameworks, databases, and tools used. Check package.json, requirements.txt, go.mod, etc."
+
+4. Task: "Analyze Entry Points"
+   - subagent_type: "backend-architect"  
+   - prompt: "Map all application entry points and create docs/architecture/entry-points.md. Document main files, routes, CLI commands, and how the application starts."
+
+5. Task: "Analyze External Services"
+   - subagent_type: "backend-architect"
+   - prompt: "Identify all external services/APIs and create docs/architecture/external-services.md. Document third-party integrations, APIs consumed, cloud services, and dependencies."
+
+6. Task: "Analyze Project Constraints"
+   - subagent_type: "backend-architect"
+   - prompt: "Document project constraints and create docs/architecture/project-constraints.md. Include technical limitations, business rules, compliance requirements, and architectural decisions."
 ```
 
 #### Option 2: Frontend Only
