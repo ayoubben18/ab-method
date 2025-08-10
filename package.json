@@ -13,7 +13,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/ab-method.git"
+    "url": "https://github.com/ayoubben18/ab-method.git"
   },
   "scripts": {
     "semantic-release": "semantic-release"
