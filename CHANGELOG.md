@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/ayoubben18/ab-method/compare/v1.0.0...v1.1.0) (2025-08-10)
+
+
+### Features
+
+* add npm package with CLI installer for easy setup ([838dbc1](https://github.com/ayoubben18/ab-method/commit/838dbc160d61f0e3ea009c125d0cf227b181085b))
+
 # 1.0.0 (2025-08-10)
 
 
