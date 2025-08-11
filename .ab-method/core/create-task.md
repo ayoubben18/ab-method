@@ -14,13 +14,31 @@ Gather from user:
 - **Context**: What should we use, follow, or pay attention to?
 - **End Result**: What should the final solution look like?
 
-### 2. Identify Task Type
-Determine the scope:
+### 2. Analyze Project Context
+**CRITICAL: Before creating any missions, understand the existing codebase:**
+
+1. **Check `.ab-method/structure/index.yaml`** for architecture doc locations
+2. **Read architecture documentation** to understand:
+   - `tech-stack.md` - What technologies are in use
+   - `entry-points.md` - Existing routes and entry points
+   - `frontend-patterns.md` - Component structure and state management
+   - `backend-patterns.md` - API patterns and database approach
+   - `external-services.md` - Third-party integrations
+   - `project-constraints.md` - Limitations and requirements
+
+3. **Analyze relevant code areas** based on the problem:
+   - Search for similar existing implementations
+   - Understand file organization patterns
+   - Identify reusable components/services
+   - Check for existing types/models related to the task
+
+### 3. Identify Task Type
+Based on problem AND project analysis:
 - **Frontend**: Client-side only
 - **Backend**: Server-side only  
 - **Full-stack**: Both frontend and backend
 
-### 3. Create Task Document
+### 4. Create Task Document
 Based on `.ab-method/structure/index.yaml`, create a task folder with:
 ```
 tasks/[task-name]/
@@ -50,10 +68,10 @@ Current: Brainstormed
 [Frontend/Backend/Full-stack]
 
 ## Missions
-- [ ] Mission 1: [Define based on task type and problem]
-- [ ] Mission 2: [Build on Mission 1]
-- [ ] Mission 3: [Build on Mission 2]
-- [ ] Mission N: [Continue as needed]
+- [ ] Mission 1: [Frontend/Backend] - [Specific action based on project analysis]
+- [ ] Mission 2: [Frontend/Backend] - [Build on Mission 1]
+- [ ] Mission 3: [Frontend/Backend] - [Build on Mission 2]
+- [ ] Mission N: [Frontend/Backend] - [Continue as needed]
 
 ## Notes
 - Task created: YYYY-MM-DD
@@ -62,34 +80,36 @@ Current: Brainstormed
 - Each mission builds incrementally on previous ones
 ```
 
-### 5. Define All Missions Based on Task Type
+### 5. Define All Missions Based on Task Type and Project Analysis
+
+**IMPORTANT: Define missions based on actual project structure discovered in Step 2, not generic templates**
 
 #### For Frontend Tasks:
-- Mission 1: Set up component structure
-- Mission 2: Implement data fetching/state
-- Mission 3: Add styling and interactions
-- Mission N: Testing and refinements
+- Mission 1: Frontend - [Based on component patterns found in frontend-patterns.md]
+- Mission 2: Frontend - [Based on state management approach in use]
+- Mission 3: Frontend - [Based on styling methodology discovered]
+- Mission N: Frontend - [Testing using project's test framework]
 
 #### For Backend Tasks:
-- Mission 1: Define data models/schema
-- Mission 2: Create API endpoints
-- Mission 3: Add business logic
-- Mission N: Testing and optimization
+- Mission 1: Backend - [Based on database patterns in backend-patterns.md]
+- Mission 2: Backend - [Following API style from entry-points.md]
+- Mission 3: Backend - [Using services pattern from existing code]
+- Mission N: Backend - [Testing with project's test setup]
 
 #### For Full-stack Tasks (Backend First - Default):
 **Note: We start with backend to provide ready types and data for frontend (unless user prefers otherwise)**
-- Mission 1: Backend - Define models and database schema
-- Mission 2: Backend - Create API endpoints
-- Mission 3: Frontend - Build components with types from backend
-- Mission 4: Frontend - Connect to backend APIs
-- Mission N: Integration testing and polish
+- Mission 1: Backend - [Specific action based on backend-patterns.md]
+- Mission 2: Backend - [API following existing patterns]
+- Mission 3: Frontend - [Components using backend types]
+- Mission 4: Frontend - [Integration with created APIs]
+- Mission N: Full-stack - [End-to-end testing]
 
 #### For Full-stack Tasks (Frontend First - If User Requests):
-- Mission 1: Frontend - Create UI components with mock data
-- Mission 2: Frontend - Define expected data structures
-- Mission 3: Backend - Build API to match frontend needs
-- Mission 4: Integration - Connect and refine
-- Mission N: Testing and optimization
+- Mission 1: Frontend - [UI based on existing component patterns]
+- Mission 2: Frontend - [State management following project approach]
+- Mission 3: Backend - [API matching frontend requirements]
+- Mission 4: Full-stack - [Integration and refinement]
+- Mission N: Full-stack - [Testing and optimization]
 
 ### 6. Confirm with User
 Show the task document with all missions and ask:
@@ -113,16 +133,19 @@ tasks/todo-table/
   progress-tracker.md
 ```
 
-With missions:
-- Mission 1: Backend - Create todo model and database schema
-- Mission 2: Backend - Build CRUD API endpoints for todos
-- Mission 3: Frontend - Create table component with TypeScript types from backend
-- Mission 4: Frontend - Connect table to API endpoints
-- Mission 5: Add filtering and sorting features
+With missions (after analyzing project):
+- Mission 1: Backend - Create todo model using Prisma schema (found in project)
+- Mission 2: Backend - Build REST API endpoints following /api pattern
+- Mission 3: Frontend - Create table component using existing DataTable pattern
+- Mission 4: Frontend - Connect using project's API client service
+- Mission 5: Full-stack - Add filtering using existing query patterns
 
 ## Remember
+- **ALWAYS analyze project context first** - Never create generic missions
 - Check `.ab-method/structure/index.yaml` for paths
-- Define all missions when creating the task
+- Read ALL architecture docs before defining missions
+- Every mission must specify Frontend/Backend/Full-stack
+- Define missions based on discovered patterns, not templates
 - Default to backend-first for full-stack tasks
 - Each mission incrementally builds on the previous
 - Keep task document as working scratchpad
