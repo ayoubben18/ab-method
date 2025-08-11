@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/ayoubben18/ab-method/compare/v1.1.2...v1.1.3) (2025-08-11)
+
+
+### Bug Fixes
+
+* create-task now analyzes project context before creating missions ([0857b1a](https://github.com/ayoubben18/ab-method/commit/0857b1a5b49b7b36316b0b1b91d4f565ba4df295))
+
 ## [1.1.2](https://github.com/ayoubben18/ab-method/compare/v1.1.1...v1.1.2) (2025-08-10)
 
 
