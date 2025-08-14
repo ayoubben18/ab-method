@@ -30,7 +30,6 @@ From architecture docs, identify:
 - State management approach
 - Styling methodology (CSS Modules/Tailwind/styled)
 - Data fetching patterns
-- Testing approach
 
 ### 4. Check Previous Missions
 If backend missions completed, extract:
@@ -67,14 +66,12 @@ Context provided:
 - Architecture plan from mission doc
 - Component patterns from docs
 - Backend API endpoints available
-- Testing patterns
 
 Agent should:
 1. Implement planned components
 2. Connect to backend APIs
 3. Add styling following patterns
-4. Run tests continuously
-5. Update mission doc with progress
+4. Update mission doc with progress
 ```
 
 ## Key Guidelines for Agents
@@ -107,10 +104,6 @@ Ensure agents update these sections:
 - /components/TodoTable.tsx - Created
 - /hooks/useTodos.ts - Created
 - /styles/TodoTable.module.css - In progress
-
-## Testing
-- Component tests: 5/8 passing
-- Integration tests: Pending
 ```
 
 ## Backend Integration

@@ -30,7 +30,6 @@ From architecture docs, identify:
 - Database approach (ORM/raw SQL)
 - Authentication method
 - File organization pattern
-- Testing methodology
 
 ## Agent Coordination
 
@@ -47,8 +46,7 @@ Agent should:
 1. Analyze current backend implementation
 2. Define files to create/modify
 3. Create DTOs using database types (e.g., TodosTable["status"])
-4. Plan test coverage
-5. Document in mission file
+4. Document in mission file
 ```
 
 ### Phase 2: Backend Developer Agent
@@ -57,14 +55,12 @@ Deploy with architecture plan:
 Task: "Implement backend for [mission]"
 Context provided:
 - Architecture plan from mission doc
-- Testing patterns from docs
 - Code style from existing files
 
 Agent should:
 1. Implement planned changes
-2. Run tests continuously
-3. Update mission doc with progress
-4. Mark completed items
+2. Update mission doc with progress
+3. Mark completed items
 ```
 
 ## Key Guidelines for Agents
@@ -80,7 +76,6 @@ Agent should:
 - Update mission status: In dev → Testing → Completed
 - Mark each completed item in architecture plan
 - Document all file changes
-- Run tests after each major change
 - Update progress tracker
 
 ## Mission Document Updates
@@ -90,16 +85,11 @@ Ensure agents update these sections:
 ✓ Models defined
 ✓ Routes planned
 ⏳ Services in progress
-○ Tests pending
 
 ## Files Modified
 - /api/todos/route.ts - Created
 - /models/todo.ts - Created
 - /services/todoService.ts - In progress
-
-## Testing
-- Unit tests: 8/10 passing
-- Integration tests: Pending
 ```
 
 ## Remember

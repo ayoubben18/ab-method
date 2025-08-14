@@ -10,7 +10,7 @@ Prompt the user with:
 ```
 Project Architecture Analysis
 =============================
-I will deploy 6 specialized subagents to analyze your project in parallel:
+I will deploy 7 specialized subagents to analyze your project in parallel:
 
 1. Frontend Expert Agent - Will analyze client-side architecture, components, and patterns
 2. Backend Architect Agent - Will analyze server-side architecture, APIs, and services
@@ -18,11 +18,12 @@ I will deploy 6 specialized subagents to analyze your project in parallel:
 4. Entry Points Mapper - Will map application entry points and startup flow
 5. External Services Analyzer - Will identify third-party integrations and APIs
 6. Constraints Documenter - Will capture technical limitations and architectural decisions
+7. Testing Strategy Analyzer - Will document testing frameworks, patterns, and coverage
 
 These agents will work simultaneously to create comprehensive architecture documentation.
 
 Would you like to proceed with the full analysis, or prefer to analyze only specific parts?
-- [1] Full Analysis (all 6 agents in parallel)
+- [1] Full Analysis (all 7 agents in parallel)
 - [2] Frontend Only
 - [3] Backend Only
 ```
@@ -57,6 +58,10 @@ Agents to deploy in parallel:
 6. Task: "Analyze Project Constraints"
    - subagent_type: "backend-architect"
    - prompt: "Document project constraints and create docs/architecture/project-constraints.md. Include technical limitations, business rules, compliance requirements, and architectural decisions."
+
+7. Task: "Analyze Testing Strategy"
+   - subagent_type: "general-purpose"
+   - prompt: "Analyze the project's testing strategy and create docs/architecture/testing-strategy.md. Document test frameworks (Jest, Vitest, Pytest, etc.), test file patterns, test commands, coverage requirements, E2E testing setup, and any testing conventions. Check package.json scripts, test config files, and example test files."
 ```
 
 #### Option 2: Frontend Only

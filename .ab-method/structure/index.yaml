@@ -11,6 +11,7 @@ project_structure:
         - backend-patterns.md
         - external-services.md
         - project-constraints.md
+        - testing-strategy.md
     
     tasks:
       # Example task structure

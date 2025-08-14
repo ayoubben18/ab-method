@@ -95,44 +95,6 @@ async function install() {
       log('✅ Installed /ab-master command', COLORS.green);
     }
 
-    // Update or create CLAUDE.md
-    const claudeMdPath = path.join(targetDir, 'CLAUDE.md');
-    const claudeMdContent = `# Claude Code Instructions
-
-## AB Method
-The AB Method is installed in this project. Use the following command to get started:
-
-\`\`\`
-/ab-master
-\`\`\`
-
-This will show you all available workflows for incremental task management.
-
-### Key Workflows:
-- \`analyze-project\` - Analyze project architecture
-- \`create-task\` - Create a new development task
-- \`create-mission\` - Create a mission for current task
-- \`resume-task\` - Resume an existing task
-- \`resume-mission\` - Resume an in-progress mission
-
-### Important Files:
-- \`.ab-method/structure/index.yaml\` - Configuration for paths and structure
-- \`docs/architecture/\` - Generated architecture documentation
-- \`tasks/\` - Task and mission tracking
-
-Remember: Always check \`.ab-method/structure/index.yaml\` first to see where files should be created or read from.
-`;
-
-    if (fs.existsSync(claudeMdPath)) {
-      const existingContent = fs.readFileSync(claudeMdPath, 'utf8');
-      if (!existingContent.includes('AB Method')) {
-        fs.appendFileSync(claudeMdPath, '\n\n' + claudeMdContent);
-        log('✅ Updated CLAUDE.md with AB Method instructions', COLORS.green);
-      }
-    } else {
-      fs.writeFileSync(claudeMdPath, claudeMdContent);
-      log('✅ Created CLAUDE.md with AB Method instructions', COLORS.green);
-    }
 
     // Create docs/architecture directory
     const docsDir = path.join(targetDir, 'docs', 'architecture');
@@ -141,11 +103,11 @@ Remember: Always check \`.ab-method/structure/index.yaml\` first to see where fi
       log('✅ Created docs/architecture directory', COLORS.green);
     }
 
-    // Create tasks directory
-    const tasksDir = path.join(targetDir, 'tasks');
+    // Create docs/tasks directory
+    const tasksDir = path.join(targetDir, 'docs', 'tasks');
     if (!fs.existsSync(tasksDir)) {
       fs.mkdirSync(tasksDir, { recursive: true });
-      log('✅ Created tasks directory', COLORS.green);
+      log('✅ Created docs/tasks directory', COLORS.green);
     }
 
     log('\n✨ AB Method installed successfully!', COLORS.bright + COLORS.green);

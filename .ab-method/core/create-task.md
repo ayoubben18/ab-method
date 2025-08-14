@@ -8,11 +8,47 @@ Create a focused task following the AB Method principle: one task at a time to c
 
 ## Process
 
-### 1. Define Problem Statement
-Gather from user:
+### 1. Define Problem Statement (Interactive Gathering)
+**CRITICAL: Keep asking questions until you have ALL necessary information**
+
+#### Initial Questions:
 - **Problem**: What needs to be solved?
 - **Context**: What should we use, follow, or pay attention to?
 - **End Result**: What should the final solution look like?
+
+#### Follow-up Questions (Ask until clear):
+
+**If the problem is vague**, ask:
+- "Can you describe a specific user action or scenario?"
+- "What's currently broken or missing?"
+- "What triggered this need?"
+
+**For file/code modifications**, ask:
+- "Which specific files or components need to be modified?"
+- "Can you point me to an example in the codebase?"
+- "Should this follow a pattern from existing code?"
+
+**For new features**, ask:
+- "Where in the application will this appear?"
+- "Which existing features will this interact with?"
+- "Do you have a design or mockup?"
+
+**For data/API changes**, ask:
+- "What data fields are involved?"
+- "Which endpoints need to be created/modified?"
+- "What's the data flow (frontend → backend → database)?"
+
+**For UI/UX tasks**, ask:
+- "Can you describe the user interaction step-by-step?"
+- "Which pages/screens are affected?"
+- "Are there similar components I should match?"
+
+#### Stop Conditions:
+Only proceed to Step 2 when you have:
+✓ Clear understanding of WHAT needs to be done
+✓ Specific files/areas that will be affected
+✓ Expected behavior/output defined
+✓ Any constraints or requirements identified
 
 ### 2. Analyze Project Context
 **CRITICAL: Before creating any missions, understand the existing codebase:**
@@ -25,6 +61,7 @@ Gather from user:
    - `backend-patterns.md` - API patterns and database approach
    - `external-services.md` - Third-party integrations
    - `project-constraints.md` - Limitations and requirements
+   - `testing-strategy.md` - Test frameworks, patterns, and commands
 
 3. **Analyze relevant code areas** based on the problem:
    - Search for similar existing implementations
@@ -123,22 +160,70 @@ When user confirms, update status to 'Validated' and begin implementation.
 - **Backend first for full-stack** - Easier types and ready data for frontend
 - **Incremental building** - Each mission expands on previous work
 - **Avoid duplication** - Check if similar work was done in previous tasks
+- **No vague tasks** - Keep asking until you have specifics
 
-## Example
-User: "Create a todos table that fetches from API and displays in frontend"
+## ❌ Never Accept These Vague Requests:
+- "Make it better"
+- "Fix the bug" (which bug? where?)
+- "Add some tests" (for what? which files?)
+- "Improve performance" (of what specifically?)
+- "Make it look nice" (which component? what style?)
+- "Add CRUD operations" (for what entity? which endpoints?)
+- "Refactor the code" (which code? why? what's the goal?)
 
-Result (Backend First):
-```
-tasks/todo-table/
-  progress-tracker.md
-```
+## ✅ Instead, Get Specifics:
+- "Make the login form validation show inline errors"
+- "Fix the 404 error when deleting users from admin panel"
+- "Add unit tests for the payment service calculateTax function"
+- "Improve query performance for /api/reports endpoint"
+- "Update TodoCard component to match the new design system"
+- "Add CRUD for products with images and categories"
+- "Refactor auth middleware to use JWT instead of sessions"
+
+## Example: Interactive Information Gathering
+
+### Initial Request:
+User: "I want to add a search feature"
+
+### System Response (Too Vague):
+"I need more details to create a proper task. Let me ask some questions:
+
+1. **What type of search?** (users, products, content, etc.)
+2. **Where will the search appear?** (header, specific page, modal?)
+3. **What fields should be searchable?**"
+
+User: "Search for products on the shop page"
+
+### System Follow-up:
+"Good! Let me understand better:
+
+1. **Which fields?** (name, description, category, price range?)
+2. **Real-time or on submit?**
+3. **Any existing search components I should follow?**"
+
+User: "Search by name and category, real-time like the user filter"
+
+### System Final Clarification:
+"Perfect! Let me confirm:
+- Add product search to shop page
+- Search by: name and category
+- Real-time filtering (like existing user filter at /components/UserFilter.tsx)
+- Should this also include the dropdown filter pattern?
+
+One more thing: **Which API endpoint handles products?**"
+
+User: "/api/products - it already has query params support"
+
+### System Result:
+"Great! Now I have everything needed. Analyzing project..."
+
+*[Proceeds to Step 2 with clear context]*
 
 With missions (after analyzing project):
-- Mission 1: Backend - Create todo model using Prisma schema (found in project)
-- Mission 2: Backend - Build REST API endpoints following /api pattern
-- Mission 3: Frontend - Create table component using existing DataTable pattern
-- Mission 4: Frontend - Connect using project's API client service
-- Mission 5: Full-stack - Add filtering using existing query patterns
+- Mission 1: Backend - Extend /api/products query params for search
+- Mission 2: Frontend - Create ProductSearch component using UserFilter pattern
+- Mission 3: Frontend - Integrate search into shop page with real-time updates
+- Mission 4: Full-stack - Add debouncing and loading states
 
 ## Remember
 - **ALWAYS analyze project context first** - Never create generic missions
