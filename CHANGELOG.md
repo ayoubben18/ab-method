@@ -1,3 +1,19 @@
+# [2.0.0](https://github.com/ayoubben18/ab-method/compare/v1.1.3...v2.0.0) (2025-08-14)
+
+
+### Features
+
+* add dedicated test-mission workflow and testing-strategy documentation ([cc8df1c](https://github.com/ayoubben18/ab-method/commit/cc8df1cbc4795029864692bceca844cc7fc659a8))
+
+
+### BREAKING CHANGES
+
+* Testing is now a separate mission workflow instead of being part of implementation missions
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
 ## [1.1.3](https://github.com/ayoubben18/ab-method/compare/v1.1.2...v1.1.3) (2025-08-11)
 
 
