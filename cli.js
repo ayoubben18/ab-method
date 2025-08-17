@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+// const { execSync } = require('child_process'); // Removed - not needed anymore
 
 const COLORS = {
   reset: '\x1b[0m',
@@ -151,13 +151,21 @@ async function install() {
       log('\n🤖 Installing builtin agents...', COLORS.blue);
       
       try {
-        // Run the agents installation command
-        execSync('/agents', { stdio: 'inherit', cwd: targetDir });
-        log('✅ Builtin agents installed successfully', COLORS.green);
+        // Copy agents directory
+        const agentsSource = path.join(__dirname, '.claude', 'agents');
+        const agentsTarget = path.join(claudeDir, 'agents');
+        
+        if (fs.existsSync(agentsSource)) {
+          copyRecursiveSync(agentsSource, agentsTarget);
+          log('✅ Builtin agents installed successfully', COLORS.green);
+        } else {
+          log('⚠️  Agent files not found in package', COLORS.yellow);
+          log('   You can install them later by running: /agents', COLORS.white);
+        }
       } catch (error) {
         log('⚠️  Could not install builtin agents automatically', COLORS.yellow);
+        log('   Error:', error.message, COLORS.red);
         log('   You can install them manually by running: /agents', COLORS.white);
-        log('   Or install them later when you need them', COLORS.white);
       }
     }
 
