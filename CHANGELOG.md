@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/ayoubben18/ab-method/compare/v2.0.0...v2.1.0) (2025-08-17)
+
+
+### Features
+
+* add intelligent subagent integration and interactive mission clarification ([8817495](https://github.com/ayoubben18/ab-method/commit/88174952a4862d21303103616ad0d9f7f959af94))
+
 # [2.0.0](https://github.com/ayoubben18/ab-method/compare/v1.1.3...v2.0.0) (2025-08-14)
 
 
