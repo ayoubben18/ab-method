@@ -69,11 +69,34 @@ Only proceed to Step 2 when you have:
    - Identify reusable components/services
    - Check for existing types/models related to the task
 
-### 3. Identify Task Type
-Based on problem AND project analysis:
+### 3. Assess Task Complexity and Type
+Based on problem AND project analysis, determine both type and complexity:
+
+#### Task Types:
 - **Frontend**: Client-side only
 - **Backend**: Server-side only  
 - **Full-stack**: Both frontend and backend
+
+#### Task Complexity Assessment:
+**Simple Tasks** (Single mission - combine all steps):
+- Adding a single field to an existing form
+- Creating a basic CRUD operation for an existing entity
+- Simple component styling changes
+- Adding validation to an existing field
+- Creating a straightforward utility function
+- Basic text/content updates
+- Simple configuration changes
+- Adding a single endpoint that follows existing patterns
+
+**Complex Tasks** (Multiple missions - break down):
+- New feature with multiple components and backend changes
+- Implementing authentication/authorization
+- Complex data relationships or new entities
+- Multi-step user flows
+- Integration with external services
+- Major refactoring or architectural changes
+- Features requiring multiple API endpoints
+- Tasks involving file uploads, payments, or complex business logic
 
 ### 4. Create Task Document
 Based on `.ab-method/structure/index.yaml`, create a task folder with:
@@ -131,50 +154,72 @@ Current: Brainstormed
 - Agent outputs tracked for context window optimization
 ```
 
-### 5. Define All Missions Based on Task Type and Project Analysis
+### 5. Define Missions Based on Task Complexity and Project Analysis
 
 **IMPORTANT: Define missions based on actual project structure discovered in Step 2, not generic templates**
 
-#### For Frontend Tasks:
-- Mission 1: Frontend - [Based on component patterns found in frontend-patterns.md]
-- Mission 2: Frontend - [Based on state management approach in use]
-- Mission 3: Frontend - [Based on styling methodology discovered]
-- Mission N: Frontend - [Testing using project's test framework]
+#### For Simple Tasks:
+**Create a single compact mission that includes all necessary steps**
 
-#### For Backend Tasks:
-- Mission 1: Backend - [Based on database patterns in backend-patterns.md]
-- Mission 2: Backend - [Following API style from entry-points.md]
-- Mission 3: Backend - [Using services pattern from existing code]
-- Mission N: Backend - [Testing with project's test setup]
+##### Simple Frontend Tasks:
+- Mission 1: Frontend - [Complete implementation including component creation, styling, state management, and testing in one mission]
 
-#### For Full-stack Tasks (Backend First - Default):
+##### Simple Backend Tasks:
+- Mission 1: Backend - [Complete implementation including database changes, API endpoint, validation, and testing in one mission]
+
+##### Simple Full-stack Tasks:
+- Mission 1: Full-stack - [Complete end-to-end implementation including backend API, frontend component, and integration in one mission]
+
+#### For Complex Tasks:
+**Break down into logical, sequential missions**
+
+##### Complex Frontend Tasks:
+- Mission 1: Frontend - [Core component structure based on frontend-patterns.md]
+- Mission 2: Frontend - [State management and data flow]
+- Mission 3: Frontend - [Advanced features and interactions]
+- Mission N: Frontend - [Testing and polish]
+
+##### Complex Backend Tasks:
+- Mission 1: Backend - [Database schema and core models]
+- Mission 2: Backend - [API endpoints and business logic]
+- Mission 3: Backend - [Advanced features and integrations]
+- Mission N: Backend - [Testing and optimization]
+
+##### Complex Full-stack Tasks (Backend First - Default):
 **Note: We start with backend to provide ready types and data for frontend (unless user prefers otherwise)**
-- Mission 1: Backend - [Specific action based on backend-patterns.md]
-- Mission 2: Backend - [API following existing patterns]
-- Mission 3: Frontend - [Components using backend types]
-- Mission 4: Frontend - [Integration with created APIs]
-- Mission N: Full-stack - [End-to-end testing]
+- Mission 1: Backend - [Core data model and primary API]
+- Mission 2: Backend - [Additional endpoints and business logic]
+- Mission 3: Frontend - [Core UI components using backend types]
+- Mission 4: Frontend - [Advanced features and user interactions]
+- Mission N: Full-stack - [Integration testing and refinement]
 
-#### For Full-stack Tasks (Frontend First - If User Requests):
-- Mission 1: Frontend - [UI based on existing component patterns]
-- Mission 2: Frontend - [State management following project approach]
+##### Complex Full-stack Tasks (Frontend First - If User Requests):
+- Mission 1: Frontend - [Core UI and user flow]
+- Mission 2: Frontend - [Advanced interactions and state management]
 - Mission 3: Backend - [API matching frontend requirements]
-- Mission 4: Full-stack - [Integration and refinement]
-- Mission N: Full-stack - [Testing and optimization]
+- Mission 4: Backend - [Additional backend features and validation]
+- Mission N: Full-stack - [Integration and end-to-end testing]
 
 ### 6. Confirm with User
-Show the task document with all missions and ask:
-"I've created the task with all missions defined. Task status is set to 'Brainstormed'. For full-stack tasks, I've started with backend missions to provide ready types and data for the frontend. Ready to validate and start Mission 1?"
+Show the task document with defined missions and ask:
+
+**For Simple Tasks:**
+"I've analyzed this as a simple task that can be completed in a single mission. Task status is set to 'Brainstormed'. Ready to validate and start Mission 1?"
+
+**For Complex Tasks:**
+"I've created the task with multiple missions defined based on complexity analysis. Task status is set to 'Brainstormed'. For full-stack tasks, I've started with backend missions to provide ready types and data for the frontend. Ready to validate and start Mission 1?"
 
 When user confirms, update status to 'Validated' and begin implementation.
 
 ## Key Principles
 - **One task at a time** - Maintain focus, conserve context
+- **Complexity-driven mission planning** - Single missions for simple tasks, multiple missions only when genuinely complex
 - **All missions upfront** - Define complete roadmap when creating task
-- **Backend first for full-stack** - Easier types and ready data for frontend
-- **Incremental building** - Each mission expands on previous work
+- **Backend first for complex full-stack** - Easier types and ready data for frontend
+- **Incremental building** - Each mission expands on previous work (for complex tasks)
 - **Avoid duplication** - Check if similar work was done in previous tasks
 - **No vague tasks** - Keep asking until you have specifics
+- **Compact simplicity** - Don't over-engineer simple operations
 
 ## ❌ Never Accept These Vague Requests:
 - "Make it better"
@@ -233,11 +278,34 @@ User: "/api/products - it already has query params support"
 
 *[Proceeds to Step 2 with clear context]*
 
+**Complexity Assessment:** This is a complex task (new feature with multiple components)
+
 With missions (after analyzing project):
 - Mission 1: Backend - Extend /api/products query params for search
 - Mission 2: Frontend - Create ProductSearch component using UserFilter pattern
 - Mission 3: Frontend - Integrate search into shop page with real-time updates
 - Mission 4: Full-stack - Add debouncing and loading states
+
+## Simple Task Example
+
+### Initial Request:
+User: "Add an email field to the user registration form"
+
+### System Response:
+"I need to understand the scope:
+1. **Which registration form?** (path/component name)
+2. **Any specific validation rules?**
+3. **Should this be optional or required?**"
+
+User: "The /register page form, required field with email validation"
+
+### System Analysis:
+*[Analyzes project and finds existing form validation patterns]*
+
+**Complexity Assessment:** This is a simple task (single field addition with existing patterns)
+
+**Task Created with Single Mission:**
+- Mission 1: Full-stack - Add required email field to registration form with validation, following existing form patterns and validation rules in UserForm component
 
 ## Remember
 - **ALWAYS analyze project context first** - Never create generic missions
