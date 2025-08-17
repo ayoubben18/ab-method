@@ -1,3 +1,11 @@
+## [2.1.1](https://github.com/ayoubben18/ab-method/compare/v2.1.0...v2.1.1) (2025-08-17)
+
+
+### Bug Fixes
+
+* add missing @semantic-release/npm plugin and sync version to 2.1.0 ([d49ed62](https://github.com/ayoubben18/ab-method/commit/d49ed62caa95cfd04cb7c6bca64e77748f49dbbc))
+* add NPM_TOKEN to GitHub Actions workflow for npm publishing ([4af9d04](https://github.com/ayoubben18/ab-method/commit/4af9d04757e1274403c9106073333c7d794b0a10))
+
 # [2.1.0](https://github.com/ayoubben18/ab-method/compare/v2.0.0...v2.1.0) (2025-08-17)
 
 
