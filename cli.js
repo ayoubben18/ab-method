@@ -63,8 +63,44 @@ async function install() {
     }
   }
 
+  // Ask about builtin agents
+  log('🤖 Agent Configuration', COLORS.bright + COLORS.cyan);
+  log('=====================\n', COLORS.cyan);
+  log('The AB Method works with specialized Claude Code agents to improve development workflow.');
+  log('We have several builtin agents that integrate seamlessly with the AB Method:\n');
+  
+  log('Available builtin agents:', COLORS.yellow);
+  log('• shadcn-ui-adapter     - UI component creation and styling');
+  log('• nextjs-backend-architect - Next.js backend development');
+  log('• sst-cloud-architect   - Serverless infrastructure');
+  log('• vitest-component-tester - Component testing');
+  log('• playwright-e2e-tester - End-to-end testing');
+  log('• ascii-ui-mockup-generator - UI mockups and wireframes');
+  log('• mastra-ai-agent-builder - AI agent development');
+  log('• qa-code-auditor       - Code quality analysis');
+  
+  const readline = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  
+  log('\nThese agents help minimize context window usage and provide specialized expertise.');
+  const agentChoice = await new Promise(resolve => {
+    readline.question('\nDo you want to install these builtin agents? (Y/n): ', resolve);
+  });
+  readline.close();
+  
+  const installAgents = agentChoice.toLowerCase() !== 'n';
+  
+  if (installAgents) {
+    log('✅ Will install builtin agents', COLORS.green);
+  } else {
+    log('⏭️  Skipping builtin agents installation', COLORS.yellow);
+    log('   You can always install agents later or use your own custom agents', COLORS.white);
+  }
+
   try {
-    log('📦 Installing AB Method files...', COLORS.blue);
+    log('\n📦 Installing AB Method files...', COLORS.blue);
     
     // Create .ab-method directory structure
     const abMethodSource = path.join(__dirname, '.ab-method');
@@ -110,11 +146,43 @@ async function install() {
       log('✅ Created docs/tasks directory', COLORS.green);
     }
 
+    // Install builtin agents if requested
+    if (installAgents) {
+      log('\n🤖 Installing builtin agents...', COLORS.blue);
+      
+      try {
+        // Run the agents installation command
+        execSync('/agents', { stdio: 'inherit', cwd: targetDir });
+        log('✅ Builtin agents installed successfully', COLORS.green);
+      } catch (error) {
+        log('⚠️  Could not install builtin agents automatically', COLORS.yellow);
+        log('   You can install them manually by running: /agents', COLORS.white);
+        log('   Or install them later when you need them', COLORS.white);
+      }
+    }
+
     log('\n✨ AB Method installed successfully!', COLORS.bright + COLORS.green);
+    
+    if (installAgents) {
+      log('\n🎉 Installation complete with builtin agents!', COLORS.green);
+    } else {
+      log('\n🎉 Installation complete!', COLORS.green);
+    }
+    
     log('\nNext steps:', COLORS.cyan);
     log('1. Open Claude Code in this project', COLORS.white);
     log('2. Run: /ab-master', COLORS.white);
     log('3. Choose a workflow to get started', COLORS.white);
+    
+    if (installAgents) {
+      log('\n🤖 Builtin agents ready to use:', COLORS.cyan);
+      log('• Use specialized agents automatically in missions', COLORS.white);
+      log('• Check sub-agents-outputs/ folder for detailed agent work', COLORS.white);
+    } else {
+      log('\n💡 To install builtin agents later:', COLORS.cyan);
+      log('• Run: /agents', COLORS.white);
+      log('• Or use your own custom agents', COLORS.white);
+    }
     
     log('\nFor more information, visit:', COLORS.blue);
     log('https://github.com/ayoubben18/ab-method', COLORS.white);

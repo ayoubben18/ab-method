@@ -80,6 +80,7 @@ Based on `.ab-method/structure/index.yaml`, create a task folder with:
 ```
 tasks/[task-name]/
   progress-tracker.md
+  sub-agents-outputs/
 ```
 
 ### 4. Initialize Progress Tracker with All Missions
@@ -110,11 +111,24 @@ Current: Brainstormed
 - [ ] Mission 3: [Frontend/Backend] - [Build on Mission 2]
 - [ ] Mission N: [Frontend/Backend] - [Continue as needed]
 
+## Agent Usage Tracking
+*Agents used across all missions will be tracked here*
+
+### Mission 1 Agents
+- (To be updated during mission execution)
+
+### Mission 2 Agents  
+- (To be updated during mission execution)
+
+## Sub-Agent Outputs
+*Links to detailed agent outputs stored in sub-agents-outputs/ folder*
+
 ## Notes
 - Task created: YYYY-MM-DD
 - Status: Brainstormed → Validated → In dev → Testing → Completed
 - All missions defined upfront based on problem analysis
 - Each mission builds incrementally on previous ones
+- Agent outputs tracked for context window optimization
 ```
 
 ### 5. Define All Missions Based on Task Type and Project Analysis

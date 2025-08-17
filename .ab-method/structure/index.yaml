@@ -20,6 +20,8 @@ project_structure:
           - progress-tracker.md
           - mission-1-plan-and-implement-backend.md
           - mission-2-plan-and-implement-frontend.md
+        folders:
+          - sub-agents-outputs/
       # Additional tasks will follow this pattern:
       # task-name:
       #   files:
@@ -27,6 +29,8 @@ project_structure:
       #     - mission-1-[description].md
       #     - mission-2-[description].md
       #     - ...
+      #   folders:
+      #     - sub-agents-outputs/
 
 # Workflow output destinations
 workflow_outputs:
