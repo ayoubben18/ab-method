@@ -1,3 +1,10 @@
+## [2.1.3](https://github.com/ayoubben18/ab-method/compare/v2.1.2...v2.1.3) (2025-08-17)
+
+
+### Bug Fixes
+
+* improve task creation workflow to prevent over-splitting of simple tasks ([c7e78a7](https://github.com/ayoubben18/ab-method/commit/c7e78a70e4177f8fa65e8d47bd81e43bfc2bad34))
+
 ## [2.1.2](https://github.com/ayoubben18/ab-method/compare/v2.1.1...v2.1.2) (2025-08-17)
 
 
