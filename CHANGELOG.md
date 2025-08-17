@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/ayoubben18/ab-method/compare/v2.1.1...v2.1.2) (2025-08-17)
+
+
+### Bug Fixes
+
+* properly copy agent files during CLI installation instead of running non-existent command ([c4acd43](https://github.com/ayoubben18/ab-method/commit/c4acd4324077bac3ebf75952e3b408bbf59c0b40))
+
 ## [2.1.1](https://github.com/ayoubben18/ab-method/compare/v2.1.0...v2.1.1) (2025-08-17)
 
 
