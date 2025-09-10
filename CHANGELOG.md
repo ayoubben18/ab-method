@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/ayoubben18/ab-method/compare/v2.1.3...v2.2.0) (2025-09-10)
+
+
+### Features
+
+* add individual slash commands for all AB Method workflows ([97ed95b](https://github.com/ayoubben18/ab-method/commit/97ed95b08c57ec25d7c290b7b2ec3b2f221e6970))
+
 ## [2.1.3](https://github.com/ayoubben18/ab-method/compare/v2.1.2...v2.1.3) (2025-08-17)
 
 
