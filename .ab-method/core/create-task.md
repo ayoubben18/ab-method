@@ -43,12 +43,23 @@ Create a focused task following the AB Method principle: one task at a time to c
 - "Which pages/screens are affected?"
 - "Are there similar components I should match?"
 
+**For technical constraints and code guidance**, ask:
+- "Are there specific coding standards or patterns I should follow?"
+- "Which existing components or services should I reuse or avoid?"
+- "Are there particular libraries, frameworks, or versions I must use?"
+- "What are the testing requirements for this task?"
+- "Are there performance considerations or constraints?"
+- "Should this follow any specific file naming or organization patterns?"
+
 #### Stop Conditions:
 Only proceed to Step 2 when you have:
 ✓ Clear understanding of WHAT needs to be done
 ✓ Specific files/areas that will be affected
 ✓ Expected behavior/output defined
 ✓ Any constraints or requirements identified
+✓ Technical constraints and coding patterns clarified
+✓ Testing requirements and expectations defined
+✓ Performance considerations identified (if applicable)
 
 ### 2. Analyze Project Context
 **CRITICAL: Before creating any missions, understand the existing codebase:**
@@ -69,12 +80,19 @@ Only proceed to Step 2 when you have:
    - Identify reusable components/services
    - Check for existing types/models related to the task
 
-### 3. Assess Task Complexity and Type
-Based on problem AND project analysis, determine both type and complexity:
+4. **Extract technical context for documentation**:
+   - Code constraints: File naming conventions, coding standards, linting rules
+   - Architecture hints: Patterns to follow, services to reuse, integration points
+   - Tech stack requirements: Required libraries/frameworks, versions, dependencies
+   - API constraints: Endpoint naming, authentication patterns, data validation
+   - File organization: Directory structure, import/export patterns
+   - Testing requirements: Coverage expectations, test frameworks, file patterns
+   - Performance considerations: Caching strategies, optimization requirements
 
-#### Task Types:
+### 3. Identify Task Type
+Based on problem AND project analysis:
 - **Frontend**: Client-side only
-- **Backend**: Server-side only  
+- **Backend**: Server-side only
 - **Full-stack**: Both frontend and backend
 
 #### Task Complexity Assessment:
@@ -106,7 +124,7 @@ tasks/[task-name]/
   sub-agents-outputs/
 ```
 
-### 4. Initialize Progress Tracker with All Missions
+### 5. Initialize Progress Tracker with All Missions
 Create `progress-tracker.md` with:
 ```markdown
 # Task: [Task Name]
@@ -128,6 +146,43 @@ Current: Brainstormed
 ## Task Type
 [Frontend/Backend/Full-stack]
 
+## Technical Context
+### Code Constraints
+- [File naming conventions to follow]
+- [Coding standards and linting rules]
+- [Specific patterns from existing codebase]
+
+### Architecture Hints
+- [Existing services/components to reuse]
+- [Patterns to follow from similar implementations]
+- [Integration points with current architecture]
+
+### Tech Stack Requirements
+- [Required libraries/frameworks and versions]
+- [Dependencies to avoid or prefer]
+- [Environment-specific considerations]
+
+### API Constraints
+- [Endpoint naming conventions]
+- [Authentication/authorization requirements]
+- [Data validation patterns]
+
+## Code Guidance
+### File Organization
+- [Where to place new files based on project structure]
+- [Directory conventions to follow]
+- [Import/export patterns]
+
+### Testing Requirements
+- [Test coverage expectations]
+- [Test file naming and placement patterns]
+- [Testing frameworks and utilities to use]
+
+### Performance Considerations
+- [Caching strategies to implement]
+- [Optimization requirements]
+- [Resource usage constraints]
+
 ## Missions
 - [ ] Mission 1: [Frontend/Backend] - [Specific action based on project analysis]
 - [ ] Mission 2: [Frontend/Backend] - [Build on Mission 1]
@@ -140,7 +195,7 @@ Current: Brainstormed
 ### Mission 1 Agents
 - (To be updated during mission execution)
 
-### Mission 2 Agents  
+### Mission 2 Agents
 - (To be updated during mission execution)
 
 ## Sub-Agent Outputs
@@ -154,7 +209,7 @@ Current: Brainstormed
 - Agent outputs tracked for context window optimization
 ```
 
-### 5. Define Missions Based on Task Complexity and Project Analysis
+### 6. Define All Missions Based on Task Type and Project Analysis
 
 **IMPORTANT: Define missions based on actual project structure discovered in Step 2, not generic templates**
 
@@ -200,14 +255,9 @@ Current: Brainstormed
 - Mission 4: Backend - [Additional backend features and validation]
 - Mission N: Full-stack - [Integration and end-to-end testing]
 
-### 6. Confirm with User
-Show the task document with defined missions and ask:
-
-**For Simple Tasks:**
-"I've analyzed this as a simple task that can be completed in a single mission. Task status is set to 'Brainstormed'. Ready to validate and start Mission 1?"
-
-**For Complex Tasks:**
-"I've created the task with multiple missions defined based on complexity analysis. Task status is set to 'Brainstormed'. For full-stack tasks, I've started with backend missions to provide ready types and data for the frontend. Ready to validate and start Mission 1?"
+### 7. Confirm with User
+Show the task document with all missions and ask:
+"I've created the task with all missions defined. Task status is set to 'Brainstormed'. For full-stack tasks, I've started with backend missions to provide ready types and data for the frontend. Ready to validate and start Mission 1?"
 
 When user confirms, update status to 'Validated' and begin implementation.
 
