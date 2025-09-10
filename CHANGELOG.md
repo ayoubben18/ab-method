@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/ayoubben18/ab-method/compare/v2.2.0...v2.2.1) (2025-09-10)
+
+
+### Bug Fixes
+
+* CLI installer now includes all individual slash commands and updated README ([aa23823](https://github.com/ayoubben18/ab-method/commit/aa23823f0c70c9cdfb059a2bea552a9a18dea92a))
+
 # [2.2.0](https://github.com/ayoubben18/ab-method/compare/v2.1.3...v2.2.0) (2025-09-10)
 
 
