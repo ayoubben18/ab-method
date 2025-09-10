@@ -12,16 +12,27 @@ npx ab-method
 
 This will:
 - ✅ Install all AB Method workflows in `.ab-method/`
-- ✅ Add the `/ab-master` command to Claude Code
+- ✅ Add **10 slash commands** to Claude Code (both `/ab-master` and individual commands)
 - ✅ Create necessary directories (`docs/architecture/`, `tasks/`)
 - ✅ Set up or update `CLAUDE.md` with instructions
+- ✅ Install builtin specialized agents for enhanced development workflow
 
-After installation, just open Claude Code and run:
+After installation, open Claude Code and choose your preferred approach:
+
+**Quick Access (NEW!):**
 ```bash
-/ab-master
+/create-task      # Create new tasks with technical details
+/create-mission   # Transform tasks into focused missions
+/analyze-project  # Complete project analysis
+# ... and 7 more individual commands
 ```
 
-That's it! You're ready to start using the AB Method.
+**Traditional Approach:**
+```bash
+/ab-master        # Master controller for all workflows
+```
+
+That's it! You're ready to start using the AB Method with enhanced command access.
 
 ## 📋 Table of Contents
 - [Overview](#overview)
@@ -61,7 +72,16 @@ The AB Method is an incremental task management system designed specifically for
 ```
 .claude/
 └── commands/
-    └── ab-master.md    # Entry point slash command
+    ├── ab-master.md            # Traditional master controller
+    ├── create-task.md          # Direct task creation
+    ├── resume-task.md          # Resume existing tasks
+    ├── create-mission.md       # Direct mission creation
+    ├── resume-mission.md       # Resume missions
+    ├── test-mission.md         # Create comprehensive tests
+    ├── analyze-project.md      # Full project analysis
+    ├── analyze-frontend.md     # Frontend analysis
+    ├── analyze-backend.md      # Backend analysis
+    └── update-architecture.md  # Architecture updates
 
 .ab-method/
 ├── core/                     # Core workflow files
@@ -100,15 +120,30 @@ tasks/                      # Created tasks and missions
 
 ## 🚦 Getting Started
 
-### Entry Point - Always Start Here!
+### Two Ways to Access Workflows
 
+**🚀 Quick Access (Recommended for experienced users):**
+```bash
+/create-task        # Create new task with enhanced technical details
+/resume-task        # Resume paused tasks
+/create-mission     # Transform tasks into missions
+/resume-mission     # Continue incomplete missions
+/test-mission       # Create comprehensive tests
+/analyze-project    # Complete project analysis
+/analyze-frontend   # Frontend architecture analysis
+/analyze-backend    # Backend services analysis
+/update-architecture # Maintain architecture docs
+```
+
+**📚 Traditional Controller (Great for beginners):**
 ```bash
 /ab-master [workflow-name]
 ```
 
-This is your single entry point to the AB Method system. Use it to:
+The master controller provides:
 - View all available workflows (call without arguments)
-- Start a specific workflow (provide workflow name)
+- Start specific workflows with guidance (provide workflow name)
+- Help text and workflow descriptions
 
 ### Available Workflows
 
@@ -192,40 +227,64 @@ Brainstormed → Validated → In dev → Testing → Completed
 
 ## 💡 Usage Examples
 
-### Example 1: Starting a New Feature
+### Example 1: Starting a New Feature (Quick Style)
 
 ```bash
-# 1. Start with the master command
-/ab-master create-task
+# 1. Create task directly with enhanced technical context
+/create-task
 
-# 2. System asks for problem definition
+# 2. System asks for problem definition + technical details
 "Create a todos table that fetches from API and displays in frontend"
+"Follow existing shadcn/ui patterns, use our current API structure"
+"Testing with vitest, ensure responsive design"
 
-# 3. Creates task with missions:
+# 3. Creates task with comprehensive technical context:
+# Technical Context: Code constraints, architecture hints, tech requirements
+# Code Guidance: File organization, testing requirements, performance
 # - Mission 1: Backend - Create todo model and API
-# - Mission 2: Frontend - Create table component
+# - Mission 2: Frontend - Create table component  
 # - Mission 3: Integration - Connect frontend to backend
 
 # 4. System prompts for validation
 "Task created with status 'Brainstormed'. Ready to validate?"
 
 # 5. After validation, start first mission
-/ab-master create-mission
+/create-mission  # Deploys nextjs-backend-architect agent
+```
+
+### Example 1b: Starting a New Feature (Traditional Style)
+
+```bash
+# 1. Use master controller for guidance
+/ab-master create-task
+
+# 2. Same enhanced flow but with help text and explanations
+# 3. Creates same comprehensive task documentation
+# 4. Use /ab-master create-mission for guided mission creation
 ```
 
 ### Example 2: Resuming Work
 
+**Quick Style:**
 ```bash
-# Resume a task
-/ab-master resume-task
+# Resume directly
+/resume-task
 > "Which task to resume?"
 > "todo-table"
 
-# Shows progress:
-# ✓ Mission 1: Backend API - COMPLETED
-# ⏳ Mission 2: Frontend Table - IN PROGRESS
-#   Last: Created base component
-#   Next: Add state management
+# Shows progress with agent tracking:
+# ✓ Mission 1: Backend API - COMPLETED (nextjs-backend-architect)
+# ⏳ Mission 2: Frontend Table - IN PROGRESS (shadcn-ui-adapter)  
+#   Last: Created base component with shadcn/ui patterns
+#   Next: Add state management and data fetching
+#   Agent Output: Component documented in docs/tasks/todo-table/
+```
+
+**Traditional Style:**
+```bash
+# Resume with guidance
+/ab-master resume-task
+# Same progress display with helpful explanations
 ```
 
 ## 🔄 Task Lifecycle
@@ -292,6 +351,74 @@ This will:
 
 ## 🚀 Advanced Features
 
+### Specialized Sub-Agent System
+The AB Method leverages Claude Code's specialized agents for enhanced development:
+
+**Built-in Agents (Installed by default):**
+- **shadcn-ui-adapter** - UI component creation and styling
+- **nextjs-backend-architect** - Next.js backend development
+- **sst-cloud-architect** - Serverless infrastructure
+- **vitest-component-tester** - Component testing
+- **playwright-e2e-tester** - End-to-end testing
+- **ascii-ui-mockup-generator** - UI mockups and wireframes
+- **mastra-ai-agent-builder** - AI agent development
+- **qa-code-auditor** - Code quality analysis
+
+**Agent Coordination Flow:**
+```mermaid
+graph TB
+    A[Mission Start] --> B{Mission Type?}
+    B -->|Backend| C[nextjs-backend-architect]
+    B -->|Frontend| D[shadcn-ui-adapter]
+    B -->|Testing| E[vitest-component-tester]
+    C --> F[Document in docs/]
+    D --> F
+    E --> F
+    F --> G[Update Progress Tracker]
+```
+
+### Comprehensive Documentation Output
+All agent work is automatically documented in structured locations:
+
+**Architecture Documentation:**
+- `docs/architecture/` - Generated by analysis workflows
+- Technical constraints, patterns, and tech stack details
+- Updated continuously as missions complete
+
+**Task Documentation:**
+- `docs/tasks/[task-name]/` - Individual task folders  
+- Progress trackers with technical context sections
+- Mission-specific documentation with agent outputs
+
+**Agent Output Tracking:**
+Each mission tracks which agents were used and their contributions:
+```markdown
+## Agent Usage Tracking
+### Mission 1 Agents
+- nextjs-backend-architect: Created API endpoints and data models
+- qa-code-auditor: Performed code quality analysis
+
+## Sub-Agent Outputs
+### Backend Architecture Plan (nextjs-backend-architect)
+- Database schema: users, todos tables
+- API endpoints: GET/POST /api/todos
+- Type definitions: TodosTable, UserTable
+```
+
+### Enhanced Technical Context (NEW!)
+Create-task workflow now includes comprehensive technical guidance:
+
+**Technical Context Sections:**
+- **Code Constraints** - File naming, coding standards, patterns
+- **Architecture Hints** - Services to reuse, integration points  
+- **Tech Stack Requirements** - Required libraries, versions, dependencies
+- **API Constraints** - Endpoint naming, authentication patterns
+
+**Code Guidance Sections:**  
+- **File Organization** - Directory structure, import patterns
+- **Testing Requirements** - Coverage expectations, test frameworks
+- **Performance Considerations** - Caching, optimization requirements
+
 ### Parallel Agent Execution
 The analyze-project workflow deploys multiple specialized agents in parallel for maximum efficiency:
 - Frontend Expert Agent
@@ -317,6 +444,7 @@ Each mission document contains:
 - Files created/modified
 - Architectural decisions
 - Test results
+- Agent contributions and outputs
 
 ### Configuration Flexibility
 The `.ab-method/structure/index.yaml` file allows customization of:
@@ -344,11 +472,23 @@ workflow_outputs:
 
 ## 📈 Best Practices
 
-1. **Always start with `/ab-master`** - It's your entry point to everything
-2. **Complete missions sequentially** - Don't skip ahead
-3. **Validate before implementing** - Review plans before execution
-4. **Update architecture regularly** - Keep docs current
-5. **Use backend types in frontend** - Maintain type safety
+1. **Choose your preferred command style:**
+   - **Quick**: Use direct commands like `/create-task`, `/analyze-project`
+   - **Guided**: Use `/ab-master` for help and workflow descriptions
+
+2. **Complete missions sequentially** - Don't skip ahead, each builds on the previous
+
+3. **Validate before implementing** - Review plans and technical context before execution
+
+4. **Leverage technical context** - Fill in code constraints, architecture hints, and testing requirements during task creation
+
+5. **Trust the agent coordination** - Let specialized agents handle their domains (UI, backend, testing)
+
+6. **Review documentation outputs** - Check `docs/` folders for agent-generated architecture and technical details
+
+7. **Update architecture regularly** - Use `/update-architecture` after major changes
+
+8. **Use backend types in frontend** - Maintain type safety across the stack
 
 ## 🤝 Contributing
 
@@ -367,13 +507,15 @@ The AB Method is continuously evolving. Key areas for improvement:
 
 ## 🎉 Getting Started Checklist
 
-- [ ] Run `/ab-master` to see available workflows
-- [ ] Start with `analyze-project` for new projects
-- [ ] Create your first task with `create-task`
-- [ ] Define missions based on task type
-- [ ] Validate before starting implementation
-- [ ] Complete missions one at a time
-- [ ] Update architecture after major changes
+- [ ] Install: `npx ab-method` (includes builtin agents)
+- [ ] Choose your style: Direct commands (`/create-task`) or guided (`/ab-master`)
+- [ ] Start with `/analyze-project` for new projects (creates architecture docs)
+- [ ] Create your first task with `/create-task` (includes technical context)
+- [ ] Fill in technical constraints and code guidance during task creation
+- [ ] Validate before starting implementation  
+- [ ] Let specialized agents handle missions (creates documentation in `docs/`)
+- [ ] Complete missions one at a time, review agent outputs
+- [ ] Use `/update-architecture` after major changes
 
 ---
 

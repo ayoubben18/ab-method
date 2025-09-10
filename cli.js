@@ -117,18 +117,19 @@ async function install() {
       fs.mkdirSync(claudeDir, { recursive: true });
     }
 
-    // Copy ab-master command
+    // Copy all commands
     const commandsDir = path.join(claudeDir, 'commands');
     if (!fs.existsSync(commandsDir)) {
       fs.mkdirSync(commandsDir, { recursive: true });
     }
 
-    const commandSource = path.join(__dirname, '.claude', 'commands', 'ab-master.md');
-    const commandTarget = path.join(commandsDir, 'ab-master.md');
-    
-    if (fs.existsSync(commandSource)) {
-      fs.copyFileSync(commandSource, commandTarget);
-      log('✅ Installed /ab-master command', COLORS.green);
+    // Copy all command files from the package
+    const commandsSource = path.join(__dirname, '.claude', 'commands');
+    if (fs.existsSync(commandsSource)) {
+      copyRecursiveSync(commandsSource, commandsDir);
+      log('✅ Installed all AB Method commands', COLORS.green);
+      log('   • /ab-master (traditional workflow controller)', COLORS.white);
+      log('   • Individual workflow commands: /create-task, /create-mission, etc.', COLORS.white);
     }
 
 
@@ -179,8 +180,10 @@ async function install() {
     
     log('\nNext steps:', COLORS.cyan);
     log('1. Open Claude Code in this project', COLORS.white);
-    log('2. Run: /ab-master', COLORS.white);
-    log('3. Choose a workflow to get started', COLORS.white);
+    log('2. Choose your preferred way to start:', COLORS.white);
+    log('   • Quick: /create-task, /analyze-project, etc.', COLORS.white);
+    log('   • Traditional: /ab-master', COLORS.white);
+    log('3. Follow the workflow to create your first task', COLORS.white);
     
     if (installAgents) {
       log('\n🤖 Builtin agents ready to use:', COLORS.cyan);
