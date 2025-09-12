@@ -50,8 +50,6 @@ That's it! You're ready to start using the AB Method with enhanced command acces
 
 The AB Method is an incremental task management system designed specifically for Claude Code that breaks down complex software development projects into manageable tasks and missions. Each mission is completed entirely before moving to the next, building knowledge incrementally while maintaining focus and conserving context.
 
-**For visual diagrams and detailed workflows**, see our [Eraser documentation](https://app.eraser.io/workspace/QLkAOQsRloFdVJZzqunT) (Note: The diagrams are currently a bit messy but will be refined in future updates).
-
 ## 🧠 Core Philosophy
 
 ### Key Principles:
