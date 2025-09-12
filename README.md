@@ -518,5 +518,3 @@ The AB Method is continuously evolving. Key areas for improvement:
 ---
 
 **Remember**: The AB Method is about focused, incremental progress. One task, one mission, one step at a time. Each building on the last, creating a robust and maintainable codebase.
-
-For questions or visual workflow diagrams, check our [Eraser documentation](https://app.eraser.io/workspace/QLkAOQsRloFdVJZzqunT).
