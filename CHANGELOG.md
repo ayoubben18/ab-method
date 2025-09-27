@@ -1,3 +1,10 @@
+## [2.2.2](https://github.com/ayoubben18/ab-method/compare/v2.2.1...v2.2.2) (2025-09-27)
+
+
+### Bug Fixes
+
+* improve workflow simplicity and efficiency to prevent over-complication ([ffad449](https://github.com/ayoubben18/ab-method/commit/ffad44946f22c4456f8011ffb86de26086f2192c))
+
 ## [2.2.1](https://github.com/ayoubben18/ab-method/compare/v2.2.0...v2.2.1) (2025-09-10)
 
 
