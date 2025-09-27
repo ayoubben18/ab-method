@@ -3,24 +3,46 @@
 ## Purpose
 Execute one mission at a time, completing it entirely before moving to the next. Each mission uses specialized subagents for architecture and implementation.
 
+## 🚨 Core Behavior
+**RESPECT USER INSTRUCTIONS AND KEEP IT SIMPLE:**
+- If user provides clear instructions → Follow them exactly, don't ask unnecessary questions
+- Only ask when something is genuinely unclear or ambiguous
+- Don't overcomplicate simple requests
+- Trust the user knows what they want
+
 ## Critical Step
 **ALWAYS check `.ab-method/structure/index.yaml` FIRST** to find task and mission document locations.
 
 ## Process
 
-### 1. Identify Task and Current Context (Interactive Gathering)
-**CRITICAL: Keep asking questions until you have ALL necessary information for this specific mission**
+### 1. Identify Task and Current Context
+**CRITICAL: If user provides clear, specific instructions, follow them exactly. Only ask questions if something is genuinely unclear.**
 
 #### Initial Questions:
 Ask user: "Which task are we creating a mission for? Please provide the task name."
 
 #### Context Loading:
 Based on `.ab-method/structure/index.yaml`, read from task folder:
-- `progress-tracker.md` - Current task status and mission progress
-- Previous mission files (if any) - Knowledge from completed missions
+1. **Read `progress-tracker.md` first** - Check mission summaries section for completed missions
+2. **Check Mission Summaries** in progress tracker:
+   - If summaries provide clear technical context → Use them
+   - If summaries are unclear or missing details → Read full mission docs
+3. **Only read full mission files** if summaries insufficient
 
-#### Mission Clarification (Ask until clear):
-From progress tracker, identify the next uncompleted mission, then **ASK CLARIFYING QUESTIONS**:
+#### Check User's Instructions First:
+From progress tracker, identify the next uncompleted mission.
+
+**If the user already provided specific, clear instructions in the progress tracker or their message:**
+- ✅ Proceed directly to Step 3
+- DO NOT ask unnecessary clarifying questions
+- Trust the user knows what they want
+
+**Only ask clarifying questions if:**
+- The mission description is genuinely vague or ambiguous
+- Critical technical details are missing (e.g., no API endpoint specified when needed)
+- There's a conflict or contradiction in requirements
+
+#### Mission Clarification (Only when unclear):
 
 **If mission description is vague**, ask:
 - "Can you describe exactly what needs to be built in this mission?"
@@ -54,13 +76,11 @@ From progress tracker, identify the next uncompleted mission, then **ASK CLARIFY
 - "Are there specific technologies/approaches to compare?"
 - "What's the scope of research needed?"
 
-#### Stop Conditions:
-Only proceed to Step 3 when you have:
-✓ Clear understanding of EXACTLY what this mission should accomplish
-✓ Specific files/components that will be affected
-✓ Clear acceptance criteria (what "done" looks like)
-✓ Understanding of how this mission connects to previous/future missions
-✓ Any constraints, patterns, or requirements identified
+#### Proceed When:
+✓ User provided clear instructions → Follow them exactly
+✓ OR all genuine ambiguities have been resolved
+
+**IMPORTANT:** Do NOT over-clarify. If the user said "create a todo API", that's clear enough. Don't ask 20 questions.
 
 ### 3. Determine Mission Type
 Based on clarified requirements, determine mission type:
@@ -204,10 +224,42 @@ Ready to proceed?"
 
 ### 7. Execute Mission Based on Type
 
+**CRITICAL: Assess if subagents are needed before deploying**
+
+#### When to Skip Subagents (Direct Implementation):
+**Implement directly WITHOUT subagents when:**
+- ✅ Implementation is straightforward and follows existing patterns
+- ✅ You have all necessary context (from summaries, utils, architecture docs)
+- ✅ Changes are simple/incremental (adding field, fixing bug, small feature)
+- ✅ Clear example exists in codebase to follow
+- ✅ No complex architecture decisions needed
+
+**Examples of direct implementation:**
+- Adding a field to existing form (pattern already established)
+- Creating simple CRUD endpoint (following existing API patterns)
+- Building component matching existing ones (same structure/styling)
+- Simple validation or error handling
+- Minor refactoring with clear approach
+
+#### When to Use Subagents:
+**Deploy subagents when:**
+- 🤖 Complex architecture decisions needed
+- 🤖 Multiple approaches possible, need expert recommendation
+- 🤖 Large/complex implementation requiring specialized knowledge
+- 🤖 Need UI mockups before implementation
+- 🤖 Specialized testing or QA needed
+- 🤖 Working with unfamiliar tech stack
+
 **Use the context gathered in Step 4 to guide intelligent agent deployment:**
 
 #### For Backend Mission:
-**Phase 1: Architecture Planning**
+
+**First: Can this be implemented directly?**
+- If following existing API patterns → Implement directly
+- If simple CRUD with existing examples → Implement directly
+- If complex or uncertain → Deploy agents
+
+**Phase 1: Architecture Planning** (Only if needed)
 Deploy available backend-focused agents (e.g., nextjs-backend-architect, sst-cloud-architect, backend-architect):
 - Provide architecture patterns loaded in Step 4
 - Include tech stack information
@@ -231,7 +283,13 @@ Deploy specialized implementation agents based on mission needs:
   - Testing approach
 
 #### For Frontend Mission:
-**Phase 1: UI/UX Planning**
+
+**First: Can this be implemented directly?**
+- If following existing component patterns → Implement directly
+- If similar component exists to copy → Implement directly
+- If complex UI or unclear design → Deploy agents
+
+**Phase 1: UI/UX Planning** (Only if needed)
 Deploy available frontend-focused agents (e.g., ascii-ui-mockup-generator, shadcn-ui-adapter):
 - Provide component patterns loaded in Step 4
 - Include design system/styling approach
@@ -254,6 +312,13 @@ Deploy specialized frontend agents based on mission requirements:
   - Accessibility features added
 
 #### For Planning Mission:
+
+**First: Can this be decided directly?**
+- If decision is clear from requirements → Decide directly
+- If simple evaluation needed → Research directly
+- If complex trade-offs or multiple options → Deploy agents
+
+**Research/Analysis** (Only if needed)
 Deploy research and analysis agents (e.g., general-purpose, qa-code-auditor):
 - **Agent Output**: Creates `sub-agents-outputs/[agent-name]-analysis-[timestamp].md` documenting:
   - Research findings
@@ -303,19 +368,114 @@ Current: In dev
 
 ### 8. Mission Completion
 When mission is fully complete:
-1. Update mission status to "Completed"
-2. Update progress tracker
-3. Update task status if all missions done
-4. Prompt user: "Mission N completed. Ready to start Mission N+1?"
+
+#### 1. Update Mission Document
+- Set status to "Completed"
+- Fill all sections (Architecture Plan, Implementation, Testing)
+
+#### 2. Add Mission Summary to Progress Tracker
+**CRITICAL: Add technical summary for next missions to reference**
+
+Update progress tracker with:
+```markdown
+## Mission Summaries
+### Mission N: [Description]
+**Status**: Completed
+**Technical Summary**:
+- **Files Created/Modified**: [List with paths]
+- **Key Implementations**: [What was built - APIs, components, functions]
+- **Patterns Used**: [Specific patterns, libraries, approaches]
+- **Data Flow**: [How data moves through the system]
+- **Integration Points**: [What this connects to]
+- **Important Notes**: [Gotchas, decisions, constraints for next missions]
+
+**Agent Outputs**:
+- `sub-agents-outputs/[agent]-[timestamp].md`
+```
+
+**Example Technical Summary**:
+```markdown
+### Mission 1: Backend - Create Todo API
+**Status**: Completed
+**Technical Summary**:
+- **Files Created/Modified**:
+  - `app/api/todos/route.ts` - GET/POST endpoints
+  - `lib/db/schema.ts` - Todo table schema
+  - `lib/types/todo.ts` - Todo TypeScript types
+- **Key Implementations**:
+  - RESTful API with Drizzle ORM
+  - Todo CRUD operations (GET all, POST create)
+  - Input validation with Zod
+- **Patterns Used**:
+  - Next.js App Router API routes
+  - Drizzle schema-first approach
+  - Centralized error handling middleware
+- **Data Flow**: Client → API Route → Drizzle ORM → PostgreSQL
+- **Integration Points**:
+  - Exports `Todo` type from `lib/types/todo.ts`
+  - Database connection via `lib/db/client.ts`
+- **Important Notes**:
+  - Use `Todo` type in frontend components
+  - API returns ISO date strings, convert in frontend
+  - Auth middleware not yet added (Mission 3)
+```
+
+#### 3. Update CLAUDE.md (If Needed)
+**CRITICAL: Update CLAUDE.md if mission introduced significant structural changes**
+
+Update CLAUDE.md when mission involves:
+- ✅ **New features/pages** - Added new routes, major components, or user-facing features
+- ✅ **Refactoring** - Changed project structure, moved files, reorganized code
+- ✅ **New patterns** - Introduced new architectural patterns or conventions
+- ✅ **New tech/libraries** - Added significant dependencies that affect workflow
+- ✅ **Build/deploy changes** - Modified how project builds, tests, or deploys
+- ✅ **API changes** - New endpoints, changed authentication, or major API restructuring
+
+Do NOT update for:
+- ❌ Minor bug fixes
+- ❌ Small styling changes
+- ❌ Content updates
+- ❌ Simple CRUD operations following existing patterns
+
+**What to add to CLAUDE.md:**
+```markdown
+## [Feature/Change Name]
+- **Location**: [Where in codebase]
+- **Purpose**: [What this is for]
+- **Usage**: [How to work with it]
+- **Important**: [Key notes for future development]
+```
+
+**Example CLAUDE.md Update:**
+```markdown
+## Todo Management Feature
+- **Location**: `app/api/todos/` (API), `components/todos/` (UI)
+- **Purpose**: Full CRUD for user todos with real-time updates
+- **Usage**:
+  - API: Use `Todo` type from `lib/types/todo.ts`
+  - Frontend: Import components from `components/todos/`
+  - Pattern: Follow Drizzle ORM + Next.js App Router pattern
+- **Important**: Auth required for all todo endpoints (use `withAuth` middleware)
+```
+
+#### 4. Update Task Progress
+- Mark mission as completed in missions list
+- Update task status if all missions done
+
+#### 5. Prompt User
+"Mission N completed. Ready to start Mission N+1?"
 
 ## Key Principles
-- **Interactive clarification** - NEVER assume, always ask until crystal clear
-- **Specific requirements** - Get exact files, endpoints, patterns, behaviors
-- **Detailed acceptance criteria** - Define testable outcomes upfront
-- **Validation checkpoint** - User must validate complete plan before implementation
+- **Respect user instructions** - If user is clear, follow exactly what they said
+- **Keep it simple** - Don't overcomplicate straightforward tasks
+- **Read summaries first** - Check progress tracker mission summaries before reading full docs
+- **Avoid repetition** - Use previous mission context to avoid asking same questions
+- **Ask only when unclear** - Only clarify genuine ambiguities, not obvious details
+- **Trust the user** - They often know what they want; don't second-guess
+- **Validation checkpoint** - User must validate plan before implementation
 - **Utils delegation** - Mission reads utils, utils read architecture docs
 - **One mission at a time** - Complete entirely before moving on
-- **No vague missions** - Reject generic descriptions, demand specifics
+- **Technical summaries** - Always add detailed summary to progress tracker when completing
 
 ## Important Notes
 - Mission workflow is independent - doesn't read architecture docs directly
@@ -327,20 +487,28 @@ When mission is fully complete:
 1. User: "Create next mission"
 2. System: "Which task are we creating a mission for?"
 3. User: "todo-table"
-4. System: 
-   - Reads progress-tracker.md to identify next mission (e.g., "Backend API")
-   - Reads `.ab-method/utils/backend-mission.md` to understand what context is needed
+4. System:
+   - Reads progress-tracker.md
+   - Checks Mission Summaries section for completed missions
+   - If Mission 1 summary exists and is clear → Uses it for context
+   - If summary unclear → Reads full mission-1 doc
+   - Identifies next mission (e.g., "Frontend - Todo Table Component")
+   - Reads `.ab-method/utils/frontend-mission.md`
    - Checks `.ab-method/structure/index.yaml` for architecture doc paths
-   - Reads relevant architecture docs as specified by utils file
-   - Gathers patterns, tech stack, existing code structure
-5. System: Creates mission doc with all gathered context and brainstormed status
+   - Reads relevant architecture docs
+   - Has context from Mission 1 summary (API endpoints, types, patterns)
+5. System: Creates mission doc with context from previous mission + architecture
 6. System: "Please validate to proceed"
 7. User: "Validated"
-8. System: Deploys agents with the pre-gathered context
+8. System: Deploys agents with pre-gathered context
+9. When complete: Adds technical summary to progress tracker for Mission 3
 
 ## Remember
 - Always ask for task name if not provided
+- **Read mission summaries from progress tracker first** - avoid re-reading full docs
+- Only read full mission docs if summaries insufficient
 - Check `.ab-method/structure/index.yaml` for paths
 - Delegate architecture reading to utils files
 - Require validation before implementation
 - Update status at each phase
+- **Always create technical summary in progress tracker when mission completes**

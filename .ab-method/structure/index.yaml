@@ -2,6 +2,7 @@
 # This file defines the expected structure for AB Method documentation and tasks
 
 project_structure:
+  # ROOT OF THE PROJECT AND NOT THE DOTFILE
   docs:
     architecture:
       files:
@@ -12,7 +13,7 @@ project_structure:
         - external-services.md
         - project-constraints.md
         - testing-strategy.md
-    
+
     tasks:
       # Example task structure
       todo-table-creation:
