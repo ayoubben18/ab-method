@@ -34,6 +34,7 @@ Loads and executes the specified workflow from `.ab-method/core/[workflow-name].
 - **create-mission** - Transform a task into specific, focused missions
 - **resume-mission** - Resume an incomplete mission
 - **test-mission** - Create comprehensive tests for implemented features
+- **extend-task** - Add new missions to an existing task after initial missions are completed
 
 ### Analysis Workflows
 - **analyze-frontend** - Analyze frontend architecture and components

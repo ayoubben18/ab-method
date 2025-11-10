@@ -12,7 +12,7 @@ npx ab-method
 
 This will:
 - ✅ Install all AB Method workflows in `.ab-method/`
-- ✅ Add **10 slash commands** to Claude Code (both `/ab-master` and individual commands)
+- ✅ Add **11 slash commands** to Claude Code (both `/ab-master` and individual commands)
 - ✅ Create necessary directories (`docs/architecture/`, `tasks/`)
 - ✅ Set up or update `CLAUDE.md` with instructions
 - ✅ Install builtin specialized agents for enhanced development workflow
@@ -23,6 +23,7 @@ After installation, open Claude Code and choose your preferred approach:
 ```bash
 /create-task      # Create new tasks with technical details
 /create-mission   # Transform tasks into focused missions
+/extend-task      # Add new missions to existing tasks
 /analyze-project  # Complete project analysis
 # ... and 7 more individual commands
 ```
@@ -76,6 +77,7 @@ The AB Method is an incremental task management system designed specifically for
     ├── create-mission.md       # Direct mission creation
     ├── resume-mission.md       # Resume missions
     ├── test-mission.md         # Create comprehensive tests
+    ├── extend-task.md          # Add missions to existing tasks
     ├── analyze-project.md      # Full project analysis
     ├── analyze-frontend.md     # Frontend analysis
     ├── analyze-backend.md      # Backend analysis
@@ -90,7 +92,8 @@ The AB Method is an incremental task management system designed specifically for
 │   ├── create-task.md        # Task creation workflow
 │   ├── resume-task.md        # Task resumption workflow
 │   ├── create-mission.md     # Mission creation workflow
-│   └── resume-mission.md     # Mission resumption workflow
+│   ├── resume-mission.md     # Mission resumption workflow
+│   └── extend-task.md        # Task extension workflow
 │
 ├── utils/                    # Mission utility files
 │   ├── backend-mission.md   # Backend mission coordinator
@@ -127,6 +130,7 @@ tasks/                      # Created tasks and missions
 /create-mission     # Transform tasks into missions
 /resume-mission     # Continue incomplete missions
 /test-mission       # Create comprehensive tests
+/extend-task        # Add new missions to existing tasks
 /analyze-project    # Complete project analysis
 /analyze-frontend   # Frontend architecture analysis
 /analyze-backend    # Backend services analysis
@@ -154,6 +158,7 @@ The master controller provides:
 | `resume-task` | Resume an existing task | Continuing previous work |
 | `create-mission` | Create next mission for a task | Ready for next step |
 | `resume-mission` | Resume an in-progress mission | Continuing mission work |
+| `extend-task` | Add new missions to existing task | Requirements changed or scope expanded |
 | `update-architecture` | Update architecture docs | After implementing features |
 
 ## 📁 Workflow Files Documentation
