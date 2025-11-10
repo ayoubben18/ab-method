@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/ayoubben18/ab-method/compare/v2.2.2...v2.3.0) (2025-11-10)
+
+
+### Features
+
+* add extend-task command to add missions to existing tasks ([1ae31e9](https://github.com/ayoubben18/ab-method/commit/1ae31e984e2cb7be0d0793b3dfebe5e9ae70fae2))
+
 ## [2.2.2](https://github.com/ayoubben18/ab-method/compare/v2.2.1...v2.2.2) (2025-09-27)
 
 
