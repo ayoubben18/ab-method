@@ -1,139 +1,103 @@
 # Analyze Backend Workflow
 
 ## Purpose
-Deep analysis of backend architecture, services, and patterns to document the server-side structure.
+Document server-side architecture: API design, data layer, auth, services, background work. External services, testing, deployment, and language/runtime details are out of scope here — they live in `docs/architecture/tech-stack.md`.
 
-## Important Configuration
-**ALWAYS check `.ab-method/structure/index.yaml` first** to determine where to save the output documentation. Do not assume paths - they are configurable by the user.
+## Configuration
+**ALWAYS check `.ab-method/structure/index.yaml` first** for the output path.
 
 ## Process
 
-### 1. Initial Discovery
-- Detect backend framework (Express, Django, Rails, Spring, etc.)
-- Identify main language and runtime version
+### 1. Discovery
+- Detect framework (Express, Fastify, Hono, Django, Rails, Spring, etc.)
 - Find entry point (server.js, app.py, main.go, etc.)
-- Locate configuration files
 
-### 2. API Architecture
-- Map all API endpoints
-- Document HTTP methods and routes
-- Identify API versioning strategy
-- Document request/response formats
-- Analyze middleware chain
+### 2. API Design
+- Style (REST, GraphQL, gRPC, RPC)
+- Endpoint organization and versioning
+- Middleware chain
+- Request/response conventions
 
-### 3. Database Layer
-- Identify database type(s) (SQL, NoSQL, etc.)
-- Document schema/models
-- Map relationships between entities
-- Identify migration strategy
-- Document query patterns (ORM, raw SQL, etc.)
+### 3. Data Layer
+- Database(s) and access pattern (ORM, query builder, raw SQL)
+- Schema/models and relationships
+- Migration strategy
+- Caching layer if any
 
-### 4. Authentication & Authorization
-- Identify auth strategy (JWT, sessions, OAuth, etc.)
-- Document user roles and permissions
-- Map protected endpoints
-- Analyze security middleware
+### 4. Auth
+- Strategy (JWT, sessions, OAuth, API keys)
+- Roles/permissions model
+- Protected endpoints — pattern, not full list
 
 ### 5. Service Architecture
-- Document service layer organization
-- Identify business logic patterns
-- Map internal service communication
-- Document dependency injection patterns
+- Layering (controllers / services / repos, hexagonal, vertical slices, etc.)
+- Business logic patterns
+- Internal communication (function calls, events, queues)
+- Dependency wiring (DI container, factories, manual)
 
-### 6. External Integrations
-- Third-party API integrations
-- Message queues/brokers
-- Cache layers (Redis, Memcached, etc.)
-- File storage solutions
-- Email/notification services
-
-### 7. Background Jobs
-- Job queue implementation
-- Scheduled tasks/cron jobs
+### 6. Background Work
+- Queue/scheduler implementation
 - Worker processes
-- Event-driven processing
+- Event-driven patterns
 
-### 8. Error Handling & Logging
-- Error handling patterns
-- Logging strategy and tools
-- Monitoring integration
-- Debug configuration
-
-### 9. Testing Strategy
-- Unit test patterns
-- Integration test setup
-- API testing approach
-- Test database configuration
+### 7. Error Handling
+- Error types and propagation
+- Logging patterns
+- Observability hooks
 
 ## Output
 
 ### Location
-Check `.ab-method/structure/index.yaml` for the output path. The workflow_outputs section will specify where to save the backend analysis results.
+Path defined in `.ab-method/structure/index.yaml` → `workflow_outputs.analyze-backend`.
 
-### backend-patterns.md Structure:
+### `backend-patterns.md` Structure
 ```markdown
-# Backend Architecture
+# Backend Patterns
 
-## Framework & Runtime
-- Main framework and version
-- Language and runtime version
-- Key dependencies
+## Framework
+- Framework + version
+- Entry point
 
-## API Design
-- Architecture style (REST, GraphQL, gRPC)
+## API
+- Style and conventions
 - Endpoint organization
-- Versioning strategy
-- Documentation approach
+- Middleware chain
 
-## Data Layer
-- Database systems used
-- Schema design patterns
-- Query optimization strategies
-- Caching strategy
+## Data
+- Database(s)
+- Access pattern (ORM/raw)
+- Schema highlights
+- Caching
 
-## Authentication & Security
-- Auth implementation
-- Security measures
-- Rate limiting
-- CORS configuration
+## Auth
+- Strategy
+- Roles/permissions
+- Protected-route pattern
 
-## Service Architecture
-- Service organization
-- Business logic patterns
-- Dependency management
-- Error boundaries
+## Services
+- Layering
+- Business-logic patterns
+- Internal communication
+- DI/wiring
 
-## External Services
-- Third-party integrations
-- Message systems
-- Storage solutions
-- Communication protocols
+## Background Work
+- Queues/schedulers
+- Workers
+- Events
 
-## Background Processing
-- Job queue system
-- Scheduled tasks
-- Event processing
-- Worker configuration
+## Error Handling
+- Error types
+- Logging
+- Observability
 
-## DevOps & Deployment
-- Environment configuration
-- Container setup
-- CI/CD pipeline
-- Monitoring setup
-
-## Testing Infrastructure
-- Test strategies
-- Mock patterns
-- Test data management
-- Coverage goals
+## Cross-references
+- Runtime, external services, testing, deployment → docs/architecture/tech-stack.md
 ```
 
-## Key Files to Analyze
-- package.json, requirements.txt, go.mod, pom.xml, etc.
-- Main application entry point
+## Key Files
+- package.json / requirements.txt / go.mod / pom.xml
+- Main entry point
 - Route/controller definitions
 - Model/schema definitions
-- Database configuration
-- Middleware configuration
-- Environment configuration files
-- Docker/deployment files
+- Database config
+- Middleware config

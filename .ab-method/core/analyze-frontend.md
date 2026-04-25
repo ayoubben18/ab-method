@@ -1,116 +1,87 @@
 # Analyze Frontend Workflow
 
 ## Purpose
-Deep analysis of frontend architecture, components, and patterns to document the client-side structure.
+Document client-side architecture: components, state, routing, styling, API integration. Build tooling, testing, and external services are out of scope here — they live in `docs/architecture/tech-stack.md`.
 
-## Important Configuration
-**ALWAYS check `.ab-method/structure/index.yaml` first** to determine where to save the output documentation. Do not assume paths - they are configurable by the user.
+## Configuration
+**ALWAYS check `.ab-method/structure/index.yaml` first** for the output path.
 
 ## Process
 
-### 1. Initial Discovery
-- Detect frontend framework (React, Vue, Angular, Svelte, etc.)
-- Identify package.json/package-lock.json location
-- Find main entry point (index.js, main.ts, app.tsx, etc.)
-- Locate build configuration files
+### 1. Discovery
+- Detect framework (React, Vue, Angular, Svelte, etc.)
+- Find main entry point (index.tsx, main.ts, App.tsx, etc.)
 
-### 2. Component Analysis
-- Map component hierarchy
-- Identify reusable components vs page components
-- Document component patterns (functional, class-based, etc.)
-- Analyze prop drilling vs context/store usage
+### 2. Component Architecture
+- Component hierarchy and organization
+- Reusable vs page components
+- Composition patterns (functional, hooks, HOCs, slots)
 
 ### 3. State Management
-- Identify state management solution (Redux, MobX, Zustand, Context API, etc.)
-- Document store structure
-- Map data flow patterns
-- Identify local vs global state usage
+- Solution (Redux, Zustand, MobX, Context, signals, etc.)
+- Store shape and data flow
+- Local vs global state
 
-### 4. Routing Analysis
-- Document routing library and configuration
-- Map all routes and their components
-- Identify protected routes
-- Document navigation patterns
+### 4. Routing
+- Routing library and config
+- Route map (high-level, not exhaustive)
+- Protected/auth-gated routes
 
-### 5. Styling Architecture
-- CSS methodology (CSS Modules, Styled Components, Tailwind, etc.)
-- Theme configuration
-- Responsive design approach
-- Component styling patterns
+### 5. Styling
+- Methodology (CSS Modules, Tailwind, styled-components, etc.)
+- Theme/token system
+- Responsive approach
 
 ### 6. API Integration
-- API client configuration
-- Request/response handling
-- Error handling patterns
-- Data fetching strategies (REST, GraphQL, etc.)
-
-### 7. Build & Bundle
-- Build tool configuration (Webpack, Vite, Parcel, etc.)
-- Code splitting strategy
-- Asset optimization
-- Environment configuration
-
-### 8. Testing Setup
-- Testing frameworks used
-- Test file patterns
-- Coverage configuration
-- E2E testing setup
+- Client setup (fetch wrapper, axios, tRPC, GraphQL client, etc.)
+- Request/response patterns
+- Error handling and retries
+- Caching/data-fetching layer (React Query, SWR, RTK Query, etc.)
 
 ## Output
 
 ### Location
-Check `.ab-method/structure/index.yaml` for the output path. The workflow_outputs section will specify where to save the frontend analysis results.
+Path defined in `.ab-method/structure/index.yaml` → `workflow_outputs.analyze-frontend`.
 
-### frontend-patterns.md Structure:
+### `frontend-patterns.md` Structure
 ```markdown
-# Frontend Architecture
+# Frontend Patterns
 
-## Framework & Setup
-- Main framework and version
-- Key dependencies
-- Development environment
+## Framework
+- Framework + version
+- Entry point
 
-## Component Architecture
-- Component organization
-- Naming conventions
-- Composition patterns
+## Components
+- Organization
+- Naming + composition conventions
 
-## State Management
-- Solution used
-- Store structure
-- Data flow diagram
+## State
+- Solution and store shape
+- Data flow
 
 ## Routing
-- Route definitions
-- Navigation patterns
-- Auth flow
+- Library
+- Route map
+- Auth-gated routes
 
-## Styling System
+## Styling
 - Methodology
-- Theme structure
+- Theme/tokens
 - Responsive approach
 
 ## API Layer
-- Client setup
-- Request patterns
+- Client and patterns
 - Error handling
+- Caching/data-fetching
 
-## Build Configuration
-- Tools used
-- Optimization strategies
-- Deployment setup
-
-## Testing Strategy
-- Unit testing approach
-- Integration tests
-- E2E coverage
+## Cross-references
+- Build tooling, testing, external services → docs/architecture/tech-stack.md
 ```
 
-## Key Files to Analyze
+## Key Files
 - package.json
-- src/index.* or main entry
-- src/App.* or root component
-- Router configuration files
-- Store/state configuration
-- API client setup
-- Build configuration files
+- src/index.* / main entry
+- src/App.* / root component
+- Router config
+- Store/state config
+- API client

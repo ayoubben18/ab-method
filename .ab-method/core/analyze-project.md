@@ -1,7 +1,10 @@
 # Analyze Project Workflow
 
 ## Purpose
-Entry point orchestrator that deploys specialized subagents to analyze project architecture in parallel.
+Entry point that deploys 4 specialized subagents in parallel to produce a concise architecture baseline: domain language, tech stack, and frontend/backend patterns.
+
+## Important
+**ALWAYS check `.ab-method/structure/index.yaml` first** to determine output paths. They are user-configurable.
 
 ## Process
 
@@ -10,81 +13,102 @@ Prompt the user with:
 ```
 Project Architecture Analysis
 =============================
-I will deploy 7 specialized subagents to analyze your project in parallel:
+I will deploy 4 specialized subagents in parallel:
 
-1. Frontend Expert Agent - Will analyze client-side architecture, components, and patterns
-2. Backend Architect Agent - Will analyze server-side architecture, APIs, and services
-3. Tech Stack Analyzer - Will document all technologies, frameworks, and tools
-4. Entry Points Mapper - Will map application entry points and startup flow
-5. External Services Analyzer - Will identify third-party integrations and APIs
-6. Constraints Documenter - Will capture technical limitations and architectural decisions
-7. Testing Strategy Analyzer - Will document testing frameworks, patterns, and coverage
+1. Domain Extractor       → UBIQUITOUS_LANGUAGE.md + CONTEXT.md (root)
+2. Tech Stack Mapper      → docs/architecture/tech-stack.md
+                            (stack, entry points, external services,
+                             constraints, testing — merged)
+3. Frontend Patterns      → docs/architecture/frontend-patterns.md
+4. Backend Patterns       → docs/architecture/backend-patterns.md
 
-These agents will work simultaneously to create comprehensive architecture documentation.
-
-Would you like to proceed with the full analysis, or prefer to analyze only specific parts?
-- [1] Full Analysis (all 7 agents in parallel)
-- [2] Frontend Only
-- [3] Backend Only
+Choose:
+- [1] Full (all 4 in parallel)
+- [2] Frontend only        (Frontend Patterns + Domain Extractor)
+- [3] Backend only         (Backend Patterns + Domain Extractor)
+- [4] Domain only          (Domain Extractor)
 ```
 
-### 2. Deploy Agents Based on Choice
+### 2. Deploy Agents (Parallel)
 
-#### Option 1: Full Analysis (Parallel Execution)
-Deploy all agents simultaneously using Task tool:
+#### Option 1: Full Analysis
+Deploy 4 Task calls in a single message:
 
 ```
-Agents to deploy in parallel:
-1. Task: "Analyze Frontend Architecture"
-   - subagent_type: "frontend-developer"
-   - prompt: "Analyze the frontend architecture following the workflow in .ab-method/core/analyze-frontend.md. Check .ab-method/structure/index.yaml for output paths and create comprehensive frontend-patterns.md documentation."
-
-2. Task: "Analyze Backend Architecture"  
-   - subagent_type: "backend-architect"
-   - prompt: "Analyze the backend architecture following the workflow in .ab-method/core/analyze-backend.md. Check .ab-method/structure/index.yaml for output paths and create comprehensive backend-patterns.md documentation."
-
-3. Task: "Analyze Tech Stack"
-   - subagent_type: "backend-architect"
-   - prompt: "Analyze the project's technology stack and create docs/architecture/tech-stack.md. Document all languages, frameworks, databases, and tools used. Check package.json, requirements.txt, go.mod, etc."
-
-4. Task: "Analyze Entry Points"
-   - subagent_type: "backend-architect"  
-   - prompt: "Map all application entry points and create docs/architecture/entry-points.md. Document main files, routes, CLI commands, and how the application starts."
-
-5. Task: "Analyze External Services"
-   - subagent_type: "backend-architect"
-   - prompt: "Identify all external services/APIs and create docs/architecture/external-services.md. Document third-party integrations, APIs consumed, cloud services, and dependencies."
-
-6. Task: "Analyze Project Constraints"
-   - subagent_type: "backend-architect"
-   - prompt: "Document project constraints and create docs/architecture/project-constraints.md. Include technical limitations, business rules, compliance requirements, and architectural decisions."
-
-7. Task: "Analyze Testing Strategy"
+1. Task: "Extract Domain Model"
    - subagent_type: "general-purpose"
-   - prompt: "Analyze the project's testing strategy and create docs/architecture/testing-strategy.md. Document test frameworks (Jest, Vitest, Pytest, etc.), test file patterns, test commands, coverage requirements, E2E testing setup, and any testing conventions. Check package.json scripts, test config files, and example test files."
+   - prompt: |
+       Extract the project's domain language from the codebase.
+       Produce TWO root-level files:
+       - UBIQUITOUS_LANGUAGE.md  (flat glossary — follow the format
+         in .claude/skills/ubiquitous-language/SKILL.md, keep as-is)
+       - CONTEXT.md              (bounded-context overview — follow
+         .claude/skills/domain-model/CONTEXT-FORMAT.md)
+       If you detect multiple bounded contexts (e.g. /src/ordering,
+       /src/billing as distinct domains), produce CONTEXT-MAP.md at
+       root + a CONTEXT.md inside each context folder instead.
+       Source domain nouns from: model/schema definitions, route
+       names, aggregate roots, recurring nouns in module/file names.
+       Skip generic programming concepts. Flag ambiguities found
+       (same word, different meanings).
+       This is a FIRST DRAFT — the user will refine it via
+       /domain-model later.
+
+2. Task: "Map Tech Stack"
+   - subagent_type: "backend-architect"
+   - prompt: |
+       Create docs/architecture/tech-stack.md with these sections,
+       each kept short (use bullet lists, not prose):
+       ## Stack            — languages, frameworks, runtimes, DBs
+       ## Entry Points     — main files, routes, CLI commands, start scripts
+       ## External Services — third-party APIs, cloud services, queues
+       ## Constraints      — limits, compliance, perf budgets, lock-in
+       ## Testing          — frameworks, file patterns, commands, coverage
+       Source from package.json/requirements.txt/go.mod/pom.xml,
+       config files, and Dockerfile/CI configs. One file. Concise.
+
+3. Task: "Analyze Frontend Patterns"
+   - subagent_type: "frontend-developer"
+   - prompt: "Follow .ab-method/core/analyze-frontend.md. Output
+     to the path in .ab-method/structure/index.yaml. Skip sections
+     covered by tech-stack.md (testing, build tooling) — link to
+     them instead."
+
+4. Task: "Analyze Backend Patterns"
+   - subagent_type: "backend-architect"
+   - prompt: "Follow .ab-method/core/analyze-backend.md. Output
+     to the path in .ab-method/structure/index.yaml. Skip sections
+     covered by tech-stack.md (testing, external services, deploy)
+     — link to them instead."
 ```
 
 #### Option 2: Frontend Only
-Deploy single agent:
-- Task: "Analyze Frontend Architecture"
-- subagent_type: "frontend-developer"
-- Same prompt as above
+Deploy: Domain Extractor + Frontend Patterns.
 
 #### Option 3: Backend Only
-Deploy single agent:
-- Task: "Analyze Backend Architecture"
-- subagent_type: "backend-architect"
-- Same prompt as above
+Deploy: Domain Extractor + Backend Patterns.
+
+#### Option 4: Domain Only
+Deploy: Domain Extractor.
 
 ### 3. Post-Analysis
-After agents complete their work:
-1. Inform user that analysis is complete
-2. List the documentation files created
-3. Suggest next steps (e.g., review documentation, create tasks based on findings)
+1. List the files produced.
+2. Recommend the next phase:
+   ```
+   Architecture baseline ready. Next:
+   - Run /domain-model to grill UBIQUITOUS_LANGUAGE.md + CONTEXT.md
+     into shape (interactive). ADRs are captured there as decisions
+     surface.
+   - Run /create-task when ready to start work — tasks/missions
+     will read CONTEXT.md so they speak the right language.
+   ```
 
-## Important Notes
-- This workflow is **only an entry point** - it doesn't perform analysis itself
-- All actual analysis work is delegated to specialized agents
-- Agents work in parallel for maximum efficiency
-- Each agent follows its own workflow (.ab-method/core/analyze-frontend.md or analyze-backend.md)
-- Output paths are determined by `.ab-method/structure/index.yaml`
+## Notes
+- This workflow is an **orchestrator** — all real work is delegated.
+- Agents run in parallel; each writes to its own file (no contention).
+- `UBIQUITOUS_LANGUAGE.md` follows the format defined by the
+  `ubiquitous-language` skill — do not modify that format here.
+- `CONTEXT.md` follows the format in
+  `.claude/skills/domain-model/CONTEXT-FORMAT.md`.
+- ADRs (`docs/adr/`) are NOT created here — they're created lazily
+  by `/domain-model` when a real trade-off is recorded.

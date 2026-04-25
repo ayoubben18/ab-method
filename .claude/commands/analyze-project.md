@@ -11,20 +11,20 @@ Complete project structure analysis to understand architecture, patterns, and te
 ## Behavior
 Loads and executes the analyze-project workflow from `.ab-method/core/analyze-project.md`
 
-This workflow will:
-1. Analyze the complete project structure and architecture
-2. Document technology stack and frameworks in use
-3. Identify coding patterns and conventions
-4. Create comprehensive architecture documentation
-5. Extract technical constraints and requirements
+This workflow deploys 4 specialized subagents in parallel to produce:
+1. `UBIQUITOUS_LANGUAGE.md` (root) — flat domain glossary
+2. `CONTEXT.md` (root) — bounded-context overview (or `CONTEXT-MAP.md` + per-context files for multi-context repos)
+3. `docs/architecture/tech-stack.md` — stack, entry points, external services, constraints, testing (merged)
+4. `docs/architecture/frontend-patterns.md` — components, state, routing, styling, API integration
+5. `docs/architecture/backend-patterns.md` — API, data, auth, services, background work
+
+These are **first drafts**. To sharpen the domain language and capture decisions as ADRs, run `/domain-model` afterwards (interactive grilling session).
 
 ## Workflow Details
-The analyze-project workflow provides:
-- **Architecture Analysis** - Complete understanding of project structure
-- **Tech Stack Documentation** - Cataloging frameworks, libraries, and tools
-- **Pattern Recognition** - Identifying existing coding and design patterns
-- **Documentation Creation** - Comprehensive technical documentation
-- **Constraint Extraction** - Understanding limitations and requirements
+- **Domain Extraction** - Inferred glossary + bounded-context skeleton from code
+- **Tech Stack Map** - Single concise file covering stack, entry points, external services, constraints, testing
+- **Frontend Patterns** - Client-side architecture
+- **Backend Patterns** - Server-side architecture
 
 ## Examples
 ```

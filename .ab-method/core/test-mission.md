@@ -1,7 +1,12 @@
 # Test Mission Workflow
 
 ## Purpose
-Create comprehensive tests for implemented features by analyzing the codebase and following the project's testing strategy. This workflow is typically run when implementation missions reach "Testing" status.
+Add tests **retroactively** to code that wasn't written test-first.
+
+> **Default path is `tdd`**, not this workflow. Every mission run through `/create-task` or `/resume-task` already drives implementation via the `tdd` skill — tests come first, by construction. Use `/test-mission` only when:
+> - Pre-existing untested code needs coverage
+> - A bug surfaced that wasn't caught (write the regression test, then fix)
+> - Test coverage is being added to a feature shipped before the AB Method was adopted
 
 ## Critical Step
 **ALWAYS check `.ab-method/structure/index.yaml` FIRST** to find task and documentation locations.
@@ -13,14 +18,13 @@ Ask user: "Which task are we creating tests for? Please provide the task name."
 
 ### 2. Load Task Context
 Based on `.ab-method/structure/index.yaml`, read from task folder:
-- `progress-tracker.md` - See what has been implemented
-- All completed mission files - Understand what was built
-- Identify files that were created/modified
+- `progress-tracker.md` — mission list and per-mission technical summaries (this is the source of truth; there are no separate mission docs)
+- Identify the files listed in each mission's summary that need testing
 
 ### 3. Load Testing Strategy
-**CRITICAL: Read testing-strategy.md to understand project's testing approach:**
-1. **Check `.ab-method/structure/index.yaml`** for testing-strategy.md location
-2. **Read `testing-strategy.md`** to understand:
+**CRITICAL: Read the Testing section of `docs/architecture/tech-stack.md` to understand project's testing approach:**
+1. **Check `.ab-method/structure/index.yaml`** for `tech-stack.md` location
+2. **Read the Testing section of `tech-stack.md`** to understand:
    - Test frameworks (Jest, Vitest, Pytest, etc.)
    - Test file patterns (*.test.js, *.spec.ts, test_*.py)
    - Test commands (npm test, pytest, go test)
@@ -49,7 +53,7 @@ Based on `.ab-method/structure/index.yaml`, read from task folder:
 
 ### 5. Search for Existing Test Patterns
 **Find and analyze existing tests in the codebase:**
-- Search for test files matching the pattern from testing-strategy.md
+- Search for test files matching the pattern from tech-stack.md (Testing section)
 - Understand test structure and conventions
 - Identify reusable test utilities
 - Find mock/stub patterns
@@ -66,7 +70,7 @@ Current: Brainstormed
 [What implementations are being tested]
 
 ## Testing Strategy
-- Framework: [From testing-strategy.md]
+- Framework: [From tech-stack.md (Testing section)]
 - Test types: [Unit/Integration/E2E]
 - Coverage target: [From requirements]
 
@@ -101,7 +105,7 @@ Deploy with gathered context:
 ```
 Task: "Plan test coverage for [implementations]"
 Context provided:
-- Testing strategy from testing-strategy.md
+- Testing strategy from tech-stack.md (Testing section)
 - Implemented features from previous missions
 - Existing test patterns from codebase
 - Files that need testing
@@ -165,7 +169,7 @@ When all tests are complete:
 6. Update original implementation missions from "Testing" to "Completed"
 
 ## Key Principles
-- **Always load testing-strategy.md first** - Understand project's approach
+- **Always load tech-stack.md (Testing section) first** - Understand project's approach
 - **Test what was actually built** - Focus on new implementations
 - **Follow existing patterns** - Match test style and structure
 - **Comprehensive coverage** - Unit, integration, and E2E as needed
@@ -203,7 +207,7 @@ When all tests are complete:
 3. User: "todo-table"
 4. System: 
    - Reads progress-tracker.md to see completed missions
-   - Reads testing-strategy.md for test framework and patterns
+   - Reads tech-stack.md (Testing section) for test framework and patterns
    - Analyzes implemented files from missions
    - Searches for existing test examples
 5. System: Creates test mission doc with plan
@@ -213,7 +217,7 @@ When all tests are complete:
 
 ## Remember
 - Check `.ab-method/structure/index.yaml` for paths
-- Load testing-strategy.md before creating any tests
+- Load tech-stack.md (Testing section) before creating any tests
 - Analyze actual implementations from completed missions
 - Follow project's existing test patterns
 - Ensure tests actually run and pass

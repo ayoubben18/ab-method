@@ -12,19 +12,16 @@ Create a new task from a problem definition using the AB Method's incremental ta
 Loads and executes the create-task workflow from `.ab-method/core/create-task.md`
 
 This workflow will:
-1. Gather detailed problem requirements through interactive questioning
-2. Analyze project context and extract technical constraints
-3. Create a comprehensive task document with technical details
-4. Define all missions upfront based on project analysis
-5. Set up progress tracking for incremental development
+1. **Always invoke `grill-me`** to interview the user (no skip — even when the request looks clear)
+2. Read UBIQ + CONTEXT + tech-stack + patterns + ADRs to ground the task in canonical terms
+3. Write a slim `progress-tracker.md` with all missions defined as one-line entries
+4. **Run every mission through the `tdd` skill** (red-green-refactor) — no separate mission docs are created
 
 ## Workflow Details
-The create-task workflow follows AB Method principles:
-- **Problem Definition** - Interactive gathering of requirements and technical constraints
-- **Context Analysis** - Understanding existing codebase architecture and patterns
-- **Task Documentation** - Creating comprehensive task documents with code constraints and hints
-- **Mission Planning** - Defining all missions upfront for complete roadmap
-- **Technical Guidance** - Including coding standards, testing requirements, and performance considerations
+- **Always grill** — `grill-me` runs on every invocation
+- **Always TDD** — every mission goes through the `tdd` skill; the test is the spec
+- **No mission docs** — missions live as one-line entries in `progress-tracker.md`; tight technical summaries are appended on completion
+- **Subagents only when warranted** — direct implementation by default; pick agents by need (backend / UI / testing / quality / research), not by mission type
 
 ## Examples
 ```

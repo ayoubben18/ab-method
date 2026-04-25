@@ -10,22 +10,34 @@ Install AB Method in your project with a single command:
 npx ab-method
 ```
 
-This will:
-- ✅ Install all AB Method workflows in `.ab-method/`
-- ✅ Add **11 slash commands** to Claude Code (both `/ab-master` and individual commands)
-- ✅ Create necessary directories (`docs/architecture/`, `tasks/`)
-- ✅ Set up or update `CLAUDE.md` with instructions
-- ✅ Install builtin specialized agents for enhanced development workflow
+The installer **detects your environment** and installs the right things:
+
+| Detected         | Result                                                    |
+|------------------|-----------------------------------------------------------|
+| `.claude/` only  | Slash commands + skills installed under `.claude/`        |
+| `.agents/` only  | Skills installed under `.agents/skills/` (Codex layout)   |
+| Both             | Both targets receive the right files                      |
+| Neither          | Asks you which to install (default: both)                 |
+
+In every case it also installs:
+- ✅ `.ab-method/` — workflow definitions
+- ✅ `docs/architecture/` and `docs/tasks/` — output scaffolding
+- ✅ Skills: `grill-me`, `tdd`, `domain-model`, `ubiquitous-language`, `improve-codebase-architecture`, `request-refactor-plan`, `to-issues`, `to-prd`, `write-a-skill`
+- ✅ **9 slash commands** (Claude only): `/ab-master` + 8 individual commands
+- ✅ Optional built-in subagents (Claude only, prompted): shadcn-ui-adapter, nextjs-backend-architect, sst-cloud-architect, vitest-component-tester, playwright-e2e-tester, ascii-ui-mockup-generator, mastra-ai-agent-builder, qa-code-auditor
+
+Skills are copied as real files, not symlinks — portable across OS and CI.
 
 After installation, open Claude Code and choose your preferred approach:
 
-**Quick Access (NEW!):**
+**Quick Access:**
 ```bash
-/create-task      # Create new tasks with technical details
-/create-mission   # Transform tasks into focused missions
-/extend-task      # Add new missions to existing tasks
-/analyze-project  # Complete project analysis
-# ... and 7 more individual commands
+/create-task        # Create a new task. Always grills via `grill-me`,
+                    # runs every mission through the `tdd` skill.
+/resume-task        # Continue an existing task from its progress tracker
+/extend-task        # Append new missions to an existing task
+/analyze-project    # Full architecture sweep (4 agents in parallel)
+# ... and 5 more individual commands
 ```
 
 **Traditional Approach:**
@@ -54,69 +66,62 @@ The AB Method is an incremental task management system designed specifically for
 ## 🧠 Core Philosophy
 
 ### Key Principles:
-1. **One Task at a Time** - Maintain laser focus on a single task
-2. **Incremental Missions** - Each mission builds on previous knowledge
-3. **Backend First** - For full-stack tasks, start with backend to provide types and data
-4. **Validation Checkpoints** - User validates before implementation begins
-5. **Continuous Documentation** - Architecture and progress tracked in real-time
+1. **Always grill** — `/create-task` invokes `grill-me` on every invocation, no skip
+2. **Always TDD** — every mission runs through the `tdd` skill (red-green-refactor); the test is the spec
+3. **No mission docs** — missions live as one-line entries in `progress-tracker.md`; tight technical summaries on completion
+4. **One task at a time** — focus, conserve context
+5. **Backend-first** for full-stack tasks (types feed the frontend)
 
 ### Why AB Method?
-- **Context Conservation** - Avoid overwhelming the model with too much planning
-- **Knowledge Building** - Each mission uses learnings from previous ones
-- **No Redundancy** - Prevent implementing the same thing twice
-- **Clear Progress** - Always know exactly where you are
+- **Context conservation** — minimal docs, no scaffolding-as-noise
+- **Tests as spec** — TDD makes the contract executable, not aspirational
+- **Domain language** — UBIQUITOUS_LANGUAGE.md + CONTEXT.md keep terms consistent across tasks
+- **Clear progress** — the progress tracker is always the source of truth
 
 ## 🏗️ System Architecture
 
 ```
 .claude/
 └── commands/
-    ├── ab-master.md            # Traditional master controller
-    ├── create-task.md          # Direct task creation
-    ├── resume-task.md          # Resume existing tasks
-    ├── create-mission.md       # Direct mission creation
-    ├── resume-mission.md       # Resume missions
-    ├── test-mission.md         # Create comprehensive tests
-    ├── extend-task.md          # Add missions to existing tasks
-    ├── analyze-project.md      # Full project analysis
-    ├── analyze-frontend.md     # Frontend analysis
-    ├── analyze-backend.md      # Backend analysis
-    └── update-architecture.md  # Architecture updates
+    ├── ab-master.md            # Master controller
+    ├── create-task.md          # Always grills + drives missions via tdd
+    ├── resume-task.md          # Continue from progress tracker
+    ├── extend-task.md          # Append missions to an existing task
+    ├── test-mission.md         # Retroactive test coverage (rare)
+    ├── analyze-project.md      # Full architecture sweep
+    ├── analyze-frontend.md     # Frontend patterns only
+    ├── analyze-backend.md      # Backend patterns only
+    └── update-architecture.md  # Refresh docs after changes
 
 .ab-method/
-├── core/                     # Core workflow files
-│   ├── analyze-project.md    # Project analysis orchestrator
-│   ├── analyze-frontend.md   # Frontend architecture analysis
-│   ├── analyze-backend.md    # Backend architecture analysis
-│   ├── update-architecture.md # Architecture documentation updater
-│   ├── create-task.md        # Task creation workflow
-│   ├── resume-task.md        # Task resumption workflow
-│   ├── create-mission.md     # Mission creation workflow
-│   ├── resume-mission.md     # Mission resumption workflow
-│   └── extend-task.md        # Task extension workflow
+├── core/                       # Workflow files (one per command)
+│   ├── analyze-project.md
+│   ├── analyze-frontend.md
+│   ├── analyze-backend.md
+│   ├── create-task.md
+│   ├── resume-task.md
+│   ├── extend-task.md
+│   ├── test-mission.md
+│   └── update-architecture.md
 │
-├── utils/                    # Mission utility files
-│   ├── backend-mission.md   # Backend mission coordinator
-│   ├── frontend-mission.md  # Frontend mission coordinator
-│   └── planning-mission.md  # Planning mission coordinator
-│
-├── structure/               # Configuration
-│   └── index.yaml          # Paths and structure configuration
+└── structure/
+    └── index.yaml              # Paths and outputs
 
+UBIQUITOUS_LANGUAGE.md          # Root: domain glossary (ubiquitous-language skill format)
+CONTEXT.md                      # Root: bounded-context overview (domain-model skill format)
+                                # OR CONTEXT-MAP.md + per-context CONTEXT.md files
 
 docs/
-└── architecture/           # Generated architecture docs
-    ├── tech-stack.md
-    ├── entry-points.md
-    ├── frontend-patterns.md
-    ├── backend-patterns.md
-    ├── external-services.md
-    └── project-constraints.md
-
-tasks/                      # Created tasks and missions
-└── [task-name]/
-    ├── progress-tracker.md
-    └── mission-*.md
+├── architecture/               # 3 lean files
+│   ├── tech-stack.md           # Stack + entry points + external services + constraints + testing
+│   ├── frontend-patterns.md
+│   └── backend-patterns.md
+├── adr/                        # Created lazily by /domain-model
+│   └── 0001-*.md
+└── tasks/
+    └── <task-name>/
+        ├── progress-tracker.md # SINGLE source of truth — missions are one-line entries
+        └── sub-agents-outputs/ # only created when a subagent runs
 ```
 
 ## 🚦 Getting Started
@@ -125,16 +130,14 @@ tasks/                      # Created tasks and missions
 
 **🚀 Quick Access (Recommended for experienced users):**
 ```bash
-/create-task        # Create new task with enhanced technical details
-/resume-task        # Resume paused tasks
-/create-mission     # Transform tasks into missions
-/resume-mission     # Continue incomplete missions
-/test-mission       # Create comprehensive tests
-/extend-task        # Add new missions to existing tasks
-/analyze-project    # Complete project analysis
-/analyze-frontend   # Frontend architecture analysis
-/analyze-backend    # Backend services analysis
-/update-architecture # Maintain architecture docs
+/create-task         # Always grills, drives every mission via tdd
+/resume-task         # Continue from the progress tracker
+/extend-task         # Append missions to an existing task
+/test-mission        # Retroactive test coverage (rare — tdd handles tests upfront)
+/analyze-project     # Full architecture sweep
+/analyze-frontend    # Frontend patterns only
+/analyze-backend     # Backend patterns only
+/update-architecture # Refresh architecture/domain docs
 ```
 
 **📚 Traditional Controller (Great for beginners):**
@@ -151,15 +154,14 @@ The master controller provides:
 
 | Workflow | Purpose | When to Use |
 |----------|---------|-------------|
-| `analyze-project` | Full project architecture analysis | Starting a new project or onboarding |
-| `analyze-frontend` | Deep frontend analysis | Understanding client-side architecture |
-| `analyze-backend` | Deep backend analysis | Understanding server-side architecture |
-| `create-task` | Create a new development task | Starting new feature/fix |
-| `resume-task` | Resume an existing task | Continuing previous work |
-| `create-mission` | Create next mission for a task | Ready for next step |
-| `resume-mission` | Resume an in-progress mission | Continuing mission work |
-| `extend-task` | Add new missions to existing task | Requirements changed or scope expanded |
-| `update-architecture` | Update architecture docs | After implementing features |
+| `analyze-project` | Full architecture sweep — UBIQ + CONTEXT + tech-stack + FE/BE patterns | New project or onboarding |
+| `analyze-frontend` | Frontend patterns only | Re-analyze just the FE |
+| `analyze-backend` | Backend patterns only | Re-analyze just the BE |
+| `create-task` | Define a task; always grills, drives every mission through `tdd` | Starting new feature/fix |
+| `resume-task` | Continue an existing task from its progress tracker | Continuing previous work |
+| `extend-task` | Append new missions to an existing task | Requirements changed or scope expanded |
+| `test-mission` | Retroactive test coverage | Adding tests to code not written test-first |
+| `update-architecture` | Refresh architecture/domain docs | After impactful changes |
 
 ## 📁 Workflow Files Documentation
 
@@ -200,94 +202,50 @@ Brainstormed → Validated → In dev → Testing → Completed
 3. Create all missions upfront
 4. Initialize with "Brainstormed" status
 
-#### 🔄 `resume-task.md` & `resume-mission.md`
-**Purpose**: Resume work from exact breakpoint.
+#### 🔄 `resume-task.md`
+**Purpose**: Continue an existing task from its progress tracker. No mission docs to recover — the tracker carries the mission list, prior technical summaries, and the next-up entry.
 
-**Features**:
-- Shows current progress visually
-- Identifies last action and next step
-- Maintains continuity across sessions
+### Skill Integration
 
-### Utility Files
+`/create-task` **always** invokes the **`grill-me`** skill (no skip, ever) to interview the user before missions are defined. The skill reads `UBIQUITOUS_LANGUAGE.md` + `CONTEXT.md` so the resulting task speaks the canonical language.
 
-#### 🔧 `backend-mission.md`
-**Responsibilities**:
-- Loads backend architecture documentation
-- Coordinates backend-architect and backend-developer agents
-- Ensures DTOs use database types for maintainability
+Every mission — whether created at task time or appended via `/extend-task`, whether started fresh or resumed — runs through the **`tdd`** skill. Red-green-refactor; the test is the spec.
 
-#### 🎨 `frontend-mission.md`
-**Responsibilities**:
-- Loads frontend patterns and backend types
-- Coordinates UX expert and frontend-developer agents
-- Integrates with backend missions for type safety
-
-#### 📊 `planning-mission.md`
-**Responsibilities**:
-- Loads ALL architecture documentation
-- Handles research and design decisions
-- Documents rationale and trade-offs
+The **`domain-model`** skill is the recommended Phase 2 after `/analyze-project` — it grills the user about `CONTEXT.md` and captures hard-to-reverse decisions in `docs/adr/`.
 
 ## 💡 Usage Examples
 
-### Example 1: Starting a New Feature (Quick Style)
+### Example 1: Starting a new feature
 
 ```bash
-# 1. Create task directly with enhanced technical context
 /create-task
 
-# 2. System asks for problem definition + technical details
-"Create a todos table that fetches from API and displays in frontend"
-"Follow existing shadcn/ui patterns, use our current API structure"
-"Testing with vitest, ensure responsive design"
-
-# 3. Creates task with comprehensive technical context:
-# Technical Context: Code constraints, architecture hints, tech requirements
-# Code Guidance: File organization, testing requirements, performance
-# - Mission 1: Backend - Create todo model and API
-# - Mission 2: Frontend - Create table component  
-# - Mission 3: Integration - Connect frontend to backend
-
-# 4. System prompts for validation
-"Task created with status 'Brainstormed'. Ready to validate?"
-
-# 5. After validation, start first mission
-/create-mission  # Deploys nextjs-backend-architect agent
+# 1. grill-me runs (always) — resolves problem, scope, behavior,
+#    constraints, existing-code anchors. One Q at a time.
+# 2. Reads UBIQ + CONTEXT + tech-stack + patterns + ADRs.
+# 3. Writes a slim progress-tracker.md:
+#       Missions:
+#       - [ ] Mission 1: Backend — POST /api/todos with Zod validation
+#       - [ ] Mission 2: Backend — GET /api/todos with cursor pagination
+#       - [ ] Mission 3: Frontend — TodoTable using shadcn DataTable pattern
+# 4. User validates → status moves to Validated.
+# 5. For each mission:
+#    • load context  • invoke `tdd` skill  • red-green-refactor
+#    • on completion → tight technical summary appended to tracker.
 ```
 
-### Example 1b: Starting a New Feature (Traditional Style)
+### Example 2: Resuming work
 
 ```bash
-# 1. Use master controller for guidance
-/ab-master create-task
-
-# 2. Same enhanced flow but with help text and explanations
-# 3. Creates same comprehensive task documentation
-# 4. Use /ab-master create-mission for guided mission creation
-```
-
-### Example 2: Resuming Work
-
-**Quick Style:**
-```bash
-# Resume directly
 /resume-task
-> "Which task to resume?"
 > "todo-table"
 
-# Shows progress with agent tracking:
-# ✓ Mission 1: Backend API - COMPLETED (nextjs-backend-architect)
-# ⏳ Mission 2: Frontend Table - IN PROGRESS (shadcn-ui-adapter)  
-#   Last: Created base component with shadcn/ui patterns
-#   Next: Add state management and data fetching
-#   Agent Output: Component documented in docs/tasks/todo-table/
-```
-
-**Traditional Style:**
-```bash
-# Resume with guidance
-/ab-master resume-task
-# Same progress display with helpful explanations
+# Reads progress-tracker.md:
+#   ✓ Mission 1: Backend POST — Completed
+#   ✓ Mission 2: Backend GET — Completed
+#   ⏳ Mission 3: Frontend TodoTable — next up
+# Loads UBIQ + CONTEXT + frontend-patterns + tech-stack.
+# Invokes `tdd` skill on Mission 3.
 ```
 
 ## 🔄 Task Lifecycle
@@ -309,36 +267,31 @@ graph LR
 
 ```mermaid
 graph TB
-    A[Create Mission] --> B{Mission Type?}
-    B -->|Backend| C[Load backend-mission.md]
-    B -->|Frontend| D[Load frontend-mission.md]
-    B -->|Planning| E[Load planning-mission.md]
-    
-    C --> F[Backend Architect Agent]
-    F --> G[Backend Developer Agent]
-    
-    D --> H[UX Expert Agent]
-    H --> I[Frontend Developer Agent]
-    
-    E --> J[Research/Planning Agent]
-    
-    G --> K[Update Progress]
-    I --> K
-    J --> K
-    K --> L[Mission Complete]
+    A[Create Mission] --> B{Description clear?}
+    B -->|No| G[Invoke grill-me skill]
+    G --> C
+    B -->|Yes| C[Load domain + architecture context]
+    C --> D{Direct or subagent?}
+    D -->|Direct| E[Implement]
+    D -->|Subagent| F[Pick agent by need:<br/>backend / UI / testing / research]
+    F --> E
+    E --> H[Update mission + progress tracker]
+    H --> I[Mission Complete]
 ```
+
+Context loaded for every mission: `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, `tech-stack.md`, the relevant patterns doc(s), `docs/adr/`. Agent selection is need-based, not type-based.
 
 ## 📚 Architecture Documentation
 
 The system automatically generates and maintains architecture documentation:
 
 ### Generated Files:
-- **tech-stack.md** - Technologies, frameworks, and tools
-- **entry-points.md** - API endpoints and application entries
+- **UBIQUITOUS_LANGUAGE.md** *(root)* - Domain glossary (per `ubiquitous-language` skill format)
+- **CONTEXT.md** *(root)* - Bounded-context overview (per `domain-model` skill format). Multi-context repos get `CONTEXT-MAP.md` + per-context files instead.
+- **tech-stack.md** - Stack, entry points, external services, constraints, testing (merged)
 - **frontend-patterns.md** - Component architecture and patterns
 - **backend-patterns.md** - API design and service patterns
-- **external-services.md** - Third-party integrations
-- **project-constraints.md** - Limitations and requirements
+- **docs/adr/*.md** - Decision records, created lazily by `/domain-model`
 
 ### Update Strategy:
 After implementing features, run:
@@ -460,17 +413,29 @@ The `.ab-method/structure/index.yaml` file allows customization of:
 ### Structure Index (`.ab-method/structure/index.yaml`)
 ```yaml
 project_structure:
+  root:
+    files:
+      - UBIQUITOUS_LANGUAGE.md
+      - CONTEXT.md
   docs:
     architecture:
       files:
         - tech-stack.md
-        - entry-points.md
-        # ... more files
+        - frontend-patterns.md
+        - backend-patterns.md
+    adr:
+      files: []   # created lazily by /domain-model
 
 workflow_outputs:
-  analyze-project: docs/architecture/
-  analyze-frontend: docs/architecture/frontend-patterns.md
-  # ... more mappings
+  analyze-project:
+    - UBIQUITOUS_LANGUAGE.md
+    - CONTEXT.md
+    - docs/architecture/tech-stack.md
+    - docs/architecture/frontend-patterns.md
+    - docs/architecture/backend-patterns.md
+  domain-model:
+    - CONTEXT.md
+    - docs/adr/
 ```
 
 ## 📈 Best Practices

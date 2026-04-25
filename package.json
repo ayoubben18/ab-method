@@ -22,7 +22,9 @@
   "files": [
     "cli.js",
     ".ab-method/**/*",
-    ".claude/**/*",
+    ".claude/commands/**/*",
+    ".claude/agents/**/*",
+    ".agents/skills/**/*",
     "README.md",
     "LICENSE"
   ],

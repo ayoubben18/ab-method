@@ -12,18 +12,16 @@ Resume an existing task from where it was paused, continuing with the next incom
 Loads and executes the resume-task workflow from `.ab-method/core/resume-task.md`
 
 This workflow will:
-1. Find and load the most recent incomplete task
-2. Review the current progress and mission status
-3. Continue with the next pending mission
-4. Maintain context from previous work
+1. Identify the task and read its `progress-tracker.md` (single source of truth — there are no mission docs)
+2. Show progress: which missions are done, which is next
+3. Load UBIQ + CONTEXT + tech-stack + patterns + ADRs for the next mission
+4. **Run the next mission through the `tdd` skill** (red-green-refactor)
+5. Append a tight technical summary on completion
 
 ## Workflow Details
-The resume-task workflow ensures continuity by:
-- **Task Discovery** - Finding paused or incomplete tasks
-- **Progress Review** - Understanding what has been completed
-- **Context Recovery** - Loading previous work and technical details
-- **Mission Continuation** - Picking up from the last incomplete mission
-- **Incremental Progress** - Building on existing work
+- The progress tracker carries the mission list and per-mission technical summaries from prior sessions — that's the entire context
+- Tests + summaries are the persistent artifacts across sessions
+- Always TDD via the `tdd` skill, never skip it
 
 ## Examples
 ```

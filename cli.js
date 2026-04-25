@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-// const { execSync } = require('child_process'); // Removed - not needed anymore
+const readline = require('readline');
 
 const COLORS = {
   reset: '\x1b[0m',
@@ -11,31 +11,74 @@ const COLORS = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   cyan: '\x1b[36m',
-  red: '\x1b[31m'
+  red: '\x1b[31m',
+  white: '\x1b[37m'
 };
 
 function log(message, color = '') {
   console.log(`${color}${message}${COLORS.reset}`);
 }
 
-function copyRecursiveSync(src, dest) {
-  const exists = fs.existsSync(src);
-  const stats = exists && fs.statSync(src);
-  const isDirectory = exists && stats.isDirectory();
-  
-  if (isDirectory) {
-    if (!fs.existsSync(dest)) {
-      fs.mkdirSync(dest, { recursive: true });
-    }
-    fs.readdirSync(src).forEach(childItemName => {
-      copyRecursiveSync(
-        path.join(src, childItemName),
-        path.join(dest, childItemName)
-      );
+function ask(question) {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise(resolve => {
+    rl.question(question, answer => {
+      rl.close();
+      resolve(answer);
     });
+  });
+}
+
+function copyRecursiveSync(src, dest) {
+  if (!fs.existsSync(src)) return;
+  // statSync (not lstatSync) follows symlinks — so symlinked source dirs
+  // dereference into real copies at the destination.
+  const stats = fs.statSync(src);
+  if (stats.isDirectory()) {
+    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+    for (const child of fs.readdirSync(src)) {
+      copyRecursiveSync(path.join(src, child), path.join(dest, child));
+    }
   } else {
     fs.copyFileSync(src, dest);
   }
+}
+
+function ensureDir(p) {
+  if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+}
+
+async function detectTargets(targetDir) {
+  const hasClaude = fs.existsSync(path.join(targetDir, '.claude'));
+  const hasAgents = fs.existsSync(path.join(targetDir, '.agents'));
+
+  log('🔍 Detecting environment...', COLORS.cyan);
+  log(`   .claude/  → ${hasClaude ? 'found' : 'not found'}`, hasClaude ? COLORS.green : COLORS.yellow);
+  log(`   .agents/  → ${hasAgents ? 'found' : 'not found'}`, hasAgents ? COLORS.green : COLORS.yellow);
+
+  if (hasClaude && hasAgents) {
+    log('✅ Installing for both Claude Code and Codex\n', COLORS.green);
+    return { installClaude: true, installCodex: true };
+  }
+  if (hasClaude) {
+    log('✅ Installing for Claude Code\n', COLORS.green);
+    return { installClaude: true, installCodex: false };
+  }
+  if (hasAgents) {
+    log('✅ Installing for Codex\n', COLORS.green);
+    return { installClaude: false, installCodex: true };
+  }
+
+  // Neither detected — ask the user
+  log('\nNo .claude/ or .agents/ directory detected in the project.', COLORS.yellow);
+  log('Choose what to install:', COLORS.white);
+  log('  1) Claude Code only (.claude/)', COLORS.white);
+  log('  2) Codex only (.agents/)', COLORS.white);
+  log('  3) Both (default)', COLORS.white);
+  const answer = (await ask('\nChoice [3]: ')).trim();
+  if (answer === '1') return { installClaude: true, installCodex: false };
+  if (answer === '2') return { installClaude: false, installCodex: true };
+  return { installClaude: true, installCodex: true };
 }
 
 async function install() {
@@ -43,160 +86,120 @@ async function install() {
   log('============================\n', COLORS.cyan);
 
   const targetDir = process.cwd();
-  
-  // Check if .ab-method already exists
+  const packageRoot = __dirname;
+
+  const abMethodSource = path.join(packageRoot, '.ab-method');
+  const commandsSource = path.join(packageRoot, '.claude', 'commands');
+  const subagentsSource = path.join(packageRoot, '.claude', 'agents');
+  const skillsSource = path.join(packageRoot, '.agents', 'skills');
+
+  // Overwrite check
   if (fs.existsSync(path.join(targetDir, '.ab-method'))) {
-    log('⚠️  AB Method is already installed in this project!', COLORS.yellow);
-    const readline = require('readline').createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
-    
-    const answer = await new Promise(resolve => {
-      readline.question('Do you want to overwrite? (y/N): ', resolve);
-    });
-    readline.close();
-    
+    log('⚠️  AB Method is already installed in this project.', COLORS.yellow);
+    const answer = await ask('Overwrite? (y/N): ');
     if (answer.toLowerCase() !== 'y') {
       log('Installation cancelled.', COLORS.yellow);
       process.exit(0);
     }
   }
 
-  // Ask about builtin agents
-  log('🤖 Agent Configuration', COLORS.bright + COLORS.cyan);
-  log('=====================\n', COLORS.cyan);
-  log('The AB Method works with specialized Claude Code agents to improve development workflow.');
-  log('We have several builtin agents that integrate seamlessly with the AB Method:\n');
-  
-  log('Available builtin agents:', COLORS.yellow);
-  log('• shadcn-ui-adapter     - UI component creation and styling');
-  log('• nextjs-backend-architect - Next.js backend development');
-  log('• sst-cloud-architect   - Serverless infrastructure');
-  log('• vitest-component-tester - Component testing');
-  log('• playwright-e2e-tester - End-to-end testing');
-  log('• ascii-ui-mockup-generator - UI mockups and wireframes');
-  log('• mastra-ai-agent-builder - AI agent development');
-  log('• qa-code-auditor       - Code quality analysis');
-  
-  const readline = require('readline').createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-  
-  log('\nThese agents help minimize context window usage and provide specialized expertise.');
-  const agentChoice = await new Promise(resolve => {
-    readline.question('\nDo you want to install these builtin agents? (Y/n): ', resolve);
-  });
-  readline.close();
-  
-  const installAgents = agentChoice.toLowerCase() !== 'n';
-  
-  if (installAgents) {
-    log('✅ Will install builtin agents', COLORS.green);
-  } else {
-    log('⏭️  Skipping builtin agents installation', COLORS.yellow);
-    log('   You can always install agents later or use your own custom agents', COLORS.white);
+  // Detect Claude vs Codex targets
+  const { installClaude, installCodex } = await detectTargets(targetDir);
+
+  // Built-in Claude subagents prompt — only if installing for Claude
+  let installSubagents = false;
+  if (installClaude) {
+    log('🤖 Built-in Claude Subagents', COLORS.bright + COLORS.cyan);
+    log('============================', COLORS.cyan);
+    log('Optional specialized subagents that integrate with the AB Method:', COLORS.white);
+    log('  • shadcn-ui-adapter         - UI components', COLORS.white);
+    log('  • nextjs-backend-architect  - Next.js backend', COLORS.white);
+    log('  • sst-cloud-architect       - Serverless infra', COLORS.white);
+    log('  • vitest-component-tester   - Component tests', COLORS.white);
+    log('  • playwright-e2e-tester     - E2E tests', COLORS.white);
+    log('  • ascii-ui-mockup-generator - UI mockups', COLORS.white);
+    log('  • mastra-ai-agent-builder   - AI agent dev', COLORS.white);
+    log('  • qa-code-auditor           - Code quality', COLORS.white);
+    const ans = await ask('\nInstall these built-in subagents? (Y/n): ');
+    installSubagents = ans.toLowerCase() !== 'n';
+    log(installSubagents ? '✅ Will install built-in subagents\n' : '⏭️  Skipping built-in subagents\n',
+        installSubagents ? COLORS.green : COLORS.yellow);
   }
 
   try {
-    log('\n📦 Installing AB Method files...', COLORS.blue);
-    
-    // Create .ab-method directory structure
-    const abMethodSource = path.join(__dirname, '.ab-method');
-    const abMethodTarget = path.join(targetDir, '.ab-method');
-    
+    log('📦 Installing AB Method files...', COLORS.blue);
+
+    // 1. .ab-method/ — always installed
     if (fs.existsSync(abMethodSource)) {
-      copyRecursiveSync(abMethodSource, abMethodTarget);
-      log('✅ Created .ab-method directory', COLORS.green);
+      copyRecursiveSync(abMethodSource, path.join(targetDir, '.ab-method'));
+      log('✅ .ab-method/ installed', COLORS.green);
     }
 
-    // Create .claude directory if it doesn't exist
-    const claudeDir = path.join(targetDir, '.claude');
-    if (!fs.existsSync(claudeDir)) {
-      fs.mkdirSync(claudeDir, { recursive: true });
-    }
+    // 2. docs scaffolding — always created
+    ensureDir(path.join(targetDir, 'docs', 'architecture'));
+    ensureDir(path.join(targetDir, 'docs', 'tasks'));
+    log('✅ docs/architecture/ and docs/tasks/ ready', COLORS.green);
 
-    // Copy all commands
-    const commandsDir = path.join(claudeDir, 'commands');
-    if (!fs.existsSync(commandsDir)) {
-      fs.mkdirSync(commandsDir, { recursive: true });
-    }
+    // 3. Claude Code targets
+    if (installClaude) {
+      ensureDir(path.join(targetDir, '.claude'));
 
-    // Copy all command files from the package
-    const commandsSource = path.join(__dirname, '.claude', 'commands');
-    if (fs.existsSync(commandsSource)) {
-      copyRecursiveSync(commandsSource, commandsDir);
-      log('✅ Installed all AB Method commands', COLORS.green);
-      log('   • /ab-master (traditional workflow controller)', COLORS.white);
-      log('   • Individual workflow commands: /create-task, /create-mission, etc.', COLORS.white);
-    }
+      // Slash commands
+      if (fs.existsSync(commandsSource)) {
+        copyRecursiveSync(commandsSource, path.join(targetDir, '.claude', 'commands'));
+        log('✅ .claude/commands/ installed (slash commands)', COLORS.green);
+      }
 
+      // Skills (real copies — not symlinks — for portability)
+      if (fs.existsSync(skillsSource)) {
+        copyRecursiveSync(skillsSource, path.join(targetDir, '.claude', 'skills'));
+        log('✅ .claude/skills/ installed (skills for Claude)', COLORS.green);
+      }
 
-    // Create docs/architecture directory
-    const docsDir = path.join(targetDir, 'docs', 'architecture');
-    if (!fs.existsSync(docsDir)) {
-      fs.mkdirSync(docsDir, { recursive: true });
-      log('✅ Created docs/architecture directory', COLORS.green);
-    }
-
-    // Create docs/tasks directory
-    const tasksDir = path.join(targetDir, 'docs', 'tasks');
-    if (!fs.existsSync(tasksDir)) {
-      fs.mkdirSync(tasksDir, { recursive: true });
-      log('✅ Created docs/tasks directory', COLORS.green);
-    }
-
-    // Install builtin agents if requested
-    if (installAgents) {
-      log('\n🤖 Installing builtin agents...', COLORS.blue);
-      
-      try {
-        // Copy agents directory
-        const agentsSource = path.join(__dirname, '.claude', 'agents');
-        const agentsTarget = path.join(claudeDir, 'agents');
-        
-        if (fs.existsSync(agentsSource)) {
-          copyRecursiveSync(agentsSource, agentsTarget);
-          log('✅ Builtin agents installed successfully', COLORS.green);
-        } else {
-          log('⚠️  Agent files not found in package', COLORS.yellow);
-          log('   You can install them later by running: /agents', COLORS.white);
-        }
-      } catch (error) {
-        log('⚠️  Could not install builtin agents automatically', COLORS.yellow);
-        log('   Error:', error.message, COLORS.red);
-        log('   You can install them manually by running: /agents', COLORS.white);
+      // Built-in subagents (optional)
+      if (installSubagents && fs.existsSync(subagentsSource)) {
+        copyRecursiveSync(subagentsSource, path.join(targetDir, '.claude', 'agents'));
+        log('✅ .claude/agents/ installed (built-in subagents)', COLORS.green);
       }
     }
 
+    // 4. Codex targets
+    if (installCodex) {
+      ensureDir(path.join(targetDir, '.agents'));
+      if (fs.existsSync(skillsSource)) {
+        copyRecursiveSync(skillsSource, path.join(targetDir, '.agents', 'skills'));
+        log('✅ .agents/skills/ installed (skills for Codex)', COLORS.green);
+      }
+    }
+
+    // Summary
     log('\n✨ AB Method installed successfully!', COLORS.bright + COLORS.green);
-    
-    if (installAgents) {
-      log('\n🎉 Installation complete with builtin agents!', COLORS.green);
-    } else {
-      log('\n🎉 Installation complete!', COLORS.green);
+    log('\nWhat got installed:', COLORS.cyan);
+    log('  • .ab-method/                        — workflow definitions', COLORS.white);
+    log('  • docs/architecture/, docs/tasks/   — output scaffolding', COLORS.white);
+    if (installClaude) {
+      log('  • .claude/commands/                  — /create-task, /resume-task, /analyze-project, ...', COLORS.white);
+      log('  • .claude/skills/                    — grill-me, tdd, domain-model, ubiquitous-language, ...', COLORS.white);
+      if (installSubagents) {
+        log('  • .claude/agents/                    — built-in subagents', COLORS.white);
+      }
     }
-    
+    if (installCodex) {
+      log('  • .agents/skills/                    — same skills, exposed to Codex', COLORS.white);
+    }
+
     log('\nNext steps:', COLORS.cyan);
-    log('1. Open Claude Code in this project', COLORS.white);
-    log('2. Choose your preferred way to start:', COLORS.white);
-    log('   • Quick: /create-task, /analyze-project, etc.', COLORS.white);
-    log('   • Traditional: /ab-master', COLORS.white);
-    log('3. Follow the workflow to create your first task', COLORS.white);
-    
-    if (installAgents) {
-      log('\n🤖 Builtin agents ready to use:', COLORS.cyan);
-      log('• Use specialized agents automatically in missions', COLORS.white);
-      log('• Check sub-agents-outputs/ folder for detailed agent work', COLORS.white);
+    if (installClaude) {
+      log('  1. Open Claude Code in this project', COLORS.white);
+      log('  2. Run /analyze-project to generate UBIQ + CONTEXT + arch docs', COLORS.white);
+      log('  3. Run /domain-model to sharpen the domain language (optional)', COLORS.white);
+      log('  4. Run /create-task to start work — every mission runs through the tdd skill', COLORS.white);
     } else {
-      log('\n💡 To install builtin agents later:', COLORS.cyan);
-      log('• Run: /agents', COLORS.white);
-      log('• Or use your own custom agents', COLORS.white);
+      log('  1. Open Codex in this project', COLORS.white);
+      log('  2. Skills are at .agents/skills/', COLORS.white);
     }
-    
-    log('\nFor more information, visit:', COLORS.blue);
-    log('https://github.com/ayoubben18/ab-method', COLORS.white);
+
+    log('\nDocs: https://github.com/ayoubben18/ab-method', COLORS.blue);
 
   } catch (error) {
     log(`\n❌ Installation failed: ${error.message}`, COLORS.red);
@@ -204,7 +207,7 @@ async function install() {
   }
 }
 
-// Parse command line arguments
+// CLI entry
 const args = process.argv.slice(2);
 const command = args[0];
 
@@ -217,6 +220,11 @@ if (!command || command === 'install') {
   log('  npx ab-method          Install AB Method in current project');
   log('  npx ab-method install  Install AB Method in current project');
   log('  npx ab-method --help   Show this help message');
+  log('\nThe installer detects:');
+  log('  • .claude/ → installs commands + skills for Claude Code');
+  log('  • .agents/ → installs skills for Codex');
+  log('  • neither → asks you which to install');
+  log('  • both    → installs both');
   log('\nMore info: https://github.com/ayoubben18/ab-method', COLORS.blue);
 } else if (command === '--version' || command === '-v') {
   const packageJson = require('./package.json');
