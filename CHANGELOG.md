@@ -1,3 +1,29 @@
+# [3.0.0](https://github.com/ayoubben18/ab-method/compare/v2.3.0...v3.0.0) (2026-04-25)
+
+
+* feat!: skill-driven workflow with domain model, TDD missions, and dual-target installer ([e96b343](https://github.com/ayoubben18/ab-method/commit/e96b343e137be4a2e0065d2d840647f7800ce8cb))
+
+
+### BREAKING CHANGES
+
+* /create-mission and /resume-mission slash commands removed.
+Mission documents (mission-N-*.md) are no longer created — progress-tracker.md
+is the single source of truth per task.
+* .ab-method/utils/ removed (backend-mission.md, frontend-mission.md,
+planning-mission.md). Mission dispatch by type is gone; agents are picked by need.
+* docs/architecture/ files entry-points.md, external-services.md,
+project-constraints.md, and testing-strategy.md removed — content merged into
+tech-stack.md sections.
+* .ab-method/structure/index.yaml schema changed: new root: section
+with UBIQUITOUS_LANGUAGE.md and CONTEXT.md; tasks no longer list mission files;
+workflow_outputs reshaped to list per-workflow artifacts.
+* Installer no longer always copies all of .claude/. The package
+files allowlist now ships individual subpaths; consumers running an old ab-method
+script against the new package layout will not find .claude/skills/ in the package
+(skills now live under .agents/skills/ in the package).
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+
 # [2.3.0](https://github.com/ayoubben18/ab-method/compare/v2.2.2...v2.3.0) (2025-11-10)
 
 
