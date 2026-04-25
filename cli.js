@@ -190,13 +190,14 @@ async function install() {
 
     log('\nNext steps:', COLORS.cyan);
     if (installClaude) {
-      log('  1. Open Claude Code in this project', COLORS.white);
-      log('  2. Run /analyze-project to generate UBIQ + CONTEXT + arch docs', COLORS.white);
-      log('  3. Run /domain-model to sharpen the domain language (optional)', COLORS.white);
-      log('  4. Run /create-task to start work — every mission runs through the tdd skill', COLORS.white);
-    } else {
-      log('  1. Open Codex in this project', COLORS.white);
-      log('  2. Skills are at .agents/skills/', COLORS.white);
+      log('  • Open Claude Code in this project', COLORS.white);
+      log('  • Run /analyze-project to generate UBIQ + CONTEXT + arch docs', COLORS.white);
+      log('  • Run /domain-model to sharpen the domain language (optional)', COLORS.white);
+      log('  • Run /create-task to start work — every mission runs through the tdd skill', COLORS.white);
+    }
+    if (installCodex) {
+      log('  • Open Codex in this project', COLORS.white);
+      log('  • Skills are at .agents/skills/', COLORS.white);
     }
 
     log('\nDocs: https://github.com/ayoubben18/ab-method', COLORS.blue);
