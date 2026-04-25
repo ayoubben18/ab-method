@@ -40,6 +40,11 @@ build/
 # OS
 Thumbs.db
 
+# Local IDE / tool state
+.windsurf/
+.claude/settings.local.json
+skills-lock.json
+
 # User-generated content (tasks and docs)
 # Uncomment if you want to exclude user tasks
 # tasks/
