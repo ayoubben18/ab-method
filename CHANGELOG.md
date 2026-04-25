@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/ayoubben18/ab-method/compare/v3.0.0...v3.0.1) (2026-04-25)
+
+
+### Bug Fixes
+
+* show next-steps for both targets when installing for Claude and Codex ([ba472c4](https://github.com/ayoubben18/ab-method/commit/ba472c4cf1f4c26560458dde4b87e1b8a65c937f))
+
 # [3.0.0](https://github.com/ayoubben18/ab-method/compare/v2.3.0...v3.0.0) (2026-04-25)
 
 
