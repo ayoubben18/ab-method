@@ -218,6 +218,14 @@ When the user confirms, update status to 'Validated' and proceed to Step 8.
 
 Walk through the missions list in `progress-tracker.md` from top to bottom. For each uncompleted mission:
 
+**STEP ZERO — non-negotiable, before any Read / Edit / Write / Bash for the mission:**
+
+> Invoke the `tdd` skill via the Skill tool: `Skill("tdd")`.
+
+Do this **first**, every mission, no exceptions. The skill loads `SKILL.md` plus its companions (`tests.md`, `mocking.md`, `interface-design.md`, `refactoring.md`, `deep-modules.md`) which drive every subsequent decision in the mission. Writing the test first is not enough — the discipline lives in the companion files. Skipping the Skill call means writing tests from instinct instead of from the playbook; that is a workflow violation, not a shortcut. If you find yourself about to read a source file or write a test without having called `Skill("tdd")` for this mission, stop and call it.
+
+After the skill is loaded:
+
 1. **Load context** (every mission):
    - `UBIQUITOUS_LANGUAGE.md` and `CONTEXT.md` — use canonical terms in code, types, tests
    - `docs/architecture/tech-stack.md` (incl. Testing section)
@@ -227,13 +235,13 @@ Walk through the missions list in `progress-tracker.md` from top to bottom. For 
 
 2. **Grill if vague** — if the mission's one-line description is fuzzy, invoke the `grill-me` skill before implementing.
 
-3. **Invoke the `tdd` skill — always.** Every mission runs through red-green-refactor:
+3. **Run red-green-refactor under the loaded `tdd` skill:**
    - Write the failing test first (uses framework + patterns from `tech-stack.md` Testing section)
    - Make it pass with the smallest change
    - Refactor with tests green
-   - The `tdd` skill's companion files (`tests.md`, `mocking.md`, `interface-design.md`, `refactoring.md`, `deep-modules.md`) drive the loop
+   - The `tdd` skill's companion files drive the loop — consult them, don't improvise
 
-4. **Optionally deploy a subagent** if the mission warrants it (large surface, specialized domain, infra). Pick by need — backend/UI/testing/quality/research — not by mission type. Default is direct implementation inside the `tdd` loop.
+4. **Optionally deploy a subagent** if the mission warrants it (large surface, specialized domain, infra). Pick by need — backend/UI/testing/quality/research — not by mission type. Default is direct implementation inside the `tdd` loop. A subagent does not exempt you from Step Zero — load `tdd` in the parent context first so the summary you receive can be evaluated against the playbook.
 
 5. **No mission docs.** Missions live as one-line entries in `progress-tracker.md`, nothing more. The `tdd` skill drives the work; the test file *is* the spec.
 
@@ -259,7 +267,7 @@ When all missions are done, set task status to `Completed`.
 ## Key Principles
 
 - **Always grill** — `/create-task` invokes `grill-me` on every invocation, no skip
-- **Always TDD** — every mission runs through the `tdd` skill (red-green-refactor); the test is the spec
+- **Always TDD, skill loaded first** — every mission begins with `Skill("tdd")` before any other tool call; the playbook in the companion files is what makes it TDD, not the act of writing a test first
 - **No mission docs** — missions live as one-line entries in `progress-tracker.md`, completion summaries are tight bullets
 - **One task at a time** — focus, conserve context
 - **All missions defined upfront** — full roadmap at task creation

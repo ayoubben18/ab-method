@@ -32,7 +32,13 @@ Missions:
 Ready to continue with Mission 3?
 ```
 
-### 4. Load Context for the Next Mission
+### 4. Load the `tdd` Skill — STEP ZERO, before anything else for the mission
+
+Invoke the `tdd` skill via the Skill tool: `Skill("tdd")`.
+
+Do this **first**, every resumed mission, no exceptions — before reading mission context, before grilling, before any Read / Edit / Write / Bash for the mission's work. The skill loads `SKILL.md` plus its companions (`tests.md`, `mocking.md`, `interface-design.md`, `refactoring.md`, `deep-modules.md`) which drive every subsequent decision. Writing the test first is not enough; the discipline lives in those companion files. If you catch yourself about to touch the codebase without having called `Skill("tdd")` for this mission, stop and call it.
+
+### 5. Load Context for the Next Mission
 Read (paths from `.ab-method/structure/index.yaml`):
 - `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`
 - `docs/architecture/tech-stack.md` (incl. Testing section)
@@ -40,12 +46,12 @@ Read (paths from `.ab-method/structure/index.yaml`):
 - `docs/adr/`
 - Mission summaries already in the progress tracker
 
-### 5. Run the Mission Through `tdd`
+### 6. Run the Mission Through `tdd` (red-green-refactor)
 - If the mission's one-line description is vague → invoke `grill-me` first
-- Otherwise → invoke the `tdd` skill and run red-green-refactor
-- Optionally deploy a subagent if the mission warrants it (large surface, specialized domain). Pick by need, not by mission type.
+- Run red-green-refactor under the already-loaded `tdd` skill — consult the companion files, don't improvise
+- Optionally deploy a subagent if the mission warrants it (large surface, specialized domain). Pick by need, not by mission type. A subagent does not exempt you from Step 4 — load `tdd` in the parent context first.
 
-### 6. On Completion
+### 7. On Completion
 Append a tight technical summary to the progress tracker (same format as `create-task.md` § 8.6). Skip empty bullets. Then prompt:
 "Mission N completed. Ready to start Mission N+1?"
 
@@ -54,4 +60,4 @@ When all missions are done, set task status to `Completed`.
 ## Remember
 - The progress tracker carries everything you need; there are no mission docs by design
 - Tests + technical summaries are the persistent context across sessions
-- Always TDD via the `tdd` skill, never skip it
+- Always `Skill("tdd")` first, before any other mission work — never skip the load, even when you "know" how to TDD
