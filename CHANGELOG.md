@@ -1,3 +1,14 @@
+## [3.0.2](https://github.com/ayoubben18/ab-method/compare/v3.0.1...v3.0.2) (2026-04-28)
+
+### 🐛 Bug Fixes
+
+* add missing conventional-changelog-conventionalcommits peer dep ([6e53895](https://github.com/ayoubben18/ab-method/commit/6e53895b7d1a97ffe71e0cbafee3700627f1eb98))
+* remove duplicate semantic-release config from package.json ([9b71d99](https://github.com/ayoubben18/ab-method/commit/9b71d997352f95a5ef6c47b4e2bfd468a001cc28))
+
+### 📚 Documentation
+
+* require Skill("tdd") as Step Zero of every mission ([d4ed7e2](https://github.com/ayoubben18/ab-method/commit/d4ed7e24f940b41820020cdfaa2824b05f88e019))
+
 ## [3.0.1](https://github.com/ayoubben18/ab-method/compare/v3.0.0...v3.0.1) (2026-04-25)
 
 
