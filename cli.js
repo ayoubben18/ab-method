@@ -168,7 +168,49 @@ async function install() {
       ensureDir(path.join(targetDir, '.agents'));
       if (fs.existsSync(skillsSource)) {
         copyRecursiveSync(skillsSource, path.join(targetDir, '.agents', 'skills'));
-        log('✅ .agents/skills/ installed (skills for Codex)', COLORS.green);
+        log('✅ .agents/skills/ installed (helper + ab-* workflow skills for Codex)', COLORS.green);
+      }
+
+      // AGENTS.md — Codex reads this before any work. Codex has no repo-shared
+      // slash commands, so this orients it and points at the ab-* workflow skills.
+      const agentsPath = path.join(targetDir, 'AGENTS.md');
+      const abSection = [
+        '<!-- ab-method:start -->',
+        '## AB Method',
+        '',
+        'This project uses the AB Method. Before running any AB Method workflow,',
+        'check `.ab-method/structure/index.yaml` — it defines where each workflow',
+        'reads from and writes to. Paths are user-configurable; never hardcode them.',
+        '',
+        'Workflows are available as skills (prefix `ab-`). Invoke one explicitly',
+        'with `/skills` or `$ab-<name>`, or describe your intent and Codex will',
+        'match it:',
+        '',
+        '- `ab-analyze-project` — full architecture sweep',
+        '- `ab-create-task` — define a task, break it into TDD missions',
+        '- `ab-create-goal` — produce a prompt for an autonomous /goal loop',
+        '- `ab-resume-task` — continue an existing task',
+        '- `ab-extend-task` — append missions to a task',
+        '- `ab-update-architecture` — refresh architecture docs',
+        '',
+        'Principles: always grill before defining work (`grill-with-docs`); every',
+        'mission runs through `tdd` (red-green-refactor); `progress-tracker.md` is',
+        'the single source of truth per task.',
+        '<!-- ab-method:end -->',
+        ''
+      ].join('\n');
+
+      if (fs.existsSync(agentsPath)) {
+        const existing = fs.readFileSync(agentsPath, 'utf8');
+        if (existing.includes('<!-- ab-method:start -->')) {
+          log('ℹ️  AGENTS.md already has the AB Method section — skipped', COLORS.yellow);
+        } else {
+          fs.writeFileSync(agentsPath, existing.replace(/\s*$/, '') + '\n\n' + abSection);
+          log('✅ AGENTS.md — AB Method section appended', COLORS.green);
+        }
+      } else {
+        fs.writeFileSync(agentsPath, '# AGENTS.md\n\n' + abSection);
+        log('✅ AGENTS.md created', COLORS.green);
       }
     }
 
@@ -178,14 +220,15 @@ async function install() {
     log('  • .ab-method/                        — workflow definitions', COLORS.white);
     log('  • docs/architecture/, docs/tasks/   — output scaffolding', COLORS.white);
     if (installClaude) {
-      log('  • .claude/commands/                  — /create-task, /resume-task, /analyze-project, ...', COLORS.white);
-      log('  • .claude/skills/                    — grill-me, tdd, domain-model, ubiquitous-language, ...', COLORS.white);
+      log('  • .claude/commands/                  — /create-task, /create-goal, /analyze-project, ...', COLORS.white);
+      log('  • .claude/skills/                    — grill-with-docs, tdd, domain-model, ab-* workflows, ...', COLORS.white);
       if (installSubagents) {
         log('  • .claude/agents/                    — built-in subagents', COLORS.white);
       }
     }
     if (installCodex) {
-      log('  • .agents/skills/                    — same skills, exposed to Codex', COLORS.white);
+      log('  • .agents/skills/                    — helper + ab-* workflow skills, exposed to Codex', COLORS.white);
+      log('  • AGENTS.md                          — orients Codex; lists the ab-* workflow skills', COLORS.white);
     }
 
     log('\nNext steps:', COLORS.cyan);
@@ -193,11 +236,12 @@ async function install() {
       log('  • Open Claude Code in this project', COLORS.white);
       log('  • Run /analyze-project to generate UBIQ + CONTEXT + arch docs', COLORS.white);
       log('  • Run /domain-model to sharpen the domain language (optional)', COLORS.white);
-      log('  • Run /create-task to start work — every mission runs through the tdd skill', COLORS.white);
+      log('  • Run /create-task or /create-goal to start work', COLORS.white);
     }
     if (installCodex) {
       log('  • Open Codex in this project', COLORS.white);
-      log('  • Skills are at .agents/skills/', COLORS.white);
+      log('  • Run a workflow with /skills or $ab-analyze-project (Codex has no repo slash commands)', COLORS.white);
+      log('  • Or just describe your intent — Codex matches the ab-* skill by its description', COLORS.white);
     }
 
     log('\nDocs: https://github.com/ayoubben18/ab-method', COLORS.blue);

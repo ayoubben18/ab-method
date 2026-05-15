@@ -18,16 +18,16 @@ Extending: <Task Name>
 Status: <Current>
 
 Missions:
-✓ Mission 1 — Completed
-✓ Mission 2 — Completed
-○ Mission 3 — Pending
+[x] Mission 1 — Completed
+[x] Mission 2 — Completed
+[ ] Mission 3 — Pending
 ```
 
 ### 3. Gather New Mission Requirements
 - If the user's description is clear → add the missions as one-line entries
-- If vague → invoke the `grill-me` skill before drafting them
+- If vague → invoke the `grill-with-docs` skill before drafting them
 
-`grill-me` reads `UBIQUITOUS_LANGUAGE.md` + `CONTEXT.md` and explores the codebase, so the new missions land in canonical terms.
+`grill-with-docs` reads `UBIQUITOUS_LANGUAGE.md` + `CONTEXT.md` and explores the codebase, so the new missions land in canonical terms.
 
 ### 4. Append Missions to the Progress Tracker
 Continue numbering sequentially:
@@ -53,5 +53,5 @@ When the user confirms, hand off to `/resume-task` (or continue inline) — each
 ## Remember
 - Add to `progress-tracker.md`, never create separate mission files
 - Sequential numbering, no gaps
-- Use `grill-me` whenever the new mission descriptions are vague
+- Use `grill-with-docs` whenever the new mission descriptions are vague
 - The `tdd` skill runs on every mission, including extensions

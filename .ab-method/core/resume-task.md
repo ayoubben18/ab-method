@@ -16,7 +16,7 @@ Open `docs/tasks/<task>/progress-tracker.md`. From it, identify:
 - Task status (Brainstormed / Validated / In dev / Testing / Completed)
 - Which missions are completed (with their technical summaries)
 - Which mission is next (or in progress)
-- Any constraints/notes from the original grill-me session
+- Any constraints/notes from the original grill-with-docs session
 
 ### 3. Display Resume Context
 ```
@@ -24,10 +24,10 @@ Resuming: <Task Name>
 Status: <In dev>
 
 Missions:
-✓ Mission 1: [Name] — Completed
-✓ Mission 2: [Name] — Completed
-⏳ Mission 3: [Name] — next up
-○ Mission 4: [Name] — pending
+[x] Mission 1: [Name] — Completed
+[x] Mission 2: [Name] — Completed
+[ ] Mission 3: [Name] — next up
+[ ] Mission 4: [Name] — pending
 
 Ready to continue with Mission 3?
 ```
@@ -47,7 +47,7 @@ Read (paths from `.ab-method/structure/index.yaml`):
 - Mission summaries already in the progress tracker
 
 ### 6. Run the Mission Through `tdd` (red-green-refactor)
-- If the mission's one-line description is vague → invoke `grill-me` first
+- If the mission's one-line description is vague → invoke `grill-with-docs` first
 - Run red-green-refactor under the already-loaded `tdd` skill — consult the companion files, don't improvise
 - Optionally deploy a subagent if the mission warrants it (large surface, specialized domain). Pick by need, not by mission type. A subagent does not exempt you from Step 4 — load `tdd` in the parent context first.
 

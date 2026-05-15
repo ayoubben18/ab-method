@@ -4,7 +4,7 @@
 
 Create a focused task following the AB Method principle: one task at a time to conserve context and avoid redundant implementations.
 
-## 🚨 Core Behavior
+## Core Behavior
 
 **RESPECT USER INSTRUCTIONS AND KEEP IT SIMPLE:**
 
@@ -19,9 +19,9 @@ Create a focused task following the AB Method principle: one task at a time to c
 
 ## Process
 
-### 1. Define Problem Statement — ALWAYS invoke the `grill-me` skill
+### 1. Define Problem Statement — ALWAYS invoke the `grill-with-docs` skill
 
-**Invoke the `grill-me` skill on every `/create-task` invocation. No exceptions, no shortcut, no "the request looks clear so I'll skip it."**
+**Invoke the `grill-with-docs` skill on every `/create-task` invocation. No exceptions, no shortcut, no "the request looks clear so I'll skip it."**
 
 Even when the user's request reads specific, the grill surfaces hidden assumptions, missing edge cases, terminology drift against `UBIQUITOUS_LANGUAGE.md`, and constraints the user forgot to mention. A clear-sounding prompt is not the same as a fully-specified task. The grill is cheap; an under-specified task that breeds wrong missions is not.
 
@@ -39,12 +39,12 @@ It must cover, before exiting:
 - Existing-code anchors — similar implementations to mirror, types/services to reuse
 
 #### How to keep the grill efficient when the user was already specific
-If the user already named files, endpoints, or data shapes, treat those as given and let `grill-me` *confirm* and *probe edges* rather than re-asking what was just said. The skill should still run — it just won't ask many questions.
+If the user already named files, endpoints, or data shapes, treat those as given and let `grill-with-docs` *confirm* and *probe edges* rather than re-asking what was just said. The skill should still run — it just won't ask many questions.
 
-#### Proceed When:
-✓ The grill has resolved every branch it walked down
-✓ Problem, scope, behavior, constraints, and existing-code anchors are all on the table
-✓ The user has confirmed the gathered understanding
+#### Proceed when:
+- The grill has resolved every branch it walked down
+- Problem, scope, behavior, constraints, and existing-code anchors are all on the table
+- The user has confirmed the gathered understanding
 
 ### 2. Analyze Project Context
 
@@ -130,13 +130,13 @@ Create `progress-tracker.md` — slim, no empty placeholder sections:
 **Created**: YYYY-MM-DD
 
 ## Problem
-[1–3 sentences from the grill-me session.]
+[1–3 sentences from the grill-with-docs session.]
 
 ## Outcome
 [1–2 sentences: what's true after this task that isn't now.]
 
 ## Constraints / Notes
-[Only the non-obvious ones surfaced by grill-me. Skip the section if there's nothing to say. Common contents: patterns to follow, libraries to use/avoid, perf budgets, files-to-touch hints.]
+[Only the non-obvious ones surfaced by grill-with-docs. Skip the section if there's nothing to say. Common contents: patterns to follow, libraries to use/avoid, perf budgets, files-to-touch hints.]
 
 ## Missions
 - [ ] Mission 1: [Layer] — [one-line specific description]
@@ -149,7 +149,7 @@ _Filled in as each mission completes. Future missions read these for context._
 
 **Status flow**: Brainstormed → Validated → In dev → Testing → Completed
 
-**Do NOT include**: empty "Technical Context", "Code Guidance", "Agent Usage Tracking", "Sub-Agent Outputs", "Notes" sections with stub bullets. The grill-me session already extracted what matters; everything else lives in the architecture docs (`tech-stack.md`, `frontend-patterns.md`, `backend-patterns.md`) which every mission reads.
+**Do NOT include**: empty "Technical Context", "Code Guidance", "Agent Usage Tracking", "Sub-Agent Outputs", "Notes" sections with stub bullets. The grill-with-docs session already extracted what matters; everything else lives in the architecture docs (`tech-stack.md`, `frontend-patterns.md`, `backend-patterns.md`) which every mission reads.
 
 ### 6. Define All Missions Based on Task Type and Project Analysis
 
@@ -233,7 +233,7 @@ After the skill is loaded:
    - `docs/adr/` — prior decisions, do not contradict without flagging
    - Mission summaries from `progress-tracker.md` for what previous missions left behind
 
-2. **Grill if vague** — if the mission's one-line description is fuzzy, invoke the `grill-me` skill before implementing.
+2. **Grill if vague** — if the mission's one-line description is fuzzy, invoke the `grill-with-docs` skill before implementing.
 
 3. **Run red-green-refactor under the loaded `tdd` skill:**
    - Write the failing test first (uses framework + patterns from `tech-stack.md` Testing section)
@@ -266,7 +266,7 @@ When all missions are done, set task status to `Completed`.
 
 ## Key Principles
 
-- **Always grill** — `/create-task` invokes `grill-me` on every invocation, no skip
+- **Always grill** — `/create-task` invokes `grill-with-docs` on every invocation, no skip
 - **Always TDD, skill loaded first** — every mission begins with `Skill("tdd")` before any other tool call; the playbook in the companion files is what makes it TDD, not the act of writing a test first
 - **No mission docs** — missions live as one-line entries in `progress-tracker.md`, completion summaries are tight bullets
 - **One task at a time** — focus, conserve context
@@ -276,14 +276,14 @@ When all missions are done, set task status to `Completed`.
 
 ## Vague vs. specific
 
-Vague requests trigger `grill-me`. Examples:
-- ❌ "Make it better" / "Fix the bug" / "Add some tests" / "Improve performance" / "Refactor the code"
+Vague requests trigger `grill-with-docs`. Examples:
+- "Make it better" / "Fix the bug" / "Add some tests" / "Improve performance" / "Refactor the code"
 
-Specific requests skip `grill-me` and go straight to Step 2:
-- ✅ "Add inline validation errors to the login form"
-- ✅ "Fix the 404 when deleting users from /admin/users"
-- ✅ "Add unit tests for `paymentService.calculateTax`"
-- ✅ "Add a required email field to the /register form, validate format, follow UserForm pattern"
+Specific requests skip `grill-with-docs` and go straight to Step 2:
+- "Add inline validation errors to the login form"
+- "Fix the 404 when deleting users from /admin/users"
+- "Add unit tests for `paymentService.calculateTax`"
+- "Add a required email field to the /register form, validate format, follow UserForm pattern"
 
 ## Remember
 

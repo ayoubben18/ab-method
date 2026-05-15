@@ -33,6 +33,15 @@ project_structure:
         folders:
           - sub-agents-outputs/   # only created when a subagent runs
 
+    goals:
+      # Example goal structure — produced by /create-goal. goal.md is the
+      # prompt pasted into an autonomous `/goal` loop; progress-tracker.md
+      # is the checklist + discoveries log the loop maintains while running.
+      add-dark-mode:
+        files:
+          - goal.md
+          - progress-tracker.md
+
 # Workflow output destinations
 workflow_outputs:
   analyze-project:
@@ -49,6 +58,9 @@ workflow_outputs:
   create-task: docs/tasks/[task-name]/progress-tracker.md
   extend-task: docs/tasks/[task-name]/progress-tracker.md
   resume-task: docs/tasks/[task-name]/progress-tracker.md
+  create-goal:
+    - docs/goals/[goal-name]/goal.md
+    - docs/goals/[goal-name]/progress-tracker.md
 
 # Inputs that downstream workflows should read for domain context
 domain_inputs:
