@@ -1,3 +1,9 @@
+## [3.1.0](https://github.com/ayoubben18/ab-method/compare/v3.0.2...v3.1.0) (2026-05-15)
+
+### ✨ Features
+
+* add /create-goal workflow and first-class Codex support ([6d21fd6](https://github.com/ayoubben18/ab-method/commit/6d21fd69259e71faa881e2c88937b4a3670060b8))
+
 ## [3.0.2](https://github.com/ayoubben18/ab-method/compare/v3.0.1...v3.0.2) (2026-04-28)
 
 ### 🐛 Bug Fixes
