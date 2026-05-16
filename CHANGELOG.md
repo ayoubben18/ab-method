@@ -1,3 +1,9 @@
+## [3.1.1](https://github.com/ayoubben18/ab-method/compare/v3.1.0...v3.1.1) (2026-05-16)
+
+### 🐛 Bug Fixes
+
+* add /extend-goal and make goal trackers checklist-free ([be5a472](https://github.com/ayoubben18/ab-method/commit/be5a472d52f81c51e3691f69aac6ca5a51e6b0b1))
+
 ## [3.1.0](https://github.com/ayoubben18/ab-method/compare/v3.0.2...v3.1.0) (2026-05-15)
 
 ### ✨ Features
