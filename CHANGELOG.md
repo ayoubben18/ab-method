@@ -1,3 +1,9 @@
+## [3.1.2](https://github.com/ayoubben18/ab-method/compare/v3.1.1...v3.1.2) (2026-05-16)
+
+### 🐛 Bug Fixes
+
+* capture feedback loops to steer the autonomous goal run ([1d7ca2c](https://github.com/ayoubben18/ab-method/commit/1d7ca2cd512739dcb01080292bbe23741e81e525))
+
 ## [3.1.1](https://github.com/ayoubben18/ab-method/compare/v3.1.0...v3.1.1) (2026-05-16)
 
 ### 🐛 Bug Fixes
