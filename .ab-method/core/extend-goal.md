@@ -46,11 +46,15 @@ terms. It must pin down, before exiting:
 - **The new measurable end state** — verifiable (a command exits 0, a
   build is clean, a route returns 200). If you cannot name a verifiable
   end state, keep grilling.
+- **Feedback loops** — confirm the existing loops still apply and add
+  any new steering signals the extended work needs (a new test command,
+  a new visual check). These keep the loop self-correcting.
 - **Any new constraints** the extended work must respect
 
 #### Proceed when:
 - The grill has resolved every branch it walked down
-- The extension, new measurable end state, and constraints are concrete
+- The extension, new measurable end state, feedback loops, and
+  constraints are concrete
 - The end state is verifiable by a command or observable check
 - The user has confirmed the gathered understanding
 
@@ -61,6 +65,7 @@ a second goal file — the goal evolves in place. The updated file must:
 
 - State the new or expanded **Objective**
 - State the new **Measurable end state**
+- Carry forward the **Feedback loops** and add any new steering signals
 - Carry forward the existing **Constraints** and add any new ones
 - Add an **Already implemented** section summarising what the earlier
   run completed — sourced from the `progress-tracker.md` Notes and the

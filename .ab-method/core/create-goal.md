@@ -46,7 +46,7 @@ answer is in the code, and read `UBIQUITOUS_LANGUAGE.md` / `CONTEXT.md`
 (updating them inline as terms resolve) so the goal speaks canonical
 domain language.
 
-It must pin down, before exiting, the three things every good goal
+It must pin down, before exiting, the four things every good goal
 prompt needs:
 
 - **Objective** — the work, in one line
@@ -54,6 +54,13 @@ prompt needs:
   (a test command exits 0, a build is clean, a route returns 200).
   If you cannot name a verifiable end state, the goal is not ready —
   keep grilling or recommend `/create-task`.
+- **Feedback loops** — the verification signals the loop runs *every
+  iteration* to steer itself, not just at the end: test command,
+  type-check, build, lint, a screenshot/visual check, a smoke request.
+  Ask the user which signals exist, which to trust, and what each one
+  means. These are how the loop self-corrects mid-flight instead of
+  drifting for hours. If the user is unsure, propose the obvious ones
+  from `tech-stack.md` (test + type-check + build) and confirm.
 - **Constraints** — rules the loop must not break (files/dirs not to
   touch, libraries to avoid, patterns to follow, perf budgets)
 
@@ -62,7 +69,8 @@ services to reuse).
 
 #### Proceed when:
 - The grill has resolved every branch it walked down
-- Objective, measurable end state, and constraints are all concrete
+- Objective, measurable end state, feedback loops, and constraints are
+  all concrete
 - The end state is verifiable by a command or observable check
 - The user has confirmed the gathered understanding
 
@@ -109,6 +117,16 @@ inline only the sharp, non-obvious constraints the grill surfaced.
 [Verifiable "done" — e.g. `npm test` exits 0; `npm run build` is clean;
 GET /api/orders/:id returns 200 with the new field. Name the exact
 command or check.]
+
+## Feedback loops
+Run these after every meaningful change to steer yourself — not just at
+the end. Each is a check, what a pass/fail signals, and what to do on
+failure.
+- [Command or check] — [what pass/fail means] — [action on failure]
+- e.g. `npm test` — unit + integration green — fix before continuing
+- e.g. `npm run typecheck` — no type errors — fix immediately
+- e.g. visual check of /dashboard vs the design — layout matches — adjust styles
+A red feedback loop takes priority: stop adding scope and fix it first.
 
 ## Constraints
 - [Rules that must hold — dirs/files not to touch, libs to avoid,
@@ -179,6 +197,9 @@ works correctly. Use /goal clear to stop it.
 - **Always grill** — `grill-with-docs` runs on every invocation, no skip
 - **Verifiable end state or it is not a goal** — if "done" cannot be
   checked by a command, keep grilling or fall back to `/create-task`
+- **Feedback loops steer the loop** — the grill captures the checks the
+  loop runs every iteration; they are how it self-corrects toward the
+  goal instead of drifting
 - **Producer only** — `/create-goal` writes the files and stops; the
   `/goal` loop does the work
 - **The loop must be told about the tracker** — `goal.md` carries the
