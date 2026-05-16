@@ -58,7 +58,7 @@ prompt needs:
   touch, libraries to avoid, patterns to follow, perf budgets)
 
 Plus: existing-code anchors (similar implementations to mirror, types/
-services to reuse) and the discrete checklist of steps to completion.
+services to reuse).
 
 #### Proceed when:
 - The grill has resolved every branch it walked down
@@ -125,26 +125,26 @@ Read these before starting, and again whenever unsure. Paths come from
 [Plus any existing-code anchors: "mirror src/auth/UserForm.tsx".]
 
 ## Progress tracking — DO THIS AS YOU LOOP
-This goal has a tracker at `./progress-tracker.md`. The `/goal` loop
-does not know about it unless told — so you must maintain it yourself:
-- After each step that verifiably completes, tick its checklist item.
-- Under the tracker's **Discoveries** section, append ONLY important,
-  non-obvious things you discover — as short, specific sentences.
-  Decision-grade facts only: a constraint you hit, a gotcha, an
-  assumption you had to make, an interface contract another part
-  depends on. NO generic narration ("working on X", "made progress"),
-  NO restating the objective, NO templated filler. If a step revealed
-  nothing important, write nothing.
+This goal has a notes log at `./progress-tracker.md`. The `/goal` loop
+does not know about it unless told — so as you work, append to its
+**Notes** section ONLY important, non-obvious things you discover:
+a constraint you hit, a gotcha, an assumption you had to make, an
+interface contract another part depends on. Short specific sentences.
+NO generic narration ("working on X", "made progress"), NO restating
+the objective, NO templated filler. If a step revealed nothing
+important, write nothing. There is no checklist — the notes are a
+record of what happened, not a plan.
 
-## Stop when
-Every checklist item in `progress-tracker.md` is ticked AND the
-measurable end state above holds.
+## Keep going until
+The measurable end state above holds — everything works correctly and
+the verification command/check passes. Do not stop early: loop, fix,
+and re-verify until it is genuinely satisfied.
 ```
 
 ### 5. Write `progress-tracker.md`
 
-The live working surface. Starts as a checklist; the loop fills the
-Discoveries section as it runs.
+An empty notes log — no checklist, no tasks. The `/goal` loop fills the
+**Notes** section as it runs. Write it exactly like this:
 
 ```markdown
 # Goal Progress: [Goal Name]
@@ -152,14 +152,11 @@ Discoveries section as it runs.
 **Status**: Not started
 **Goal**: ./goal.md
 
-## Checklist
-- [ ] [Discrete, verifiable step]
-- [ ] [Discrete, verifiable step]
-- [ ] [Discrete, verifiable step]
-
-## Discoveries
-_Appended by the /goal loop. Important, non-obvious discovered facts
-only — short specific sentences, no generic progress text._
+## Notes
+_Maintained by the /goal loop. Append important, non-obvious discovered
+facts as you work — short specific sentences. No checklist, no generic
+progress narration. Decision-grade facts only: a constraint hit, a
+gotcha, an assumption made, an interface another part depends on._
 ```
 
 ### 6. Hand Off to the User
@@ -172,9 +169,9 @@ Goal ready: docs/goals/[goal-name]/goal.md
 To run it autonomously, paste the contents of goal.md into:
   /goal <contents of goal.md>
 
-The loop will work toward the measurable end state, ticking the
-checklist and logging discoveries in progress-tracker.md as it goes.
-Use /goal clear to stop it.
+The loop works toward the measurable end state, logging important notes
+in progress-tracker.md as it goes, and keeps going until everything
+works correctly. Use /goal clear to stop it.
 ```
 
 ## Key Principles
@@ -186,7 +183,9 @@ Use /goal clear to stop it.
   `/goal` loop does the work
 - **The loop must be told about the tracker** — `goal.md` carries the
   explicit instruction to maintain `progress-tracker.md`
-- **Discoveries are signal, not narration** — only important, non-obvious
+- **No checklist** — the tracker is a notes log, not a task list; the
+  loop runs until the measurable end state holds
+- **Notes are signal, not narration** — only important, non-obvious
   facts, as plain sentences
 - **Reference docs, do not inline them** — the loop reads them in-repo
 

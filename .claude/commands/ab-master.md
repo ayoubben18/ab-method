@@ -29,6 +29,7 @@ Loads and executes the specified workflow from `.ab-method/core/[workflow-name].
 ### Tasks
 - **create-task** — Define a new task; always grills via `grill-with-docs`, runs every mission through the `tdd` skill
 - **create-goal** — Produce a ready-to-run goal prompt for an autonomous `/goal` loop; always grills via `grill-with-docs`, no mission breakdown
+- **extend-goal** — Extend an existing goal, building on what the earlier `/goal` run implemented; always grills via `grill-with-docs`
 - **resume-task** — Continue an existing task from its progress tracker (no mission docs to recover)
 - **extend-task** — Append new missions to an existing task
 - **test-mission** — Retroactive test coverage for code that wasn't written test-first

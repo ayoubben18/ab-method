@@ -189,6 +189,7 @@ async function install() {
         '- `ab-analyze-project` — full architecture sweep',
         '- `ab-create-task` — define a task, break it into TDD missions',
         '- `ab-create-goal` — produce a prompt for an autonomous /goal loop',
+        '- `ab-extend-goal` — extend an existing goal',
         '- `ab-resume-task` — continue an existing task',
         '- `ab-extend-task` — append missions to a task',
         '- `ab-update-architecture` — refresh architecture docs',

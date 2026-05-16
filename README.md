@@ -44,6 +44,7 @@ Both read the same `.ab-method/core/*.md` definitions and the same `.ab-method/s
 |-----------------------|-------------------------------------------------------------------------|
 | `/create-task`        | Define a task; always grills, runs every mission through `tdd`          |
 | `/create-goal`        | Produce a ready-to-run prompt for an autonomous `/goal` loop            |
+| `/extend-goal`        | Extend an existing goal, building on what the `/goal` run implemented   |
 | `/resume-task`        | Continue an existing task from its progress tracker                     |
 | `/extend-task`        | Append new missions to an existing task                                 |
 | `/test-mission`       | Retroactive test coverage for code not written test-first               |

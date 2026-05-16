@@ -61,6 +61,8 @@ workflow_outputs:
   create-goal:
     - docs/goals/[goal-name]/goal.md
     - docs/goals/[goal-name]/progress-tracker.md
+  extend-goal:
+    - docs/goals/[goal-name]/goal.md   # updated in place; progress-tracker.md carries forward
 
 # Inputs that downstream workflows should read for domain context
 domain_inputs:
