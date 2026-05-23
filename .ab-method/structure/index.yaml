@@ -42,6 +42,13 @@ project_structure:
           - goal.md
           - progress-tracker.md
 
+    handoffs:
+      # Side-topics spun off mid-grill by the `handoff` skill. Each is a
+      # single self-contained markdown file named after the topic; it freezes
+      # a tangent so the current grill can continue. /create-task-from-handoff
+      # resumes one and deletes it once it becomes a task.
+      files: []   # e.g. rate-limit-redis-vs-token-bucket.md
+
 # Workflow output destinations
 workflow_outputs:
   analyze-project:
@@ -56,8 +63,10 @@ workflow_outputs:
     - CONTEXT.md          # refined inline during the grilling session
     - docs/adr/           # ADRs created lazily
   create-task: docs/tasks/[task-name]/progress-tracker.md
+  create-task-from-handoff: docs/tasks/[task-name]/progress-tracker.md   # reads docs/handoffs/[slug].md, deletes it once the task exists
   extend-task: docs/tasks/[task-name]/progress-tracker.md
   resume-task: docs/tasks/[task-name]/progress-tracker.md
+  handoff: docs/handoffs/[slug].md   # `handoff` skill; falls back to OS temp dir outside an AB Method project
   create-goal:
     - docs/goals/[goal-name]/goal.md
     - docs/goals/[goal-name]/progress-tracker.md

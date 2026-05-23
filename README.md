@@ -43,6 +43,7 @@ Both read the same `.ab-method/core/*.md` definitions and the same `.ab-method/s
 | Command               | Purpose                                                                 |
 |-----------------------|-------------------------------------------------------------------------|
 | `/create-task`        | Define a task; always grills, runs every mission through `tdd`          |
+| `/create-task-from-handoff` | Resume a handoff spun off mid-grill into a task; continues the grill, then runs `create-task` |
 | `/create-goal`        | Produce a ready-to-run prompt for an autonomous `/goal` loop            |
 | `/extend-goal`        | Extend an existing goal, building on what the `/goal` run implemented   |
 | `/resume-task`        | Continue an existing task from its progress tracker                     |
@@ -61,6 +62,7 @@ Both read the same `.ab-method/core/*.md` definitions and the same `.ab-method/s
 3. No mission docs — missions are one-line entries in `progress-tracker.md`; tight summaries on completion.
 4. One task at a time — focus, conserve context.
 5. Backend-first for full-stack tasks — types feed the frontend.
+6. Never lose a tangent — when a grill surfaces a side-topic that deserves its own task, the `handoff` skill captures it under `docs/handoffs/` instead of derailing the current grill; `/create-task-from-handoff` resumes it later.
 
 `grill-with-docs` reads `UBIQUITOUS_LANGUAGE.md` and `CONTEXT.md`, challenges terminology against them, and updates `CONTEXT.md` and `docs/adr/` inline as decisions crystallise.
 
@@ -93,6 +95,7 @@ docs/
   adr/                   Decision records, created lazily by /domain-model
   tasks/<task-name>/     progress-tracker.md (single source of truth)
   goals/<goal-name>/     goal.md + progress-tracker.md
+  handoffs/<slug>.md     Tangents spun off mid-grill, awaiting their own task
 ```
 
 ## Configuration

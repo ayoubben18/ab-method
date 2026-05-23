@@ -41,6 +41,15 @@ It must cover, before exiting:
 #### How to keep the grill efficient when the user was already specific
 If the user already named files, endpoints, or data shapes, treat those as given and let `grill-with-docs` *confirm* and *probe edges* rather than re-asking what was just said. The skill should still run — it just won't ask many questions.
 
+#### Spinning off tangents during the grill
+Grills wander. When a question opens a tangent that clearly deserves its **own** task — a separate concern, a different layer, work that would bloat this task's scope — do **not** chase it here and do **not** silently drop it. Capture it without derailing the current grill:
+
+1. Invoke the `handoff` skill to write the tangent up as a handoff under `docs/handoffs/` (one file per tangent, kebab-case slug). It records the open question, the constraints already established, and why it was deferred.
+2. Tell the user: "That's its own task — captured it as `<slug>`; resume it any time with `/create-task-from-handoff <slug>`."
+3. Return to the branch you were grilling.
+
+This keeps the current task tightly scoped while guaranteeing the tangent isn't lost. The handoff later becomes a task via the `create-task-from-handoff` workflow, which continues the grill exactly where the handoff left off.
+
 #### Proceed when:
 - The grill has resolved every branch it walked down
 - Problem, scope, behavior, constraints, and existing-code anchors are all on the table

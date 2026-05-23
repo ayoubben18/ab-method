@@ -188,6 +188,7 @@ async function install() {
         '',
         '- `ab-analyze-project` — full architecture sweep',
         '- `ab-create-task` — define a task, break it into TDD missions',
+        '- `ab-create-task-from-handoff` — resume a handoff spun off mid-grill into a task',
         '- `ab-create-goal` — produce a prompt for an autonomous /goal loop',
         '- `ab-extend-goal` — extend an existing goal',
         '- `ab-resume-task` — continue an existing task',
@@ -196,7 +197,10 @@ async function install() {
         '',
         'Principles: always grill before defining work (`grill-with-docs`); every',
         'mission runs through `tdd` (red-green-refactor); `progress-tracker.md` is',
-        'the single source of truth per task.',
+        'the single source of truth per task. When a tangent surfaces mid-grill that',
+        'deserves its own task, capture it with the `handoff` skill under',
+        '`docs/handoffs/` instead of derailing — resume it later with',
+        '`ab-create-task-from-handoff`.',
         '<!-- ab-method:end -->',
         ''
       ].join('\n');
