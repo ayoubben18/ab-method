@@ -1,9 +1,3 @@
-## [3.2.0](https://github.com/ayoubben18/ab-method/compare/v3.1.2...v3.2.0) (2026-05-23)
-
-### ✨ Features
-
-* add handoff capture and create-task-from-handoff workflow ([22ea709](https://github.com/ayoubben18/ab-method/commit/22ea709414857a08cf69f665bbd6b4875be45d7c))
-
 ## [3.1.2](https://github.com/ayoubben18/ab-method/compare/v3.1.1...v3.1.2) (2026-05-16)
 
 ### 🐛 Bug Fixes
