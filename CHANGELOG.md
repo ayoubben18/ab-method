@@ -1,3 +1,14 @@
+## [3.2.0](https://github.com/ayoubben18/ab-method/compare/v3.1.2...v3.2.0) (2026-05-23)
+
+### ✨ Features
+
+* add handoff capture and create-task-from-handoff workflow ([22ea709](https://github.com/ayoubben18/ab-method/commit/22ea709414857a08cf69f665bbd6b4875be45d7c))
+
+### 🐛 Bug Fixes
+
+* re-cut 3.2.0 release (retry npm publish with 2FA-bypass token) ([d9c9537](https://github.com/ayoubben18/ab-method/commit/d9c9537efaca11533c85807e8e031819e48b3471))
+* re-cut 3.2.0 release after partial publish (no tag/npm) ([7352249](https://github.com/ayoubben18/ab-method/commit/73522497b4fb5baa5d7cd75e329b9dc2763fc042))
+
 ## [3.1.2](https://github.com/ayoubben18/ab-method/compare/v3.1.1...v3.1.2) (2026-05-16)
 
 ### 🐛 Bug Fixes
