@@ -1,3 +1,9 @@
+## [3.3.0](https://github.com/ayoubben18/ab-method/compare/v3.2.0...v3.3.0) (2026-06-06)
+
+### ✨ Features
+
+* add opt-in parallel mission groups ([pp-x]) and start-task autonomous execution workflow ([2c68d97](https://github.com/ayoubben18/ab-method/commit/2c68d97d37929fc8376ed51284dae39c59ad40e0))
+
 ## [3.2.0](https://github.com/ayoubben18/ab-method/compare/v3.1.2...v3.2.0) (2026-05-23)
 
 ### ✨ Features
