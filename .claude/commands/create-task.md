@@ -22,6 +22,7 @@ This workflow will:
 - **Always TDD** — every mission goes through the `tdd` skill; the test is the spec
 - **No mission docs** — missions live as one-line entries in `progress-tracker.md`; tight technical summaries are appended on completion
 - **Subagents only when warranted** — direct implementation by default; pick agents by need (backend / UI / testing / quality / research), not by mission type
+- **Optional parallel groups** — independent missions can be tagged `[pp-1]`, `[pp-2]`, ... and run concurrently in subagents; untagged missions stay sequential and act as barriers. Strictly opt-in: the workflow always asks before tagging anything
 
 ## Examples
 ```

@@ -47,6 +47,7 @@ Both read the same `.ab-method/core/*.md` definitions and the same `.ab-method/s
 | `/create-goal`        | Produce a ready-to-run prompt for an autonomous `/goal` loop            |
 | `/extend-goal`        | Extend an existing goal, building on what the `/goal` run implemented   |
 | `/resume-task`        | Continue an existing task from its progress tracker                     |
+| `/start-task`         | Run a task autonomously: each mission in a subagent, commit per mission |
 | `/extend-task`        | Append new missions to an existing task                                 |
 | `/test-mission`       | Retroactive test coverage for code not written test-first               |
 | `/analyze-project`    | Full architecture sweep — domain + tech-stack + FE/BE patterns          |
@@ -63,6 +64,7 @@ Both read the same `.ab-method/core/*.md` definitions and the same `.ab-method/s
 4. One task at a time — focus, conserve context.
 5. Backend-first for full-stack tasks — types feed the frontend.
 6. Never lose a tangent — when a grill surfaces a side-topic that deserves its own task, the `handoff` skill captures it under `docs/handoffs/` instead of derailing the current grill; `/create-task-from-handoff` resumes it later.
+7. Parallel only by consent — independent missions can be tagged `[pp-1]`, `[pp-2]`, ... and run concurrently in subagents; untagged missions are sequential barriers. The workflow always asks before tagging — sequential is the default.
 
 `grill-with-docs` reads `UBIQUITOUS_LANGUAGE.md` and `CONTEXT.md`, challenges terminology against them, and updates `CONTEXT.md` and `docs/adr/` inline as decisions crystallise.
 
@@ -70,6 +72,7 @@ Both read the same `.ab-method/core/*.md` definitions and the same `.ab-method/s
 
 - `/create-task` breaks work into missions you review and run through `tdd` yourself, one at a time. Use when you want to stay in the loop.
 - `/create-goal` does the same grilling and doc-grounding, but emits a single `goal.md` prompt for an autonomous `/goal` loop (Claude Code or Codex) plus a `progress-tracker.md` the loop maintains. Use for one continuous objective with a verifiable stop condition.
+- `/start-task` bridges the two: it takes an existing task and runs it with the `/goal` philosophy — every remaining mission in a subagent (tdd, tracker updated per mission), tests verified and a commit made after each, one confirmation upfront and no prompts until done. You review commits instead of missions.
 
 ## Workflow phases
 
@@ -116,4 +119,8 @@ All paths are configurable in `.ab-method/structure/index.yaml`. Every workflow 
 
 /resume-task
 # Reads progress-tracker.md, loads context, continues the next mission.
+
+/start-task <task-name>
+# Runs the remaining missions autonomously — each in a subagent that
+# updates the tracker, with a commit after every green mission.
 ```

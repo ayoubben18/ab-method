@@ -25,6 +25,7 @@ The extend-task workflow provides:
 - **Mission Planning** - Define new missions to add
 - **Context Preservation** - Maintain technical context from existing missions
 - **Progress Tracking** - Update task documentation with new missions
+- **Optional Parallel Groups** - Independent new missions can be tagged `[pp-x]` (or join a pending group) for concurrent subagent execution — only with the user's explicit yes
 
 ## Examples
 ```

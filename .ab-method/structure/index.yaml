@@ -27,6 +27,9 @@ project_structure:
       # Example task structure — progress-tracker.md is the SINGLE source of
       # truth per task. Missions are one-line entries inside it; no separate
       # mission files. Each mission runs through the `tdd` skill.
+      # Missions may carry an optional [pp-x] tag (user opt-in only): same tag
+      # = a group of independent missions that run concurrently in subagents;
+      # untagged missions are sequential barriers.
       todo-table-creation:
         files:
           - progress-tracker.md
@@ -66,6 +69,7 @@ workflow_outputs:
   create-task-from-handoff: docs/tasks/[task-name]/progress-tracker.md   # reads docs/handoffs/[slug].md, deletes it once the task exists
   extend-task: docs/tasks/[task-name]/progress-tracker.md
   resume-task: docs/tasks/[task-name]/progress-tracker.md
+  start-task: docs/tasks/[task-name]/progress-tracker.md   # autonomous run; mission subagents update the tracker, parent commits per mission
   handoff: docs/handoffs/[slug].md   # `handoff` skill; falls back to OS temp dir outside an AB Method project
   create-goal:
     - docs/goals/[goal-name]/goal.md

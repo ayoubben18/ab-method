@@ -22,6 +22,7 @@ This workflow will:
 - The progress tracker carries the mission list and per-mission technical summaries from prior sessions — that's the entire context
 - Tests + summaries are the persistent artifacts across sessions
 - Always TDD via the `tdd` skill, never skip it
+- Group-aware resume — if the next mission carries a `[pp-x]` tag, the remaining missions in that group are offered as one concurrent subagent batch (the user can still choose sequential)
 
 ## Examples
 ```

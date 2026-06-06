@@ -156,6 +156,8 @@ Create `progress-tracker.md` — slim, no empty placeholder sections:
 _Filled in as each mission completes. Future missions read these for context._
 ```
 
+Mission lines may carry an optional `[pp-x]` parallel-group tag (see Step 7) — only when the user explicitly opted in.
+
 **Status flow**: Brainstormed → Validated → In dev → Testing → Completed
 
 **Do NOT include**: empty "Technical Context", "Code Guidance", "Agent Usage Tracking", "Sub-Agent Outputs", "Notes" sections with stub bullets. The grill-with-docs session already extracted what matters; everything else lives in the architecture docs (`tech-stack.md`, `frontend-patterns.md`, `backend-patterns.md`) which every mission reads.
@@ -216,16 +218,50 @@ _Filled in as each mission completes. Future missions read these for context._
 - Mission 4: Backend - [Additional backend features and validation]
 - Mission N: Full-stack - [Integration and end-to-end testing]
 
-### 7. Confirm with User
+### 7. Offer Parallel Mission Groups (`pp-x`) — OPTIONAL, strictly opt-in
+
+After all missions are drafted, check whether some of them are **independent of each other**: they touch disjoint files, share no type/data dependencies, and none consumes another's output. Independent missions can be tagged into a parallel group and later executed concurrently in subagents instead of one at a time.
+
+**Never tag missions on your own. ALWAYS ask the user first** — they might not want parallel execution at all. Present the proposed grouping and let them accept, adjust, or decline:
+
+> "Missions 2 and 3 look independent (disjoint files, no shared types) — want me to mark them as a parallel group `[pp-1]` so they run concurrently in subagents? Missions 5–8 likewise as `[pp-2]`. Or keep everything sequential?"
+
+If the user declines (or no candidates exist), all missions stay sequential — that is the default. Skip this step silently when no two missions are independent.
+
+#### Notation
+
+Append the tag to the mission line in `progress-tracker.md`:
+
+```markdown
+## Missions
+- [ ] Mission 1: Backend — core data model and primary API
+- [ ] Mission 2: Backend — notifications endpoint [pp-1]
+- [ ] Mission 3: Backend — export endpoint [pp-1]
+- [ ] Mission 4: Backend — shared auth middleware (dep for the rest)
+- [ ] Mission 5: Frontend — settings page [pp-2]
+- [ ] Mission 6: Frontend — profile page [pp-2]
+- [ ] Mission 7: Frontend — billing page [pp-2]
+- [ ] Mission 8: Frontend — admin page [pp-2]
+```
+
+#### Semantics
+
+- Same tag = same group = those missions may run concurrently.
+- **Untagged missions are sequential barriers**: every mission above a group must complete before the group starts, and the whole group must complete before the next mission below it starts. In the example: Mission 1 → (2 ∥ 3) → Mission 4 → (5 ∥ 6 ∥ 7 ∥ 8).
+- Missions in the same group must touch **disjoint files** — no two subagents editing the same file. If you can't guarantee that, don't propose the group.
+- A mission must never depend on a sibling in its own group. When in doubt, leave it sequential.
+- Number groups in execution order: `pp-1`, `pp-2`, ...
+
+### 8. Confirm with User
 
 Show the progress tracker with all missions defined and ask:
 "Task created with status 'Brainstormed'. Missions: [list, one line each]. Ready to validate and start Mission 1?"
 
-When the user confirms, update status to 'Validated' and proceed to Step 8.
+When the user confirms, update status to 'Validated' and proceed to Step 9.
 
-### 8. Execute Missions — ALWAYS via the `tdd` skill
+### 9. Execute Missions — ALWAYS via the `tdd` skill
 
-Walk through the missions list in `progress-tracker.md` from top to bottom. For each uncompleted mission:
+Walk through the missions list in `progress-tracker.md` from top to bottom. When the next uncompleted mission carries a `[pp-x]` tag, follow **Parallel group execution** below; otherwise run the mission sequentially as described here. For each uncompleted sequential mission:
 
 **STEP ZERO — non-negotiable, before any Read / Edit / Write / Bash for the mission:**
 
@@ -273,6 +309,22 @@ After the skill is loaded:
 
 When all missions are done, set task status to `Completed`.
 
+#### Parallel group execution (`pp-x` missions)
+
+When the next uncompleted mission is tagged `[pp-x]`, collect **all uncompleted missions sharing that tag** and run them as one concurrent batch:
+
+1. **STEP ZERO still applies** — invoke `Skill("tdd")` in the parent context first. Subagents don't exempt you; you need the playbook loaded to evaluate the summaries they return.
+2. **Confirm with the user** before launching: "Missions N–M are grouped `[pp-x]` — run them in parallel now, or one at a time?" The tag records *permission*, not *obligation*; the user may still choose sequential.
+3. **Load shared context once** (UBIQ, CONTEXT, tech-stack, relevant patterns, ADRs, prior mission summaries), then **spawn one subagent per mission in a single message** so they actually run concurrently. Each subagent prompt must include:
+   - The mission's one-line objective plus the relevant constraints/notes from the tracker
+   - The instruction to follow the `tdd` red-green-refactor discipline: failing test first, smallest change to green, refactor
+   - Which architecture/domain docs to read (paths from `.ab-method/structure/index.yaml`)
+   - The hard boundary: touch **only this mission's files** — its group siblings are running concurrently
+   - Where to write its detailed output: `docs/tasks/[task-name]/sub-agents-outputs/mission-N-[slug].md`, returning only a tight technical summary
+4. **Verify the merge** when all subagents return: run the test suite once at the parent level to catch cross-mission breakage. If anything conflicts, fix it in the parent context before proceeding.
+5. **Append each mission's technical summary** to the tracker (same format as § 9.6, one block per mission) and mark every mission in the group complete.
+6. **Prompt the user once per group**, not per mission: "Missions N–M (`[pp-x]`) completed in parallel. Ready to continue with Mission M+1?"
+
 ## Key Principles
 
 - **Always grill** — `/create-task` invokes `grill-with-docs` on every invocation, no skip
@@ -282,6 +334,7 @@ When all missions are done, set task status to `Completed`.
 - **All missions defined upfront** — full roadmap at task creation
 - **Backend first for full-stack** — types and data ready for the frontend
 - **Subagents only when warranted** — direct implementation is the default; pick agents by need, not by mission type
+- **Parallel groups are opt-in** — never tag missions `[pp-x]` without asking the user; sequential is the default, untagged missions are barriers, group siblings must touch disjoint files
 
 ## Vague vs. specific
 
@@ -301,4 +354,5 @@ Specific requests skip `grill-with-docs` and go straight to Step 2:
 - Read UBIQ + CONTEXT + architecture docs before defining missions, and again before each mission's TDD loop
 - Every mission must specify a layer (Frontend/Backend/Full-stack) and a concrete one-line objective
 - Backend-first for full-stack tasks (types feed the frontend)
+- `[pp-x]` tags only exist because the user said yes in Step 7 — and even then, confirm again before launching a group in parallel
 - Each mission's tests + technical summary together carry the context forward — no other artifacts

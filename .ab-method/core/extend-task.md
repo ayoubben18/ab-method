@@ -42,6 +42,12 @@ Continue numbering sequentially:
 
 **No mission docs.** Same rule as `/create-task`: missions live as one-line entries in the progress tracker. The `tdd` skill drives implementation when each mission is run.
 
+#### Optional: parallel-group tags on new missions (`[pp-x]`)
+
+If two or more of the **new** missions are independent of each other (disjoint files, no shared types, neither consumes the other's output), they are candidates for a parallel group — same notation and semantics as `create-task.md` § 7. New missions may also join an existing **pending** group when they're independent of every sibling in it.
+
+**Never tag on your own — always ask the user first**; they might not want parallel execution. If they decline, the new missions stay sequential. Continue group numbering from the highest existing tag (existing `[pp-2]` → next group is `[pp-3]`). Never retag completed missions or groups already underway.
+
 ### 5. Update Task Status
 If the task was `Completed`, move it back to `Validated` (or `In dev` if work has already started on the new missions).
 
@@ -55,3 +61,4 @@ When the user confirms, hand off to `/resume-task` (or continue inline) — each
 - Sequential numbering, no gaps
 - Use `grill-with-docs` whenever the new mission descriptions are vague
 - The `tdd` skill runs on every mission, including extensions
+- `[pp-x]` tags on new missions only with the user's explicit yes — sequential is the default
