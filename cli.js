@@ -186,6 +186,7 @@ async function install() {
         'with `/skills` or `$ab-<name>`, or describe your intent and Codex will',
         'match it:',
         '',
+        '- `ab-mastermind` — intelligent entry point: routes your intent to the right workflow, helps decide goal vs task, explains the method',
         '- `ab-analyze-project` — full architecture sweep',
         '- `ab-create-task` — define a task, break it into TDD missions',
         '- `ab-create-task-from-handoff` — resume a handoff spun off mid-grill into a task',

@@ -26,6 +26,10 @@ Loads and executes the specified workflow from `.ab-method/core/[workflow-name].
 
 ## Available Workflows
 
+> **Not sure which workflow you need?** Use `/mastermind` — it reasons about
+> your intent, helps you decide goal vs task, and routes you to the right
+> workflow. This menu is the static list; mastermind is the smart entry point.
+
 ### Tasks
 - **create-task** — Define a new task; always grills via `grill-with-docs`, runs every mission through the `tdd` skill
 - **create-task-from-handoff** — Resume a handoff spun off mid-grill (`docs/handoffs/`) into a task; continues the grill where it left off, then runs `create-task`

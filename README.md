@@ -42,6 +42,7 @@ Both read the same `.ab-method/core/*.md` definitions and the same `.ab-method/s
 
 | Command               | Purpose                                                                 |
 |-----------------------|-------------------------------------------------------------------------|
+| `/mastermind`         | Intelligent entry point — routes your intent to the right workflow, helps decide goal vs task, explains the method |
 | `/create-task`        | Define a task; always grills, runs every mission through `tdd`          |
 | `/create-task-from-handoff` | Resume a handoff spun off mid-grill into a task; continues the grill, then runs `create-task` |
 | `/create-goal`        | Produce a ready-to-run prompt for an autonomous `/goal` loop            |
