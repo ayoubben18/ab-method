@@ -1,3 +1,9 @@
+## [3.4.0](https://github.com/ayoubben18/ab-method/compare/v3.3.0...v3.4.0) (2026-07-05)
+
+### ✨ Features
+
+* add mastermind intelligent router (Claude /mastermind + Codex ab-mastermind) ([38e6572](https://github.com/ayoubben18/ab-method/commit/38e657279bb3ad5a1e93769b1766bcefb4e9871f)), closes [#3](https://github.com/ayoubben18/ab-method/issues/3)
+
 ## [3.3.0](https://github.com/ayoubben18/ab-method/compare/v3.2.0...v3.3.0) (2026-06-06)
 
 ### ✨ Features
