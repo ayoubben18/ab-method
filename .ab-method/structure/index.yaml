@@ -45,6 +45,19 @@ project_structure:
           - goal.md
           - progress-tracker.md
 
+    roadmaps:
+      # Example roadmap structure — produced by /create-roadmap. roadmap.md
+      # is the roadmap-level single source of truth: a DAG of tasks with
+      # `depends-on` edges, plus per-task `plan:` (⬜/✅) and `status:`
+      # (pending/in-dev/done). The roadmap references tasks by slug; the
+      # tasks themselves live under docs/tasks/<slug>/ (reused, not nested),
+      # so every task workflow still operates on them. /start-roadmap
+      # executes the graph in dependency order, independent tasks optionally
+      # in parallel (git worktrees or sequential — user's choice per run).
+      payments-v2:
+        files:
+          - roadmap.md
+
     handoffs:
       # Side-topics spun off mid-grill by the `handoff` skill. Each is a
       # single self-contained markdown file named after the topic; it freezes
@@ -76,6 +89,47 @@ workflow_outputs:
     - docs/goals/[goal-name]/progress-tracker.md
   extend-goal:
     - docs/goals/[goal-name]/goal.md   # updated in place; progress-tracker.md carries forward
+  create-roadmap: docs/roadmaps/[roadmap-name]/roadmap.md   # DAG of tasks; per-task create-task prompts emitted in dep order
+  start-roadmap:
+    - docs/roadmaps/[roadmap-name]/roadmap.md   # statuses updated as tasks run; verifies plans exist before executing
+    - docs/tasks/[task-name]/progress-tracker.md   # each task executes like start-task (subagent per mission, commit per green mission)
+
+# How the workflows and their artifacts reference each other. Any workflow
+# reads this file first, so this map is how they "know about each other"
+# instead of being siloed.
+relationships:
+  roadmap_to_task:
+    # A roadmap (docs/roadmaps/<name>/roadmap.md) lists tasks by slug. Each
+    # slug resolves to a normal task at docs/tasks/<slug>/ — tasks are NOT
+    # nested inside the roadmap folder, so resume-task / extend-task / etc.
+    # all still work on them unchanged.
+    roadmap: docs/roadmaps/[roadmap-name]/roadmap.md
+    tasks: docs/tasks/[task-slug]/
+    edges: "roadmap.md `depends-on:` fields form a DAG; independent tasks parallelize"
+  create_task_is_roadmap_aware:
+    # /create-task (and ab-create-task) checks docs/roadmaps/*/roadmap.md at
+    # the start of every run. If the requested task matches an entry marked
+    # `plan: ⬜ unplanned`, it plans it AS a roadmap task (seeds the grill
+    # with the roadmap Objective + upstream deps' summaries) and flips that
+    # entry to `plan: ✅ planned` on completion. No match → standalone task.
+    detect_in: docs/roadmaps/*/roadmap.md
+    on_match: "seed grill from Objective + upstream deps; write plan:✅ back on completion"
+    on_no_match: "standalone task, roadmaps ignored"
+  start_roadmap_verifies_plans:
+    # /start-roadmap will NOT execute a task whose dependency lacks a plan.
+    # It verifies the whole dependency tree first: a task is runnable only if
+    # its progress-tracker.md exists (plan:✅) and its deps are truly done.
+    # An unplanned live dependency halts the run with instructions to plan it.
+    gate: "every runnable task needs plan:✅ (real progress-tracker.md) + deps done (no unchecked missions)"
+  extend_task_reopens_roadmap:
+    # /extend-task (and ab-extend-task) is roadmap-aware: adding missions to a
+    # task that belongs to a roadmap flips that task's roadmap entry from
+    # status:done back to status:pending (and the roadmap Status from Completed
+    # back to In dev). This is the incremental case — after a completed
+    # roadmap, tweak tasks with extend-task, then re-run /start-roadmap.
+    reopens: "roadmap.md task status:done → pending; roadmap Status:Completed → In dev"
+    signal_of_truth: "a task NEEDS WORK when its progress-tracker.md has any unchecked mission, regardless of status: field"
+    rerun: "/start-roadmap re-verifies the tree and runs only tasks that need work, in dependency order; done tasks are skipped"
 
 # Inputs that downstream workflows should read for domain context
 domain_inputs:

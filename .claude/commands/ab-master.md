@@ -30,8 +30,12 @@ Loads and executes the specified workflow from `.ab-method/core/[workflow-name].
 > your intent, helps you decide goal vs task, and routes you to the right
 > workflow. This menu is the static list; mastermind is the smart entry point.
 
+### Roadmaps (multi-task)
+- **create-roadmap** — Turn a bigger idea into a dependency-ordered DAG of tasks; grills the decomposition once, then hands back a `/create-task` prompt per task in dep order
+- **start-roadmap** — Execute a planned roadmap in dependency order; verifies plans exist first, each task runs like `start-task`, independent tasks optionally parallel (git worktrees or sequential)
+
 ### Tasks
-- **create-task** — Define a new task; always grills via `grill-with-docs`, runs every mission through the `tdd` skill
+- **create-task** — Define a new task; always grills via `grill-with-docs`, runs every mission through the `tdd` skill. Roadmap-aware: planning a roadmap task auto-syncs its `roadmap.md` entry
 - **create-task-from-handoff** — Resume a handoff spun off mid-grill (`docs/handoffs/`) into a task; continues the grill where it left off, then runs `create-task`
 - **create-goal** — Produce a ready-to-run goal prompt for an autonomous `/goal` loop; always grills via `grill-with-docs`, no mission breakdown
 - **extend-goal** — Extend an existing goal, building on what the earlier `/goal` run implemented; always grills via `grill-with-docs`

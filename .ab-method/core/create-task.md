@@ -19,6 +19,41 @@ Create a focused task following the AB Method principle: one task at a time to c
 
 ## Process
 
+### 0. Roadmap Awareness — standalone task or a roadmap task?
+
+**Before grilling, figure out which kind of task this is.** Users phrase
+the same request many ways ("create a task for the charge API", "plan the
+next roadmap task", "let's build charges") — the workflow, not the
+phrasing, decides. After reading `.ab-method/structure/index.yaml` (which
+documents the task↔roadmap link in its `relationships` section), scan
+`docs/roadmaps/*/roadmap.md`:
+
+- **Roadmap task** — the requested task matches a `roadmap.md` entry
+  marked `plan: ⬜ unplanned` (by slug, or clearly by scope). Then:
+  1. Read that roadmap's **Objective** and the entry's `depends-on` list.
+  2. Read the `progress-tracker.md` (Mission Summaries) of each **already
+     planned** upstream dep — seed the grill with them so this task builds
+     on what they established. If an upstream dep is still unplanned, note
+     it: "‘charge-api’ depends on ‘stripe-schema’, which isn't planned
+     yet — planning it first gives a better grill. Continue anyway?"
+  3. Proceed through the normal steps below (grill → missions → tracker),
+     writing the task under `docs/tasks/<slug>/` as usual.
+  4. **On completion**, flip that task's line in `roadmap.md` from
+     `plan: ⬜ unplanned` to `plan: ✅ planned`. If every task in the
+     roadmap is now planned, set the roadmap **Status** to `Ready`. This
+     keeps `create-roadmap` / `start-roadmap` in sync automatically — the
+     user never hand-edits the roadmap.
+
+- **Standalone task** — no roadmap matches, or the user is clearly
+  starting fresh. Proceed exactly as before; ignore roadmaps entirely.
+
+- **Ambiguous** — a partial/fuzzy match to a roadmap entry. Ask once:
+  "‘payments’ roadmap has an unplanned task ‘charge-api’ — is this that
+  task, or a standalone one?" Then proceed accordingly.
+
+Everything below is identical for both kinds; only the seeding (from
+upstream deps) and the completion write-back (to `roadmap.md`) differ.
+
 ### 1. Define Problem Statement — ALWAYS invoke the `grill-with-docs` skill
 
 **Invoke the `grill-with-docs` skill on every `/create-task` invocation. No exceptions, no shortcut, no "the request looks clear so I'll skip it."**

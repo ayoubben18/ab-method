@@ -51,10 +51,20 @@ If two or more of the **new** missions are independent of each other (disjoint f
 ### 5. Update Task Status
 If the task was `Completed`, move it back to `Validated` (or `In dev` if work has already started on the new missions).
 
+#### If the task belongs to a roadmap — reopen it there too
+Check `docs/roadmaps/*/roadmap.md` (the `relationships` map in `.ab-method/structure/index.yaml` documents the link). If this task's slug appears in a roadmap:
+
+- Flip its roadmap entry's `status:` from `done` back to `pending` (it has unfinished work again) and uncheck its roadmap line. Leave `plan: ✅` as is — the task is still planned, just extended.
+- If the roadmap's overall **Status** was `Completed`, move it back to `In dev` (or `Ready`).
+
+This is what lets a later `/start-roadmap` re-run notice the new work. Extending a task that others depend on does **not** auto-reopen those downstream tasks — their own missions are still done. If the tweak actually changes what a downstream task needs, extend that task too; `/start-roadmap` will then run both in dependency order.
+
 ### 6. Confirm with User
 "Added [N] missions. Ready to start Mission X?"
 
-When the user confirms, hand off to `/resume-task` (or continue inline) — each new mission runs through the `tdd` skill, same as missions created at task time.
+When the user confirms, choose how to run the new missions:
+- **Standalone task** → hand off to `/resume-task` (or continue inline); each new mission runs through the `tdd` skill.
+- **Roadmap task** → the user can run the new missions right here via `/resume-task`, **or** re-run `/start-roadmap <name>` to execute every extended task across the roadmap in dependency order (the common case after a big roadmap implementation, when several tasks got tweaks).
 
 ## Remember
 - Add to `progress-tracker.md`, never create separate mission files
@@ -62,3 +72,4 @@ When the user confirms, hand off to `/resume-task` (or continue inline) — each
 - Use `grill-with-docs` whenever the new mission descriptions are vague
 - The `tdd` skill runs on every mission, including extensions
 - `[pp-x]` tags on new missions only with the user's explicit yes — sequential is the default
+- If the task is in a roadmap, reopen its `roadmap.md` entry (`status: done → pending`) so a `/start-roadmap` re-run picks up the new missions in dependency order

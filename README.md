@@ -38,12 +38,30 @@ The workflows are identical; only the trigger differs.
 
 Both read the same `.ab-method/core/*.md` definitions and the same `.ab-method/structure/index.yaml`.
 
+### Subagent nesting — a real runtime difference
+
+The two runtimes differ in one way that matters for roadmap execution, and it was verified empirically (a subagent asked to spawn its own subagent):
+
+| Runtime | Subagent mechanism | Can a subagent spawn another? |
+|---------|--------------------|-------------------------------|
+| **Claude Code** | `Agent` / `Task` tool | ✅ **Yes** — nesting works (verified two levels deep) |
+| **Codex** | `multi_agent_v1.spawn_agent` | ❌ **No** — one level only (`NESTING_UNAVAILABLE`) |
+
+Because of this, `/start-roadmap` is **runtime-adaptive**:
+
+- **On Claude Code** it may nest: each task can run in its own task-subagent that spawns the task's mission-subagents inside it (`roadmap → task-agent → mission-agents`). This keeps the parent's context lean across a large roadmap.
+- **On Codex** it stays **flat**: the parent run spawns each task's mission-subagents directly — one level, never a subagent-that-spawns-subagents. Task structure lives in `roadmap.md`, not in an extra agent layer.
+
+**Flat is the portable default** — it runs correctly on both, and nesting is a Claude-only optimization, never a requirement. If a runtime can't tell or lacks nesting, it falls back to flat. Everything else about a roadmap run (dependency gate, topological order, commit-per-mission, worktree isolation) is identical on both.
+
 ## Commands
 
 | Command               | Purpose                                                                 |
 |-----------------------|-------------------------------------------------------------------------|
-| `/mastermind`         | Intelligent entry point — routes your intent to the right workflow, helps decide goal vs task, explains the method |
-| `/create-task`        | Define a task; always grills, runs every mission through `tdd`          |
+| `/mastermind`         | Intelligent entry point — routes your intent to the right workflow, helps decide goal vs task vs roadmap, explains the method |
+| `/create-roadmap`     | Turn a bigger idea into a dependency-ordered DAG of tasks; plan each via `/create-task` |
+| `/start-roadmap`      | Execute a planned roadmap in dependency order; independent tasks optionally parallel  |
+| `/create-task`        | Define a task; always grills, runs every mission through `tdd`. Roadmap-aware        |
 | `/create-task-from-handoff` | Resume a handoff spun off mid-grill into a task; continues the grill, then runs `create-task` |
 | `/create-goal`        | Produce a ready-to-run prompt for an autonomous `/goal` loop            |
 | `/extend-goal`        | Extend an existing goal, building on what the `/goal` run implemented   |
@@ -69,17 +87,23 @@ Both read the same `.ab-method/core/*.md` definitions and the same `.ab-method/s
 
 `grill-with-docs` reads `UBIQUITOUS_LANGUAGE.md` and `CONTEXT.md`, challenges terminology against them, and updates `CONTEXT.md` and `docs/adr/` inline as decisions crystallise.
 
-## Task vs Goal
+## Task vs Goal vs Roadmap
 
 - `/create-task` breaks work into missions you review and run through `tdd` yourself, one at a time. Use when you want to stay in the loop.
 - `/create-goal` does the same grilling and doc-grounding, but emits a single `goal.md` prompt for an autonomous `/goal` loop (Claude Code or Codex) plus a `progress-tracker.md` the loop maintains. Use for one continuous objective with a verifiable stop condition.
-- `/start-task` bridges the two: it takes an existing task and runs it with the `/goal` philosophy — every remaining mission in a subagent (tdd, tracker updated per mission), tests verified and a commit made after each, one confirmation upfront and no prompts until done. You review commits instead of missions.
+- `/create-roadmap` is the layer **above** tasks: it turns a bigger idea into a dependency-ordered DAG of tasks (a schema before the API before the UI), then hands you a `/create-task` prompt per task in dependency order. Use when the work is several distinct, ordered tasks.
+- `/start-task` runs one existing task with the `/goal` philosophy — every remaining mission in a subagent (tdd, tracker updated per mission), tests verified and a commit made after each. It starts immediately on invocation (no "Proceed?" prompt) and runs with no prompts until done. You review commits instead of missions.
+- `/start-roadmap` is the same idea one level up: it verifies every task's plan exists, then runs the whole graph in dependency order — each task by `/start-task` rules, independent tasks optionally parallelized in git worktrees. Its **execution shape is runtime-adaptive** (see below): nested subagents on Claude Code, flat one-level orchestration on Codex.
+
+The method is **fractal**: `roadmap → tasks` mirrors `task → missions`. `depends-on` edges between tasks are the task-level counterpart of `[pp-x]` groups between missions — independent units run concurrently, dependent ones wait.
+
+`/start-roadmap` is **re-runnable and incremental**. After a long roadmap run (e.g. a PRD-sized build), use `/extend-task` to add missions to any task — it reopens that task in `roadmap.md`. Re-running `/start-roadmap` then executes only the tasks that have unfinished work, in dependency order, and skips everything already done. A task counts as "needs work" whenever its tracker has an unchecked mission, so tweaks flow through the same dependency discipline as the original build.
 
 ## Workflow phases
 
 1. Baseline — `/analyze-project` produces `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, and three lean architecture docs.
 2. Sharpen — the `domain-model` skill grills the domain language and captures ADRs.
-3. Build — `/create-task` or `/create-goal` grills, then either TDD-loops missions or hands off a goal prompt.
+3. Build — `/create-task` or `/create-goal` grills, then either TDD-loops missions or hands off a goal prompt. For multi-task efforts, `/create-roadmap` draws the task graph and `/start-roadmap` runs it in dependency order.
 4. Maintain — `/update-architecture` keeps the baseline fresh.
 
 ## File layout

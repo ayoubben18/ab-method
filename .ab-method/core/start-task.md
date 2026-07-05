@@ -31,9 +31,12 @@ Open `docs/tasks/<task>/progress-tracker.md`. From it, identify:
 
 **Vagueness gate**: an autonomous run cannot stop to ask questions. If any remaining mission's one-line description is too vague to execute without judgment calls, say so now and grill it (`grill-with-docs`) **before** the run starts — never mid-run.
 
-### 3. Confirm the Run — ONCE, upfront
+### 3. Announce the Run — then start immediately, no confirmation
 
-This is the only prompt in the whole workflow. Show the plan and get explicit consent — it covers every commit the run will make:
+`/start-task` does **not** ask "Proceed?". When invoked, it starts right
+away — the invocation itself is the consent. Show the plan for visibility
+(so the user sees what's about to run and can Esc-interrupt if it's
+wrong), then begin the loop in the same turn:
 
 ```
 Starting: <Task Name>
@@ -44,16 +47,17 @@ Remaining missions:
 [ ] Mission 5: [Name] [pp-1]
 [ ] Mission 6: [Name]
 
-This will run autonomously:
+Running autonomously now:
 - each mission in a subagent (tdd discipline, updates the tracker itself)
 - test suite verified after each mission
 - one commit per mission (one per [pp-x] group)
-- no further prompts unless something goes red
-
-Proceed?
+- no prompts unless something goes red
 ```
 
-On confirmation, set the task status to `In dev`.
+Set the task status to `In dev` and proceed straight into Step 4 — do
+not wait for a reply. (The only thing that can pause a run before it
+starts is the Step 2 vagueness gate, and only when a remaining mission is
+too fuzzy to execute without judgment calls.)
 
 ### 4. Load the `tdd` Skill — STEP ZERO
 
@@ -112,7 +116,7 @@ If a mission subagent fails, tests stay red, or a merge conflict can't be resolv
 
 ## Key Principles
 
-- **One confirmation, then autonomous** — the upfront confirmation covers all commits; no prompting between missions
+- **No confirmation — starts on invocation** — `/start-task` announces the plan and begins immediately; it does not ask "Proceed?". Invoking it *is* the consent for every commit the run makes. The only pre-run pause is the vagueness gate (Step 2), and only for a genuinely fuzzy mission
 - **Executor, not producer** — `/start-task` does not define or reshape missions; that's `/create-task` and `/extend-task`. The vagueness gate is the only place grilling happens, and only before the run
 - **Every mission in a subagent** — the subagent runs tdd and updates the tracker itself; the parent verifies and commits
 - **Commit after each mission** — green tests are the gate; one commit per mission, one per `[pp-x]` group

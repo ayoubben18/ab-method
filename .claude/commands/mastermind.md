@@ -34,8 +34,7 @@ It will:
 ```
 
 ## Notes
-- Multi-task orchestration (idea → dependency-ordered roadmap → subagent
-  execution with `[pp-x]` parallel groups) is **not** part of mastermind
-  yet — it's being designed separately. Mastermind currently routes and
-  advises.
+- Multi-task orchestration (idea → dependency-ordered roadmap → execution)
+  lives in the `/create-roadmap` → `/start-roadmap` pair. Mastermind routes
+  to them; it doesn't hold that logic itself.
 - For the plain workflow menu, use `/ab-master`.

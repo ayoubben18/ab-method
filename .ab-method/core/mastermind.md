@@ -52,11 +52,13 @@ Common routes:
 | The user wants to… | Route to |
 |---|---|
 | Start a focused piece of work, stay in the loop | `create-task` |
+| Break a bigger idea into several dependent tasks | `create-roadmap` |
 | Hand a big continuous objective to an autonomous loop | `create-goal` |
 | Resume a task already in progress | `resume-task` |
 | Add more work to an existing task | `extend-task` |
 | Extend a goal after its loop ran | `extend-goal` |
 | Run an existing task autonomously to completion | `start-task` |
+| Run a whole roadmap of tasks in dependency order | `start-roadmap` |
 | Continue a tangent that got parked mid-grill | `create-task-from-handoff` |
 | Understand the codebase (arch / domain) | `analyze-project` / `analyze-frontend` / `analyze-backend` |
 | Refresh architecture docs after big changes | `update-architecture` |
@@ -76,8 +78,12 @@ The most common fork. Decide it with the user, don't guess blindly:
   autonomous `/goal` loop; no mission breakdown.
 
 Rule of thumb: a goal is *bigger than one prompt but smaller than an
-open-ended backlog*. If the request is genuinely several unrelated pieces
-of work, that's multiple tasks — steer to `create-task` (one at a time).
+open-ended backlog*. If the request is genuinely several **dependent**
+pieces of work (a schema before the API before the UI), that's a
+**roadmap** — steer to `create-roadmap`, which draws the task DAG and
+then plans each task via `create-task`. One task → `create-task`; one
+autonomous objective → `create-goal`; several ordered tasks →
+`create-roadmap`.
 
 ### 4. Explain the method (when asked)
 
@@ -100,10 +106,13 @@ Keep it short. Point them at `/ab-master` for the full workflow menu.
 - **One task at a time** to conserve context.
 - Never reimplement a workflow — delegate to it.
 
-## Out of scope (future)
+## Multi-task orchestration
 
-Multi-task orchestration — turning an idea into a dependency-ordered
-roadmap and driving each task's implementation via subagents (respecting
-inter-task dependencies and `[pp-x]` parallel groups) — is **not** part of
-mastermind yet. It is being designed separately. For now, mastermind
-routes and advises; it does not autonomously execute a chain of tasks.
+Turning an idea into a dependency-ordered roadmap and driving each task's
+implementation is handled by the **`create-roadmap` → `start-roadmap`**
+pair (the fractal counterpart of `create-task` → `start-task`, one level
+up). Mastermind **routes** to them; it does not itself hold the
+orchestration logic. When a user wants to plan or run a multi-task effort,
+send them to `create-roadmap` (to draw and plan the graph) or
+`start-roadmap` (to execute a planned one in dependency order, with
+independent tasks optionally parallelized via git worktrees).
