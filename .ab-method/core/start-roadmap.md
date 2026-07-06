@@ -118,38 +118,46 @@ verification gate: a needed-but-unplanned dependency.)
 Walk the DAG topologically. A task becomes eligible the moment all its
 `depends-on` tasks are `done`.
 
-#### Execution shape — runtime-adaptive (nest on Claude, flat on Codex)
+#### Execution shape — nested on Claude by default, flat on Codex
 
-How many subagent levels you use depends on the runtime, because the two
+The number of subagent levels is decided by the runtime, because the two
 differ in a hard way (verified empirically):
 
 - **Claude Code** — nested subagents work: a subagent can spawn its own.
 - **Codex** — nesting is **unavailable**: `multi_agent_v1.spawn_agent` is
   one level deep; a subagent cannot spawn another (`NESTING_UNAVAILABLE`).
 
-So pick the shape by runtime:
+Pick the shape by runtime:
 
-- **On Claude Code (default, fuller shape):** you MAY wrap each task in
-  its own **task-subagent** that runs that task's mission loop and spawns
-  the **mission-subagents** inside it. This gives per-task context
-  isolation (the parent's context stays lean across a large roadmap) —
-  `roadmap → task-agent → mission-agents`, the fractal shape realized.
-- **On Codex (only what works):** you MUST orchestrate **flat**. The
-  parent `/start-roadmap` run holds the mission loop and spawns the
-  task's **mission-subagents directly** — one subagent level, never a
-  task-subagent-that-spawns-subagents. Task-level structure is bookkeeping
-  in `roadmap.md`, not an extra agent layer.
+- **On Claude Code — NEST BY DEFAULT.** Wrap each eligible task in its own
+  **task-subagent** that runs that task's mission loop and spawns the
+  **mission-subagents** inside it: `roadmap → task-agent → mission-agents`.
+  This is the fractal shape realized, and its point is **per-task context
+  isolation** — the parent orchestrator's context stays lean no matter how
+  big the roadmap, because each task's mission churn lives in its own
+  window. The task-subagent updates its `progress-tracker.md`, runs the
+  `start-task` loop (tdd, commit per mission), and returns a tight summary;
+  the parent only tracks `roadmap.md` status and commits/merges. Drop to
+  the flat shape only for a trivially small roadmap where a task layer is
+  pure overhead.
+- **On Codex — FLAT (only what works).** The parent `/start-roadmap` run
+  holds the mission loop and spawns each task's **mission-subagents
+  directly** — one subagent level, never a task-subagent-that-spawns-
+  subagents. Task-level structure is bookkeeping in `roadmap.md`, not an
+  extra agent layer.
 
-If you can't tell which runtime you're on, **default to flat** — it runs
-correctly on both; nesting is a Claude-only optimization, never a
-requirement.
+If you genuinely can't tell which runtime you're on, **fall back to
+flat** — it runs correctly on both. But on Claude Code the default is
+nested.
 
 **For each eligible task (either shape):**
 - Set its `status:` to `in-dev` in `roadmap.md`.
 - Run its missions per `.ab-method/core/start-task.md` — each mission in a
   subagent under `tdd`, the mission's own `[pp-x]` groups honored, the
   task's `progress-tracker.md` updated per mission, a commit after every
-  green mission.
+  green mission. **Who runs this loop is the only difference between the
+  shapes:** on Claude (nested) it's the task-subagent; on Codex (flat)
+  it's the parent directly. The mission subagents are the same either way.
 - On green completion, set `status:` to `done` in `roadmap.md` and check
   off its line.
 
@@ -248,11 +256,11 @@ Same discipline as `/start-task`, one level up:
   `/create-roadmap` + `/create-task` planned
 - **Each task runs by `start-task` rules** — same subagent-per-mission,
   tdd, commit trail
-- **Execution shape is runtime-adaptive** — on **Claude** you may nest
-  (task-subagent → mission-subagents) for per-task context isolation; on
-  **Codex** you must stay flat (parent → mission-subagents) because
-  `spawn_agent` is one level deep (`NESTING_UNAVAILABLE`). When unsure,
-  default to flat — it works on both
+- **Execution shape is runtime-adaptive** — on **Claude Code, nest by
+  default** (task-subagent → mission-subagents) for per-task context
+  isolation; on **Codex** stay flat (parent → mission-subagents) because
+  `spawn_agent` is one level deep (`NESTING_UNAVAILABLE`). If the runtime
+  is unknown, fall back to flat — it works on both
 - **Parallel isolation is the user's call** — worktrees for real
   concurrency, sequential for zero git risk
 - **`roadmap.md` is the single source of truth** — plan state and

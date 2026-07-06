@@ -47,12 +47,12 @@ The two runtimes differ in one way that matters for roadmap execution, and it wa
 | **Claude Code** | `Agent` / `Task` tool | ✅ **Yes** — nesting works (verified two levels deep) |
 | **Codex** | `multi_agent_v1.spawn_agent` | ❌ **No** — one level only (`NESTING_UNAVAILABLE`) |
 
-Because of this, `/start-roadmap` is **runtime-adaptive**:
+Because of this, `/start-roadmap` picks its execution shape by runtime:
 
-- **On Claude Code** it may nest: each task can run in its own task-subagent that spawns the task's mission-subagents inside it (`roadmap → task-agent → mission-agents`). This keeps the parent's context lean across a large roadmap.
-- **On Codex** it stays **flat**: the parent run spawns each task's mission-subagents directly — one level, never a subagent-that-spawns-subagents. Task structure lives in `roadmap.md`, not in an extra agent layer.
+- **On Claude Code it nests by default:** each task runs in its own task-subagent that spawns the task's mission-subagents inside it (`roadmap → task-agent → mission-agents`). The point is per-task context isolation — the parent orchestrator's context stays lean no matter how big the roadmap, because each task's mission churn lives in its own window.
+- **On Codex it stays flat:** the parent run spawns each task's mission-subagents directly — one level, never a subagent-that-spawns-subagents. Task structure lives in `roadmap.md`, not in an extra agent layer.
 
-**Flat is the portable default** — it runs correctly on both, and nesting is a Claude-only optimization, never a requirement. If a runtime can't tell or lacks nesting, it falls back to flat. Everything else about a roadmap run (dependency gate, topological order, commit-per-mission, worktree isolation) is identical on both.
+If the runtime can't be determined it falls back to flat, which runs correctly on both. Everything else about a roadmap run (dependency gate, topological order, commit-per-mission, worktree isolation) is identical either way.
 
 ## Commands
 
