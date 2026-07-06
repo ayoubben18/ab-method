@@ -1,3 +1,9 @@
+## [3.5.1](https://github.com/ayoubben18/ab-method/compare/v3.5.0...v3.5.1) (2026-07-06)
+
+### 🐛 Bug Fixes
+
+* nest subagents by default on Claude Code in start-roadmap ([99d5e46](https://github.com/ayoubben18/ab-method/commit/99d5e4635d4b6f56a0c75e872037585a0391a598))
+
 ## [3.5.0](https://github.com/ayoubben18/ab-method/compare/v3.4.0...v3.5.0) (2026-07-05)
 
 ### ✨ Features
