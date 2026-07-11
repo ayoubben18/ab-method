@@ -59,6 +59,15 @@ Check `docs/roadmaps/*/roadmap.md` (the `relationships` map in `.ab-method/struc
 
 This is what lets a later `/start-roadmap` re-run notice the new work. Extending a task that others depend on does **not** auto-reopen those downstream tasks — their own missions are still done. If the tweak actually changes what a downstream task needs, extend that task too; `/start-roadmap` will then run both in dependency order.
 
+### 5.5 Pre-implementation Critique — invoke the `critique-plan` skill on the NEW missions
+
+Before confirming, run the newly drafted missions past the domain model — same discipline as
+`/create-task` § 7.5. **Invoke the `critique-plan` skill** scoped to the *new* missions (with the
+existing ones as context): a read-only domain critic pushes back only on genuine conflicts (terminology
+drift, wrong context, an ADR contradiction, a reinvented concept). Advisory and silent when the
+additions are sound. Resolve any real pushback (amend a mission, or dismiss with a load-bearing reason
+that may become an ADR) and update the tracker before Step 6.
+
 ### 6. Confirm with User
 "Added [N] missions. Ready to start Mission X?"
 

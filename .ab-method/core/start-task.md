@@ -94,6 +94,28 @@ Follow **Parallel group execution** in `create-task.md` § 9 — all uncompleted
 
 Then move straight to the next mission.
 
+### 5b. Post-Implementation Review — invoke the `review-implementation` skill (autonomous mode)
+
+Once every mission is green and committed, run the **post-implementation review** on the task's diff
+(the cohesive change across all missions — its commit range). **Invoke the `review-implementation`
+skill in autonomous mode.** It spins up three read-only critics in parallel — `cleaner-architecture`,
+`slop-defender`, `reusability-inspector` — that push back only on real issues (shallow modules the change
+introduced, AI code-slop, reinvented logic). A clean diff produces no findings; that's the normal case.
+
+Because this is an afk run, the skill:
+1. **Auto-applies only `safe-fix` findings** — mechanical, test-covered, no behavior/interface change.
+   The orchestrator (you) applies them one at a time and **re-runs the test suite after each**; a fix that
+   goes red is reverted and downgraded to an open finding. Red is still a stop sign for the *task's own*
+   work, but a reverted review fix is not a failure — it just stays open for the user.
+2. **Commits kept safe fixes** as one `refactor(<task-name>): post-review cleanup` (repo convention). No
+   fixes → no commit.
+3. **Writes `docs/tasks/<task>/review.md`** — every finding, applied (✅) or open (⬜ needs judgment) —
+   next to `progress-tracker.md`, so the user can read exactly what happened and what still wants their
+   call. It writes this file even when all lenses are clean, so the user knows the review ran.
+
+The skill never prompts — anything uncertain stays open rather than being changed. It owns the review
+logic and the `review.md` format; don't duplicate them here.
+
 ### 6. On Full Completion
 
 Set the task status to `Completed` in the tracker (include it in the final mission's commit, or a final `chore` commit if needed). Report:
@@ -103,6 +125,7 @@ Task completed: <Task Name>
 Missions run: 3, 4-5 [pp-1], 6
 Commits: <n> (<short hashes>)
 Tests: <command> green
+Review: docs/tasks/<task>/review.md — <k> safe fixes applied, <m> open for you
 ```
 
 ### 7. On Failure — Stop Loudly, Never Plough On
@@ -120,6 +143,7 @@ If a mission subagent fails, tests stay red, or a merge conflict can't be resolv
 - **Executor, not producer** — `/start-task` does not define or reshape missions; that's `/create-task` and `/extend-task`. The vagueness gate is the only place grilling happens, and only before the run
 - **Every mission in a subagent** — the subagent runs tdd and updates the tracker itself; the parent verifies and commits
 - **Commit after each mission** — green tests are the gate; one commit per mission, one per `[pp-x]` group
+- **Review before completion** — after the last green mission, `review-implementation` runs in autonomous mode: safe fixes auto-applied (tests-green-gated, own commit), everything written to `review.md` for the afk user; open findings are never silently changed
 - **Red stops the run** — exactly like a `/goal` feedback loop: a failing check takes priority over progress
 - **Tracker is the single source of truth** — same as every task workflow; subagent updates for sequential missions, parent updates for parallel groups
 

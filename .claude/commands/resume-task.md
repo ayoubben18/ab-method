@@ -17,6 +17,7 @@ This workflow will:
 3. Load UBIQ + CONTEXT + tech-stack + patterns + ADRs for the next mission
 4. **Run the next mission through the `tdd` skill** (red-green-refactor)
 5. Append a tight technical summary on completion
+6. **Run `review-implementation` after the last mission (interactive)** — three critics (cleaner-architecture, slop-defender, reusability-inspector) on the task diff; findings presented for you to apply before status → Completed
 
 ## Workflow Details
 - The progress tracker carries the mission list and per-mission technical summaries from prior sessions — that's the entire context

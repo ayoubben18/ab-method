@@ -38,7 +38,9 @@ From here the work is identical to `create-task` starting at its Step 2. Follow 
 - Identify task type and complexity.
 - Create the task folder and slim `progress-tracker.md`.
 - Define all missions upfront.
-- Confirm with the user, then run each mission through the `tdd` skill.
+- Run `critique-plan` on the drafted missions (create-task § 7.5) — the pre-implementation domain critic.
+- Confirm with the user, then run each mission through the `tdd` skill, and `review-implementation` after
+  the last one (create-task § 9) — the post-implementation review.
 
 ### 5. Retire the handoff
 

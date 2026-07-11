@@ -16,7 +16,8 @@ This workflow will:
 2. Review current mission progress
 3. Gather requirements for new missions (grills if vague)
 4. Append the new missions as one-line entries in `progress-tracker.md` (no mission docs)
-5. Reopen the task if it was `Completed` — and, if it belongs to a roadmap, reopen its `roadmap.md` entry too (`status: done → pending`) so a `/start-roadmap` re-run picks up the new work in dependency order
+5. **Run `critique-plan` on the new missions** — the pre-implementation domain critic pushes back only on genuine conflicts before you confirm
+6. Reopen the task if it was `Completed` — and, if it belongs to a roadmap, reopen its `roadmap.md` entry too (`status: done → pending`) so a `/start-roadmap` re-run picks up the new work in dependency order
 
 ## Workflow Details
 The extend-task workflow provides:
