@@ -1,3 +1,9 @@
+## [3.6.0](https://github.com/ayoubben18/ab-method/compare/v3.5.1...v3.6.0) (2026-07-11)
+
+### ✨ Features
+
+* add pre/post-implementation critic layer ([cea3db0](https://github.com/ayoubben18/ab-method/commit/cea3db0336c662e0849c023e6640705f8abd5030))
+
 ## [3.5.1](https://github.com/ayoubben18/ab-method/compare/v3.5.0...v3.5.1) (2026-07-06)
 
 ### 🐛 Bug Fixes
