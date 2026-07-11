@@ -33,6 +33,10 @@ project_structure:
       todo-table-creation:
         files:
           - progress-tracker.md
+          - review.md             # post-implementation review (review-implementation
+                                  # skill); written by autonomous runs (start-task /
+                                  # start-roadmap): safe fixes marked applied, the rest
+                                  # left open for the user. Absent until a review runs.
         folders:
           - sub-agents-outputs/   # only created when a subagent runs
 
@@ -78,21 +82,26 @@ workflow_outputs:
   domain-model:
     - CONTEXT.md          # refined inline during the grilling session
     - docs/adr/           # ADRs created lazily
-  create-task: docs/tasks/[task-name]/progress-tracker.md
+  create-task: docs/tasks/[task-name]/progress-tracker.md   # runs critique-plan (pre-impl, advisory) before validating missions, and review-implementation (post-impl, interactive) after the last mission
+  critique-plan: []   # pre-implementation critic; read-only, surfaces domain-model pushbacks only (may prompt an ADR under docs/adr/ on a load-bearing dismissal). Invoked by create-task / create-roadmap, or standalone
+  review-implementation: docs/tasks/[task-name]/review.md   # post-implementation review; three critics on the task diff. Writes review.md on autonomous runs; interactive runs present findings instead
   create-task-from-handoff: docs/tasks/[task-name]/progress-tracker.md   # reads docs/handoffs/[slug].md, deletes it once the task exists
   extend-task: docs/tasks/[task-name]/progress-tracker.md
   resume-task: docs/tasks/[task-name]/progress-tracker.md
-  start-task: docs/tasks/[task-name]/progress-tracker.md   # autonomous run; mission subagents update the tracker, parent commits per mission
   handoff: docs/handoffs/[slug].md   # `handoff` skill; falls back to OS temp dir outside an AB Method project
   create-goal:
     - docs/goals/[goal-name]/goal.md
     - docs/goals/[goal-name]/progress-tracker.md
   extend-goal:
     - docs/goals/[goal-name]/goal.md   # updated in place; progress-tracker.md carries forward
-  create-roadmap: docs/roadmaps/[roadmap-name]/roadmap.md   # DAG of tasks; per-task create-task prompts emitted in dep order
+  create-roadmap: docs/roadmaps/[roadmap-name]/roadmap.md   # DAG of tasks; runs critique-plan on the graph (pre-impl, advisory) before emitting per-task create-task prompts in dep order
+  start-task:
+    - docs/tasks/[task-name]/progress-tracker.md   # autonomous run; mission subagents update the tracker, parent commits per mission
+    - docs/tasks/[task-name]/review.md   # post-impl review-implementation pass after the last mission: safe fixes applied, open findings recorded
   start-roadmap:
     - docs/roadmaps/[roadmap-name]/roadmap.md   # statuses updated as tasks run; verifies plans exist before executing
     - docs/tasks/[task-name]/progress-tracker.md   # each task executes like start-task (subagent per mission, commit per green mission)
+    - docs/tasks/[task-name]/review.md   # each task's post-impl review (inherited from start-task rules)
 
 # How the workflows and their artifacts reference each other. Any workflow
 # reads this file first, so this map is how they "know about each other"

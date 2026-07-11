@@ -287,9 +287,24 @@ Append the tag to the mission line in `progress-tracker.md`:
 - A mission must never depend on a sibling in its own group. When in doubt, leave it sequential.
 - Number groups in execution order: `pp-1`, `pp-2`, ...
 
+### 7.5 Pre-implementation Critique — ALWAYS invoke the `critique-plan` skill
+
+Before asking the user to validate, run the drafted mission list past the domain model. **Invoke the
+`critique-plan` skill** on every `/create-task` invocation — it spins up a read-only domain critic that
+challenges the missions against `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, ADRs, and the architecture docs.
+
+It is **advisory and opt-in-silent**: it pushes back only on genuine conflicts (terminology drift, wrong
+bounded context, an ADR contradiction, a mission that reinvents a named concept). A sound plan gets a
+one-line "No objections" — that is the common outcome, so don't treat its silence as a failure to find
+something. When it does push back, resolve each with the user (amend the mission, or dismiss with a
+load-bearing reason the skill may capture as an ADR), then update the tracker to match before Step 8.
+
+The skill owns the critique logic — do not duplicate it here. It reads
+`.ab-method/structure/index.yaml` for where the domain model lives.
+
 ### 8. Confirm with User
 
-Show the progress tracker with all missions defined and ask:
+Show the progress tracker with all missions defined (reflecting any changes from Step 7.5) and ask:
 "Task created with status 'Brainstormed'. Missions: [list, one line each]. Ready to validate and start Mission 1?"
 
 When the user confirms, update status to 'Validated' and proceed to Step 9.
@@ -342,7 +357,20 @@ After the skill is loaded:
 
 8. **Prompt the user** before moving to the next mission: "Mission N completed. Ready to start Mission N+1?"
 
-When all missions are done, set task status to `Completed`.
+When all missions are done, run the **post-implementation review** (below), then set task status to `Completed`.
+
+#### Post-implementation review — invoke the `review-implementation` skill
+
+Once the last mission is green, **invoke the `review-implementation` skill** on the task's diff (the
+cohesive change across all missions). It spins up three read-only critics in parallel —
+`cleaner-architecture`, `slop-defender`, `reusability-inspector` — that push back only on real issues
+(shallow modules the change introduced, AI code-slop, reinvented logic). A clean diff produces no
+findings; that's the normal case.
+
+`/create-task` is interactive, so run the skill in **interactive mode**: it presents findings grouped by
+lens (each marked `safe-fix` / `needs-judgment`) and you apply what the user approves, keeping tests
+green. (Autonomous runs via `/start-task` instead auto-apply safe fixes and write a `review.md` — that's
+the skill's other mode.) The skill owns the review logic; don't duplicate it here.
 
 #### Parallel group execution (`pp-x` missions)
 

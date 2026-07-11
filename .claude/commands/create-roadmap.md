@@ -18,7 +18,8 @@ It will:
 1. **Always check `.ab-method/structure/index.yaml` first** for paths and the `relationships` map.
 2. **Grill the idea once** (`grill-with-docs`, aimed at decomposition) to identify discrete tasks and their `depends-on` edges.
 3. Write `docs/roadmaps/<name>/roadmap.md` — the DAG of tasks (coarse scope each, no missions), plus per-task `plan:` / `status:` fields. This is the roadmap-level source of truth.
-4. Emit a ready-to-paste `/create-task` prompt per task, **in dependency order** (foundational first), each seeded with the roadmap objective + upstream deps.
+4. **Run `critique-plan`** on the task graph — a read-only domain critic that pushes back only on genuine decomposition conflicts (wrong seams, mis-scoped tasks, boundary violations) against the domain model. Advisory; silent when the graph is sound.
+5. Emit a ready-to-paste `/create-task` prompt per task, **in dependency order** (foundational first), each seeded with the roadmap objective + upstream deps.
    - **Recommended:** run each in a fresh session (isolated, deep grilling).
    - **Discouraged:** plan inline in this session — it warns you about context bloat first.
 

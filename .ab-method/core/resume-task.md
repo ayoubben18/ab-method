@@ -69,7 +69,18 @@ Append a tight technical summary to the progress tracker (same format as `create
 
 For a parallel group: append one summary block per mission, mark the whole group complete, and prompt once per group — "Missions N–M (`[pp-x]`) completed in parallel. Ready to continue with Mission M+1?"
 
-When all missions are done, set task status to `Completed`.
+When all missions are done, run the **post-implementation review**, then set task status to `Completed`.
+
+### 8. Post-Implementation Review — invoke the `review-implementation` skill
+
+Once the last mission is complete, **invoke the `review-implementation` skill** on the task's diff (the
+cohesive change across all its missions). Three read-only critics — `cleaner-architecture`,
+`slop-defender`, `reusability-inspector` — push back only on real issues; a clean diff yields nothing.
+
+`/resume-task` keeps you in the loop, so run it in **interactive mode**: it presents findings grouped by
+lens (each marked `safe-fix` / `needs-judgment`) and you apply what you approve, keeping tests green.
+(The autonomous `/start-task` variant instead auto-applies safe fixes and writes a `review.md`.) The
+skill owns the review logic; don't duplicate it here. Then set status to `Completed`.
 
 ## Remember
 - The progress tracker carries everything you need; there are no mission docs by design

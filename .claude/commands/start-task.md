@@ -17,7 +17,8 @@ This workflow will:
 3. Announce the plan (missions, parallel groups, commit-per-mission) and **start immediately** — no "Proceed?"; invoking the command is the consent
 4. **Run every remaining mission in a subagent** through the `tdd` discipline; the subagent checks off its mission and appends its technical summary to the tracker
 5. Verify the test suite after each mission, then **commit** (one commit per mission, one per `[pp-x]` group)
-6. Stop loudly on red — never commits broken work, never starts the next mission on a broken state
+6. **Run `review-implementation` after the last mission (autonomous mode)** — three critics (cleaner-architecture, slop-defender, reusability-inspector) on the task diff; safe fixes auto-applied (tests-green-gated, own commit), everything written to `docs/tasks/<task>/review.md` for you to read afk
+7. Stop loudly on red — never commits broken work, never starts the next mission on a broken state
 
 ## `/start-task` vs `/resume-task`
 - **`/start-task`** — trust the roadmap, walk away, review commits instead of missions

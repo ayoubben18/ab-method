@@ -107,6 +107,22 @@ Rules for the graph:
 Set the roadmap **Status** flow: `Planning → Ready → In dev → Completed`.
 It becomes `Ready` once every task is `✅ planned`.
 
+### 2.5 Pre-implementation Critique — invoke the `critique-plan` skill on the DAG
+
+With the `roadmap.md` draft written, run the **task graph** past the domain model before handing off
+per-task planning. **Invoke the `critique-plan` skill** — it spins up a read-only domain critic that
+challenges the *decomposition* (not any single task's internals) against `UBIQUITOUS_LANGUAGE.md`,
+`CONTEXT.md`, and ADRs.
+
+At the roadmap level the pushbacks it looks for are graph-shaped: a `depends-on` edge that crosses a
+documented seam the wrong way, two "independent" tasks that actually share a domain concept, a task
+mis-scoped as an epic or a single mission, or a slug that reinvents a canonical term. It is **advisory and
+opt-in-silent** — a sound graph gets "No objections." Resolve any real pushback with the user (re-draw an
+edge, re-scope or rename a task, move work to the right context) and update `roadmap.md` before Step 3.
+
+The skill owns the critique logic; it reads `.ab-method/structure/index.yaml` for where the domain model
+lives.
+
 ### 3. Plan Each Task — in dependency order, in its own session
 
 Tasks are planned **foundational-first**: a task is only planned after

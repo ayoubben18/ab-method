@@ -200,10 +200,14 @@ async function install() {
         '',
         'Principles: always grill before defining work (`grill-with-docs`); every',
         'mission runs through `tdd` (red-green-refactor); `progress-tracker.md` is',
-        'the single source of truth per task. When a tangent surfaces mid-grill that',
-        'deserves its own task, capture it with the `handoff` skill under',
-        '`docs/handoffs/` instead of derailing — resume it later with',
-        '`ab-create-task-from-handoff`.',
+        'the single source of truth per task. Before implementing, `critique-plan`',
+        'stress-tests the drafted plan against the domain model (pushes back only on',
+        'real conflicts). After implementing, `review-implementation` runs three',
+        'critics on the diff (cleaner-architecture, slop-defender, reusability-',
+        'inspector) — autonomous runs apply safe fixes and write `review.md` next to',
+        'the tracker. When a tangent surfaces mid-grill that deserves its own task,',
+        'capture it with the `handoff` skill under `docs/handoffs/` instead of',
+        'derailing — resume it later with `ab-create-task-from-handoff`.',
         '<!-- ab-method:end -->',
         ''
       ].join('\n');

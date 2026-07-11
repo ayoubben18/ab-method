@@ -15,7 +15,9 @@ This workflow will:
 1. **Always invoke `grill-with-docs`** to interview the user (no skip — even when the request looks clear)
 2. Read UBIQ + CONTEXT + tech-stack + patterns + ADRs to ground the task in canonical terms
 3. Write a slim `progress-tracker.md` with all missions defined as one-line entries
-4. **Run every mission through the `tdd` skill** (red-green-refactor) — no separate mission docs are created
+4. **Run `critique-plan`** on the drafted missions — a read-only domain critic that pushes back only on genuine conflicts with the domain model (advisory; silent when the plan is sound)
+5. **Run every mission through the `tdd` skill** (red-green-refactor) — no separate mission docs are created
+6. **Run `review-implementation`** after the last mission — three critics (cleaner-architecture, slop-defender, reusability-inspector) on the task diff; interactive here, so findings are presented for you to apply
 
 ## Workflow Details
 - **Always grill** — `grill-with-docs` runs on every invocation

@@ -60,6 +60,8 @@ Common routes:
 | Run an existing task autonomously to completion | `start-task` |
 | Run a whole roadmap of tasks in dependency order | `start-roadmap` |
 | Continue a tangent that got parked mid-grill | `create-task-from-handoff` |
+| Stress-test a plan against the domain model (standalone) | `critique-plan` skill |
+| Review a completed diff for architecture / slop / reuse (standalone) | `review-implementation` skill |
 | Understand the codebase (arch / domain) | `analyze-project` / `analyze-frontend` / `analyze-backend` |
 | Refresh architecture docs after big changes | `update-architecture` |
 | Backfill tests for code written without them | `test-mission` |

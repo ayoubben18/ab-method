@@ -161,6 +161,18 @@ nested.
 - On green completion, set `status:` to `done` in `roadmap.md` and check
   off its line.
 
+**Post-implementation review is inherited per task.** Because each task
+runs by `start-task` rules, its Step 5b runs the `review-implementation`
+skill on that task's diff — three read-only critics
+(`cleaner-architecture`, `slop-defender`, `reusability-inspector`), safe
+fixes auto-applied and everything written to that task's
+`docs/tasks/<slug>/review.md`. The review's critic subagents follow the
+**same nesting rule as the mission subagents**: on **Claude** the
+task-subagent spawns them (nested); on **Codex** the parent spawns them
+at its own level (flat). Nothing extra to wire here — it comes for free
+with running each task as a `start-task`. The roadmap orchestrator only
+collects the resulting `review.md` locations for the final report.
+
 #### Running independent tasks concurrently
 
 - **Sequential mode (default):** run eligible tasks one after another in
@@ -217,7 +229,11 @@ Roadmap completed: <Name>
 Tasks run: task-a, (task-b ∥ task-c), task-d
 Commits: <n> across <m> tasks
 Tests: <command> green
+Reviews: docs/tasks/<slug>/review.md per task — <total> safe fixes applied, <total> open for you
 ```
+
+List each task's `review.md` with its open-finding count so the afk user
+can jump straight to the ones that want their judgment.
 
 If execution stopped at an unplanned frontier rather than finishing,
 report what ran and what still needs planning:
@@ -255,7 +271,8 @@ Same discipline as `/start-task`, one level up:
 - **Executor, not producer** — never define or reshape tasks; run what
   `/create-roadmap` + `/create-task` planned
 - **Each task runs by `start-task` rules** — same subagent-per-mission,
-  tdd, commit trail
+  tdd, commit trail, and post-implementation `review-implementation` pass
+  (safe fixes applied, `review.md` written per task)
 - **Execution shape is runtime-adaptive** — on **Claude Code, nest by
   default** (task-subagent → mission-subagents) for per-task context
   isolation; on **Codex** stay flat (parent → mission-subagents) because

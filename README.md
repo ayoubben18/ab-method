@@ -21,7 +21,7 @@ It also installs in every case:
 
 - `.ab-method/` — workflow definitions and the structure index
 - `docs/architecture/` and `docs/tasks/` — output scaffolding
-- Helper skills: `grill-with-docs`, `grill-me`, `tdd`, `domain-model`, `ubiquitous-language`, `improve-codebase-architecture`, `request-refactor-plan`, `to-issues`, `to-prd`, `write-a-skill`
+- Helper skills: `grill-with-docs`, `grill-me`, `tdd`, `domain-model`, `ubiquitous-language`, `critique-plan`, `review-implementation`, `improve-codebase-architecture`, `request-refactor-plan`, `to-issues`, `to-prd`, `write-a-skill`
 - Workflow skills: `ab-create-task`, `ab-create-goal`, `ab-analyze-project`, and one per workflow
 - Slash commands (Claude only): `/ab-master` plus one per workflow
 - `AGENTS.md` (Codex only): orients Codex and lists the workflow skills
@@ -84,8 +84,16 @@ If the runtime can't be determined it falls back to flat, which runs correctly o
 5. Backend-first for full-stack tasks — types feed the frontend.
 6. Never lose a tangent — when a grill surfaces a side-topic that deserves its own task, the `handoff` skill captures it under `docs/handoffs/` instead of derailing the current grill; `/create-task-from-handoff` resumes it later.
 7. Parallel only by consent — independent missions can be tagged `[pp-1]`, `[pp-2]`, ... and run concurrently in subagents; untagged missions are sequential barriers. The workflow always asks before tagging — sequential is the default.
+8. Critique before, review after — `critique-plan` stress-tests the drafted plan against the domain model before coding, and `review-implementation` runs three critics on the diff after. Both push back **only on real issues** — a sound plan or a clean diff produces nothing. No suggestion-for-its-own-sake.
 
 `grill-with-docs` reads `UBIQUITOUS_LANGUAGE.md` and `CONTEXT.md`, challenges terminology against them, and updates `CONTEXT.md` and `docs/adr/` inline as decisions crystallise.
+
+### Pre- and post-implementation analysis
+
+Two critic layers bracket every implementation, both anchored in the domain model and both **opt-in-silent** — they speak only when there is a genuine problem:
+
+- **`critique-plan` (pre-implementation, advisory).** Before missions are validated (in `/create-task`) or the task graph is handed off (in `/create-roadmap`), a read-only domain critic challenges the plan against `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, and `docs/adr/`. It pushes back on genuine conflicts — terminology drift, wrong bounded context, an ADR contradiction, a reinvented concept, a bad seam in the DAG — and stays silent otherwise. You resolve each pushback (amend the plan, or dismiss with a load-bearing reason that may become an ADR).
+- **`review-implementation` (post-implementation).** After a task's missions are done, three read-only critics run in parallel on the task's diff: **cleaner-architecture** (shallow modules the change introduced, via the deletion test), **slop-defender** (AI code-slop — speculative generality, pass-through wrappers, dead code, comments that restate code), and **reusability-inspector** (logic that duplicates an existing util/service/type). Each returns nothing when the diff is clean. In autonomous runs (`/start-task`, `/start-roadmap`) the orchestrator auto-applies only **safe** fixes (mechanical, test-covered, no behavior change — each gated on green tests) and writes **everything** to `docs/tasks/<task>/review.md` next to the tracker: safe fixes marked applied, riskier findings left open for you to read afk. Interactive runs present the findings for you to pick instead.
 
 ## Task vs Goal vs Roadmap
 
@@ -103,7 +111,7 @@ The method is **fractal**: `roadmap → tasks` mirrors `task → missions`. `dep
 
 1. Baseline — `/analyze-project` produces `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, and three lean architecture docs.
 2. Sharpen — the `domain-model` skill grills the domain language and captures ADRs.
-3. Build — `/create-task` or `/create-goal` grills, then either TDD-loops missions or hands off a goal prompt. For multi-task efforts, `/create-roadmap` draws the task graph and `/start-roadmap` runs it in dependency order.
+3. Build — `/create-task` or `/create-goal` grills, `critique-plan` stress-tests the plan against the domain model, then either TDD-loops missions or hands off a goal prompt, and `review-implementation` critiques the resulting diff. For multi-task efforts, `/create-roadmap` draws the task graph and `/start-roadmap` runs it in dependency order.
 4. Maintain — `/update-architecture` keeps the baseline fresh.
 
 ## File layout
@@ -122,6 +130,7 @@ docs/
   architecture/          tech-stack.md, frontend-patterns.md, backend-patterns.md
   adr/                   Decision records, created lazily by /domain-model
   tasks/<task-name>/     progress-tracker.md (single source of truth)
+                         review.md (post-implementation review; autonomous runs)
   goals/<goal-name>/     goal.md + progress-tracker.md
   handoffs/<slug>.md     Tangents spun off mid-grill, awaiting their own task
 ```
