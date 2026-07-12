@@ -25,6 +25,7 @@ It will:
 
 ## Relationship to other workflows
 - `/create-task` is roadmap-aware: planning a task that appears in a `roadmap.md` flips its `plan:` to ✅ automatically — no hand-editing.
+- `/reconcile-roadmap` (optional, recommended once all tasks are planned): a read-only cross-plan coherence critic that reads every planned task's `progress-tracker.md` together and pushes back only on discrepancies *between* the finished plans (a consumer with no producer, a coverage gap, a reversed edge, terminology drift). Standalone; run it before `/start-roadmap`.
 - `/start-roadmap` executes the roadmap once tasks are planned (it verifies plans exist first).
 - `/create-task` alone for a single task; `/create-goal` for one continuous autonomous objective.
 

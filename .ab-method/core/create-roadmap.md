@@ -167,6 +167,15 @@ Plan the remaining tasks with the prompts above (fresh session each),
 then run /start-roadmap <name> to execute in dependency order.
 ```
 
+**Optional (recommended once all tasks are planned):** run
+`/reconcile-roadmap <name>` before `/start-roadmap`. It's a read-only,
+cross-plan coherence critic that reads every planned task's
+`progress-tracker.md` together and pushes back only on genuine
+discrepancies *between* the finished plans — a consumer with no producer,
+a coverage gap, duplicated work, a reversed edge, terminology drift. It's
+standalone and silent when the plans cohere; where `critique-plan` judged
+the coarse DAG here, `reconcile-roadmap` checks the actual missions line up.
+
 Do not execute here. `/create-roadmap` stops once the roadmap and the
 planning prompts are delivered.
 

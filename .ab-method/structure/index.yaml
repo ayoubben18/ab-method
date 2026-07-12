@@ -85,6 +85,11 @@ workflow_outputs:
   create-task: docs/tasks/[task-name]/progress-tracker.md   # runs critique-plan (pre-impl, advisory) before validating missions, and review-implementation (post-impl, interactive) after the last mission
   critique-plan: []   # pre-implementation critic; read-only, surfaces domain-model pushbacks only (may prompt an ADR under docs/adr/ on a load-bearing dismissal). Invoked by create-task / create-roadmap, or standalone
   review-implementation: docs/tasks/[task-name]/review.md   # post-implementation review; three critics on the task diff. Writes review.md on autonomous runs; interactive runs present findings instead
+  reconcile-roadmap: []   # pre-execution cross-plan coherence critic; read-only. Reads roadmap.md +
+                          # every planned task's progress-tracker.md and surfaces seam/gap/overlap/
+                          # ordering/terminology/assumption discrepancies ACROSS the whole roadmap.
+                          # Standalone (/reconcile-roadmap <name>); complements critique-plan (single
+                          # plan, pre-impl) and review-implementation (one diff, post-impl)
   create-task-from-handoff: docs/tasks/[task-name]/progress-tracker.md   # reads docs/handoffs/[slug].md, deletes it once the task exists
   extend-task: docs/tasks/[task-name]/progress-tracker.md
   resume-task: docs/tasks/[task-name]/progress-tracker.md
@@ -139,6 +144,17 @@ relationships:
     reopens: "roadmap.md task status:done → pending; roadmap Status:Completed → In dev"
     signal_of_truth: "a task NEEDS WORK when its progress-tracker.md has any unchecked mission, regardless of status: field"
     rerun: "/start-roadmap re-verifies the tree and runs only tasks that need work, in dependency order; done tasks are skipped"
+  reconcile_roadmap_checks_across_plans:
+    # /reconcile-roadmap is the cross-plan coherence critic. Where critique-plan
+    # judges ONE plan against the domain model (the coarse DAG at create-roadmap
+    # time, or a single task's missions at create-task time), reconcile-roadmap
+    # reads the WHOLE set of finished progress-tracker.md files together and checks
+    # the seams the roadmap's depends-on edges promised are honored on both sides.
+    # Read-only, advisory, standalone — run it after planning and before
+    # /start-roadmap. It never edits a plan or blocks a run.
+    reads: "docs/roadmaps/<name>/roadmap.md + every plan:✅ task's docs/tasks/<slug>/progress-tracker.md + domain model"
+    finds: "broken seams (consumer with no producer), coverage gaps, duplication, reversed/missing edges, cross-task terminology drift, conflicting assumptions"
+    complements: "critique-plan (single plan, pre-impl) and review-implementation (one diff, post-impl)"
 
 # Inputs that downstream workflows should read for domain context
 domain_inputs:

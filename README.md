@@ -21,7 +21,7 @@ It also installs in every case:
 
 - `.ab-method/` — workflow definitions and the structure index
 - `docs/architecture/` and `docs/tasks/` — output scaffolding
-- Helper skills: `grill-with-docs`, `grill-me`, `tdd`, `domain-model`, `ubiquitous-language`, `critique-plan`, `review-implementation`, `improve-codebase-architecture`, `request-refactor-plan`, `to-issues`, `to-prd`, `write-a-skill`
+- Helper skills: `grill-with-docs`, `grill-me`, `tdd`, `domain-model`, `ubiquitous-language`, `critique-plan`, `reconcile-roadmap`, `review-implementation`, `improve-codebase-architecture`, `request-refactor-plan`, `to-issues`, `to-prd`, `write-a-skill`
 - Workflow skills: `ab-create-task`, `ab-create-goal`, `ab-analyze-project`, and one per workflow
 - Slash commands (Claude only): `/ab-master` plus one per workflow
 - `AGENTS.md` (Codex only): orients Codex and lists the workflow skills
@@ -90,9 +90,10 @@ If the runtime can't be determined it falls back to flat, which runs correctly o
 
 ### Pre- and post-implementation analysis
 
-Two critic layers bracket every implementation, both anchored in the domain model and both **opt-in-silent** — they speak only when there is a genuine problem:
+Critic layers bracket every implementation, all anchored in the domain model and all **opt-in-silent** — they speak only when there is a genuine problem:
 
 - **`critique-plan` (pre-implementation, advisory).** Before missions are validated (in `/create-task`) or the task graph is handed off (in `/create-roadmap`), a read-only domain critic challenges the plan against `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, and `docs/adr/`. It pushes back on genuine conflicts — terminology drift, wrong bounded context, an ADR contradiction, a reinvented concept, a bad seam in the DAG — and stays silent otherwise. You resolve each pushback (amend the plan, or dismiss with a load-bearing reason that may become an ADR).
+- **`reconcile-roadmap` (pre-execution, roadmap-level, advisory).** Once a roadmap's tasks are all planned, this read-only critic reads *every* planned task's `progress-tracker.md` **together** and checks the finished plans cohere as a system — catching discrepancies only visible *between* plans that `critique-plan` structurally can't see (it judges one plan at a time). It fires on a consumer with no producer, a coverage gap, duplicated work, a reversed/missing edge, cross-task terminology drift, or conflicting assumptions. Standalone (`/reconcile-roadmap <name>`), run before `/start-roadmap`; silent when the plans line up.
 - **`review-implementation` (post-implementation).** After a task's missions are done, three read-only critics run in parallel on the task's diff: **cleaner-architecture** (shallow modules the change introduced, via the deletion test), **slop-defender** (AI code-slop — speculative generality, pass-through wrappers, dead code, comments that restate code), and **reusability-inspector** (logic that duplicates an existing util/service/type). Each returns nothing when the diff is clean. In autonomous runs (`/start-task`, `/start-roadmap`) the orchestrator auto-applies only **safe** fixes (mechanical, test-covered, no behavior change — each gated on green tests) and writes **everything** to `docs/tasks/<task>/review.md` next to the tracker: safe fixes marked applied, riskier findings left open for you to read afk. Interactive runs present the findings for you to pick instead.
 
 ## Task vs Goal vs Roadmap
