@@ -1,3 +1,9 @@
+## [3.7.0](https://github.com/ayoubben18/ab-method/compare/v3.6.0...v3.7.0) (2026-07-12)
+
+### ✨ Features
+
+* add reconcile-roadmap cross-plan coherence critic ([a17cf55](https://github.com/ayoubben18/ab-method/commit/a17cf551f69dae3d345acca9370187621bfbdf62))
+
 ## [3.6.0](https://github.com/ayoubben18/ab-method/compare/v3.5.1...v3.6.0) (2026-07-11)
 
 ### ✨ Features
