@@ -82,9 +82,17 @@ workflow_outputs:
   domain-model:
     - CONTEXT.md          # refined inline during the grilling session
     - docs/adr/           # ADRs created lazily
-  create-task: docs/tasks/[task-name]/progress-tracker.md   # runs critique-plan (pre-impl, advisory) before validating missions, and review-implementation (post-impl, interactive) after the last mission
+  create-task: docs/tasks/[task-name]/progress-tracker.md   # runs critique-plan (pre-impl, advisory) before validating missions, then review-implementation + sync-architecture (post-impl, interactive) after the last mission
   critique-plan: []   # pre-implementation critic; read-only, surfaces domain-model pushbacks only (may prompt an ADR under docs/adr/ on a load-bearing dismissal). Invoked by create-task / create-roadmap, or standalone
   review-implementation: docs/tasks/[task-name]/review.md   # post-implementation review; three critics on the task diff. Writes review.md on autonomous runs; interactive runs present findings instead
+  sync-architecture:   # post-implementation documentation-sync detector; read-only. ONE subagent finds what
+    - docs/architecture/tech-stack.md        # the task diff introduced that the docs don't capture (endpoints,
+    - docs/architecture/frontend-patterns.md # patterns, deps, terms, ADR candidates) and routes each to its doc
+    - docs/architecture/backend-patterns.md  # via /update-architecture's table. Autonomous: applies append-only
+    - UBIQUITOUS_LANGUAGE.md                 # safe-adds (commit `docs(<task>): sync architecture docs`), defers
+    - CONTEXT.md                             # prose deprecation / domain reshapes / ADRs to /domain-model +
+                                             # /update-architecture. Interactive: presents deltas. Runs after
+                                             # review-implementation in create-task / start-task / start-roadmap
   reconcile-roadmap: []   # pre-execution cross-plan coherence critic; read-only. Reads roadmap.md +
                           # every planned task's progress-tracker.md and surfaces seam/gap/overlap/
                           # ordering/terminology/assumption discrepancies ACROSS the whole roadmap.
@@ -103,10 +111,12 @@ workflow_outputs:
   start-task:
     - docs/tasks/[task-name]/progress-tracker.md   # autonomous run; mission subagents update the tracker, parent commits per mission
     - docs/tasks/[task-name]/review.md   # post-impl review-implementation pass after the last mission: safe fixes applied, open findings recorded
+    - docs/architecture/*   # post-impl sync-architecture pass (Step 5c): append-only doc safe-adds committed as docs(<task>): sync architecture docs
   start-roadmap:
     - docs/roadmaps/[roadmap-name]/roadmap.md   # statuses updated as tasks run; verifies plans exist before executing
     - docs/tasks/[task-name]/progress-tracker.md   # each task executes like start-task (subagent per mission, commit per green mission)
     - docs/tasks/[task-name]/review.md   # each task's post-impl review (inherited from start-task rules)
+    - docs/architecture/*   # each task's post-impl sync-architecture pass (inherited from start-task rules)
 
 # How the workflows and their artifacts reference each other. Any workflow
 # reads this file first, so this map is how they "know about each other"
@@ -155,6 +165,16 @@ relationships:
     reads: "docs/roadmaps/<name>/roadmap.md + every plan:✅ task's docs/tasks/<slug>/progress-tracker.md + domain model"
     finds: "broken seams (consumer with no producer), coverage gaps, duplication, reversed/missing edges, cross-task terminology drift, conflicting assumptions"
     complements: "critique-plan (single plan, pre-impl) and review-implementation (one diff, post-impl)"
+  sync_architecture_is_the_auto_detector:
+    # sync-architecture is the automated detection half of /update-architecture.
+    # It runs post-implementation (right after review-implementation) in create-task /
+    # start-task / start-roadmap, so architecture docs stay live without anyone
+    # remembering to run /update-architecture by hand. It only APPENDS (safe-adds);
+    # anything that rewrites prose, reshapes the domain, or is ADR-worthy is deferred.
+    runs_after: "review-implementation, on the same task diff (post-impl phase)"
+    applies: "append-only safe-adds to docs/architecture/* + UBIQUITOUS_LANGUAGE.md/CONTEXT.md (autonomous) or presents them (interactive)"
+    defers_to: "/update-architecture (prose deprecation + improve-codebase-architecture deepening loop) and /domain-model (ADRs, new bounded contexts)"
+    reuses: "/update-architecture routing table (2a endpoints, 2b patterns, 2c stack/deps, 2d domain, 2e ADR)"
 
 # Inputs that downstream workflows should read for domain context
 domain_inputs:

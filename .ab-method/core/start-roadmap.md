@@ -173,6 +173,16 @@ at its own level (flat). Nothing extra to wire here — it comes for free
 with running each task as a `start-task`. The roadmap orchestrator only
 collects the resulting `review.md` locations for the final report.
 
+**Documentation sync is inherited per task too.** Right after the review,
+each task's `start-task` Step 5c runs the `sync-architecture` skill
+(autonomous mode) on that task's diff — a single read-only detector that
+appends any new endpoints/patterns/deps/domain-terms the change introduced
+to the architecture docs (append-only `safe-add`s, committed as
+`docs(<task>): sync architecture docs`), deferring prose deprecation, domain
+reshapes, and ADRs to the user. It also comes for free with running each
+task as a `start-task`; the docs stay live across the whole roadmap instead
+of drifting until someone runs `/update-architecture` by hand.
+
 #### Running independent tasks concurrently
 
 - **Sequential mode (default):** run eligible tasks one after another in

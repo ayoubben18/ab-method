@@ -116,6 +116,27 @@ Because this is an afk run, the skill:
 The skill never prompts — anything uncertain stays open rather than being changed. It owns the review
 logic and the `review.md` format; don't duplicate them here.
 
+### 5c. Documentation Sync — invoke the `sync-architecture` skill (autonomous mode)
+
+After the review, run **documentation sync** on the same task diff so the architecture docs don't silently
+drift. **Invoke the `sync-architecture` skill in autonomous mode.** It spins up one read-only detector that
+finds what the change introduced that the docs don't yet capture — new endpoints, patterns, dependencies,
+domain terms, ADR-worthy decisions — each routed to the exact doc (via `/update-architecture`'s routing
+table). A task that introduced nothing doc-worthy produces no deltas; that's the normal case.
+
+Because this is an afk run, the skill:
+1. **Applies only `safe-add` findings** — append-only additions (a new Entry Points line, a new dependency,
+   a new pattern subsection, a new glossary term) that follow the "add, don't rewrite" rule. Docs are
+   prose, so there's no test to re-run — but existing content is never rewritten or deleted.
+2. **Commits the additions** as one `docs(<task-name>): sync architecture docs` (repo convention). Nothing
+   to add → no commit.
+3. **Leaves every `needs-judgment` finding for the user** — prose deprecation, domain reshapes, and ADR
+   candidates are recorded (in the task's `review.md` under an **Architecture sync** heading, or the run
+   report) and pointed at `/domain-model` / `/update-architecture`, never applied autonomously.
+
+The skill never prompts and never writes an ADR or deprecates prose on its own — that keeps the docs live
+without filling them with noise. It owns the detection + routing logic; don't duplicate it here.
+
 ### 6. On Full Completion
 
 Set the task status to `Completed` in the tracker (include it in the final mission's commit, or a final `chore` commit if needed). Report:

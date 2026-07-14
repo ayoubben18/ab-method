@@ -372,6 +372,18 @@ lens (each marked `safe-fix` / `needs-judgment`) and you apply what the user app
 green. (Autonomous runs via `/start-task` instead auto-apply safe fixes and write a `review.md` — that's
 the skill's other mode.) The skill owns the review logic; don't duplicate it here.
 
+#### Documentation sync — invoke the `sync-architecture` skill
+
+After the review, **invoke the `sync-architecture` skill** on the same task diff. It spins up one
+read-only detector that finds what the change introduced that the architecture/domain docs don't yet
+capture — new endpoints, patterns, dependencies, domain terms, ADR-worthy decisions — each routed to the
+exact doc it belongs in. A task that introduced nothing doc-worthy produces no deltas; that's the normal
+case. Run it in **interactive mode**: it presents the proposed doc additions (marked `safe-add` /
+`needs-judgment`) and you apply the `safe-add`s the user approves, while `needs-judgment` items (prose
+deprecation, domain reshapes, ADRs) are pointed at `/update-architecture` / `/domain-model` rather than
+applied. This replaces the ad-hoc "remember to update the docs" step — the skill owns the detection and
+routing logic. (Autonomous runs via `/start-task` apply append-only safe-adds and defer the rest.)
+
 #### Parallel group execution (`pp-x` missions)
 
 When the next uncompleted mission is tagged `[pp-x]`, collect **all uncompleted missions sharing that tag** and run them as one concurrent batch:
