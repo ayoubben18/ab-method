@@ -1,3 +1,9 @@
+## [3.7.1](https://github.com/ayoubben18/ab-method/compare/v3.7.0...v3.7.1) (2026-07-14)
+
+### 🐛 Bug Fixes
+
+* keep architecture docs in sync after each task via sync-architecture ([0a4fbdc](https://github.com/ayoubben18/ab-method/commit/0a4fbdc324b8cc1958f37662aa28c2a8b1d2d1b6))
+
 ## [3.7.0](https://github.com/ayoubben18/ab-method/compare/v3.6.0...v3.7.0) (2026-07-12)
 
 ### ✨ Features
