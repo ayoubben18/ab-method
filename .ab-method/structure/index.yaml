@@ -33,6 +33,16 @@ project_structure:
       todo-table-creation:
         files:
           - progress-tracker.md
+          - unresolved-questions.md  # RARE. Questions the grill could not close because
+                                     # the user genuinely can't answer them yet (blocked on
+                                     # a person / contract / data). Each ships as a black
+                                     # box: a named placeholder marked `TODO(UQ-n)` in the
+                                     # code, and `⚠️ UQ-n` on every mission that builds on
+                                     # it. Written by grill-with-docs (format:
+                                     # UNRESOLVED-QUESTIONS-FORMAT.md); surfaced by
+                                     # create-task / resume-task / start-task /
+                                     # start-roadmap before work begins. Absent by default
+                                     # — most tasks never have one.
           - review.md             # post-implementation review (review-implementation
                                   # skill); written by autonomous runs (start-task /
                                   # start-roadmap): safe fixes marked applied, the rest
@@ -48,6 +58,10 @@ project_structure:
         files:
           - goal.md
           - progress-tracker.md
+          - unresolved-questions.md  # RARE, same mechanism as a task's (see docs/tasks above).
+                                     # Tighter bar for goals: the measurable end state may never
+                                     # depend on an open question, and goal.md must brief the loop
+                                     # to build the placeholder and never answer the question.
 
     roadmaps:
       # Example roadmap structure — produced by /create-roadmap. roadmap.md
@@ -58,6 +72,22 @@ project_structure:
       # so every task workflow still operates on them. /start-roadmap
       # executes the graph in dependency order, independent tasks optionally
       # in parallel (git worktrees or sequential — user's choice per run).
+      #
+      # roadmap.md may also carry four OPTIONAL sections, all omitted when
+      # empty (most roadmaps have none) — a roadmap is allowed to be
+      # deliberately incomplete rather than complete-looking and guessed:
+      #   ## Open decisions     sharp questions that must be answered before
+      #                         the tasks they `blocks:` can be planned; typed
+      #                         grilling / research / prototype / task
+      #   ## Decisions          index of resolved ones, pointing at where the
+      #                         answer lives (an ADR, a CONTEXT.md term, a
+      #                         task's scope) — never restating it
+      #   ## Not yet specified  the fog: in-scope areas you can't phrase
+      #                         sharply yet; graduates into tasks as answers
+      #                         land (a planning act — /create-roadmap and
+      #                         /create-task only, never /start-roadmap)
+      #   ## Out of scope       work ruled beyond the destination; closed,
+      #                         never graduates
       payments-v2:
         files:
           - roadmap.md
@@ -82,7 +112,21 @@ workflow_outputs:
   domain-model:
     - CONTEXT.md          # refined inline during the grilling session
     - docs/adr/           # ADRs created lazily
+  ubiquitous-language: UBIQUITOUS_LANGUAGE.md   # flat glossary; the format analyze-project follows
+  update-architecture:   # heavy human-invoked refresh after impactful changes; the manual
+    - docs/architecture/tech-stack.md        # counterpart of sync-architecture's routing table
+    - docs/architecture/frontend-patterns.md # (2a Entry Points / 2b patterns / 2c stack+deps /
+    - docs/architecture/backend-patterns.md  # 2d domain / 2e ADRs), then runs
+    - UBIQUITOUS_LANGUAGE.md                 # improve-codebase-architecture scoped to the change
+    - CONTEXT.md
+    - docs/adr/
+  test-mission: docs/tasks/[task-name]/progress-tracker.md   # backfills tests for code written
+                        # without them; appends its mission + summary to the tracker like any other
+  mastermind: []   # router only — explains the method and delegates to a workflow; writes nothing
   create-task: docs/tasks/[task-name]/progress-tracker.md   # runs critique-plan (pre-impl, advisory) before validating missions, then review-implementation + sync-architecture (post-impl, interactive) after the last mission
+  grill-with-docs: docs/tasks/[task-name]/unresolved-questions.md   # ONLY when the grill had to park a
+                          # question the user genuinely can't answer yet; the file is absent otherwise.
+                          # Also updates CONTEXT.md / docs/adr/ inline as decisions crystallise.
   critique-plan: []   # pre-implementation critic; read-only, surfaces domain-model pushbacks only (may prompt an ADR under docs/adr/ on a load-bearing dismissal). Invoked by create-task / create-roadmap, or standalone
   review-implementation: docs/tasks/[task-name]/review.md   # post-implementation review; three critics on the task diff. Writes review.md on autonomous runs; interactive runs present findings instead
   sync-architecture:   # post-implementation documentation-sync detector; read-only. ONE subagent finds what
@@ -93,14 +137,29 @@ workflow_outputs:
     - CONTEXT.md                             # prose deprecation / domain reshapes / ADRs to /domain-model +
                                              # /update-architecture. Interactive: presents deltas. Runs after
                                              # review-implementation in create-task / start-task / start-roadmap
+  codebase-design: []   # read-only reference skill; writes nothing. Single source of the architecture
+                        # vocabulary (module / interface / depth / seam / adapter / leverage / locality)
+                        # and its principles. Consumed by improve-codebase-architecture, by
+                        # review-implementation's cleaner-architecture + slop-defender lenses, and by
+                        # tdd when agreeing seams — they reference it rather than restating it
+  improve-codebase-architecture: []   # writes NOTHING to the repo: the candidate report is a
+                        # self-contained HTML file in the OS temp dir ($TMPDIR/architecture-review-<ts>.html),
+                        # falling back to a markdown list with no network. The grilling loop that follows
+                        # may update CONTEXT.md / docs/adr/ via grill-with-docs. Proposes and designs only —
+                        # implementation becomes a task via /create-task
   reconcile-roadmap: []   # pre-execution cross-plan coherence critic; read-only. Reads roadmap.md +
                           # every planned task's progress-tracker.md and surfaces seam/gap/overlap/
                           # ordering/terminology/assumption discrepancies ACROSS the whole roadmap.
                           # Standalone (/reconcile-roadmap <name>); complements critique-plan (single
                           # plan, pre-impl) and review-implementation (one diff, post-impl)
   create-task-from-handoff: docs/tasks/[task-name]/progress-tracker.md   # reads docs/handoffs/[slug].md, deletes it once the task exists
-  extend-task: docs/tasks/[task-name]/progress-tracker.md
-  resume-task: docs/tasks/[task-name]/progress-tracker.md
+  extend-task:
+    - docs/tasks/[task-name]/progress-tracker.md
+    - docs/tasks/[task-name]/unresolved-questions.md   # where a parked UQ-n gets answered: entry marked
+                          # RESOLVED, the TODO(UQ-n) seam swapped, ⚠️ UQ-n markers dropped from missions
+  resume-task:
+    - docs/tasks/[task-name]/progress-tracker.md
+    - docs/tasks/[task-name]/unresolved-questions.md   # only if an open question is answered at resume
   handoff: docs/handoffs/[slug].md   # `handoff` skill; falls back to OS temp dir outside an AB Method project
   create-goal:
     - docs/goals/[goal-name]/goal.md
@@ -110,6 +169,8 @@ workflow_outputs:
   create-roadmap: docs/roadmaps/[roadmap-name]/roadmap.md   # DAG of tasks; runs critique-plan on the graph (pre-impl, advisory) before emitting per-task create-task prompts in dep order
   start-task:
     - docs/tasks/[task-name]/progress-tracker.md   # autonomous run; mission subagents update the tracker, parent commits per mission
+    - docs/tasks/[task-name]/unresolved-questions.md   # Marker lines updated with the paths the placeholders
+                          # landed at; the run never resolves an open question — it reports them instead
     - docs/tasks/[task-name]/review.md   # post-impl review-implementation pass after the last mission: safe fixes applied, open findings recorded
     - docs/architecture/*   # post-impl sync-architecture pass (Step 5c): append-only doc safe-adds committed as docs(<task>): sync architecture docs
   start-roadmap:
