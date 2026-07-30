@@ -1,3 +1,20 @@
+## [3.8.0](https://github.com/ayoubben18/ab-method/compare/v3.7.1...v3.8.0) (2026-07-30)
+
+### ✨ Features
+
+* **grill:** park unresolved questions as black boxes instead of guessing ([4a6aec0](https://github.com/ayoubben18/ab-method/commit/4a6aec0d2ec7f1714be1e3ba158dd9dc5bca60c4))
+* **roadmap:** let a roadmap be deliberately incomplete ([2865aa3](https://github.com/ayoubben18/ab-method/commit/2865aa3e2e09be90d567ffcf564f9bf4dd3477da))
+* **skills:** extract codebase-design as the single design vocabulary ([4c00482](https://github.com/ayoubben18/ab-method/commit/4c00482174772cb71632fb4294b3ceb9864ad124))
+
+### 🐛 Bug Fixes
+
+* complete the AGENTS.md workflow list and the index.yaml output map ([a5fcb2c](https://github.com/ayoubben18/ab-method/commit/a5fcb2c5d73db08aa1212a64725e8a02ea5b9c4a))
+* **skills:** symlink critique-plan and review-implementation like every other skill ([5ac6428](https://github.com/ayoubben18/ab-method/commit/5ac6428ad4f09d2063849d51e33433d9a9b6f177))
+
+### 📚 Documentation
+
+* cover unresolved questions, incomplete roadmaps and codebase-design ([f888414](https://github.com/ayoubben18/ab-method/commit/f88841484e96e3791e9cad42da4bd6b9176005b6))
+
 ## [3.7.1](https://github.com/ayoubben18/ab-method/compare/v3.7.0...v3.7.1) (2026-07-14)
 
 ### 🐛 Bug Fixes
