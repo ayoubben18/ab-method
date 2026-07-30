@@ -15,6 +15,22 @@ description: Test-driven development with red-green-refactor loop. Use when user
 
 See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking guidelines.
 
+## Seams — where tests go
+
+A **seam** is the public boundary you test at: the interface where you observe behavior without reaching inside. Tests live at seams, never against internals.
+
+**Test only at pre-agreed seams.** Before writing any test, write down the seams under test and confirm them with the user. No test is written at an unconfirmed seam. You can't test everything — agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
+
+Ask: "What's the public interface, and which seams should we test?"
+
+Seam placement is a design decision, not a testing one. When the answer is "there isn't a good seam here," that's a design problem — run the `codebase-design` skill for the vocabulary and the deep-module principles before contorting a test around the current shape.
+
+## Anti-Pattern: Tautological Tests
+
+The assertion recomputes the expected value the way the code does — `expect(add(a, b)).toBe(a + b)`, a snapshot derived by hand the same way, a constant asserted equal to itself. The test passes by construction and can never disagree with the code.
+
+Expected values must come from an **independent source of truth**: a known-good literal, a worked example, the spec. See [tests.md](tests.md).
+
 ## Anti-Pattern: Horizontal Slices
 
 **DO NOT write all tests first, then all implementation.** This is "horizontal slicing" - treating RED as "write all tests" and GREEN as "write all code."
@@ -47,6 +63,7 @@ RIGHT (vertical):
 Before writing any code:
 
 - [ ] Confirm with user what interface changes are needed
+- [ ] Write down the seams under test and confirm them with the user
 - [ ] Confirm with user which behaviors to test (prioritize)
 - [ ] Identify opportunities for [deep modules](deep-modules.md) (small interface, deep implementation)
 - [ ] Design interfaces for [testability](interface-design.md)

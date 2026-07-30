@@ -4,11 +4,15 @@ description: Grilling session that challenges your plan against the existing dom
 disable-model-invocation: true
 ---
 
+This skill is the *active* discipline — challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise. Merely *reading* `CONTEXT.md` for vocabulary is not this skill; that's a one-line habit any workflow can do. Reach for it when you're changing the model, not just consuming it.
+
 Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
 
-Ask the questions one at a time, waiting for feedback on each question before continuing.
+Ask the questions one at a time, waiting for feedback on each question before continuing. Asking multiple questions at once is bewildering.
 
-If a question can be answered by exploring the codebase, explore the codebase instead.
+If a *fact* can be found by exploring the environment (filesystem, tools, codebase), look it up rather than asking me. The *decisions*, though, are mine — put each one to me and wait for my answer.
+
+Do not act on the plan until I confirm we have reached a shared understanding.
 
 ## Domain awareness
 
