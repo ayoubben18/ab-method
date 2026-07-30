@@ -49,10 +49,15 @@ edits a plan, reshapes a task, or blocks a run. It is **standalone**: invoke it 
 
 Read (skip missing files silently — don't flag them or offer to create them):
 
-- **`roadmap.md`** — the Objective, the task list, and every `depends-on` edge (the DAG).
+- **`roadmap.md`** — the Objective (the destination), the task list, every `depends-on` edge
+  (the DAG), and — when present — `## Open decisions`, `## Not yet specified` (fog), and
+  `## Out of scope`.
 - **Every planned task's tracker** — for each task marked `plan: ✅`, read
   `docs/tasks/<slug>/progress-tracker.md`. **Confirm the file actually exists with missions;
   don't trust the flag alone** (same discipline as `/start-roadmap`).
+- **Every planned task's `unresolved-questions.md`**, where one exists — the black boxes those
+  plans intend to ship. Usually absent; when present, it's exactly the kind of assumption that
+  only misbehaves *across* plans.
 - **The domain model that exists** — `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md` (or `CONTEXT-MAP.md`
   + per-context `src/<context>/CONTEXT.md`), `docs/adr/`, `docs/architecture/*`. Used to judge
   terminology and seam ownership, not re-critiqued per plan.
@@ -95,6 +100,22 @@ Its brief — **fire ONLY on a genuine cross-plan discrepancy**, one of:
 6. **Conflicting assumptions** — two tasks assume incompatible things about a shared entity or
    contract (soft- vs hard-delete of the same record, sync vs async on the same boundary,
    differing auth or ownership model).
+7. **The map contradicts the plans** — the roadmap's own sections have gone stale against the
+   finished trackers. Never fire on fog merely existing (an uncharted area is honest). Fire when:
+   a `## Not yet specified` patch is *already covered* by a planned task's missions (it graduated
+   and nobody cleared it); an `## Out of scope` item is implemented by a task's missions (the
+   scope boundary was crossed without redrawing the destination); an `## Open decisions` entry
+   blocks a task that is nonetheless `plan: ✅` (planned around an unsettled decision — say which
+   missions would change if it resolves the other way); or a `## Decisions` line points at an
+   ADR/term that doesn't exist.
+8. **Black boxes that leak across tasks** — a parked question (`⚠️ UQ-n`) is a deliberate
+   placeholder *within* its own task, so never fire on one existing. Fire when it stops being
+   local: a downstream task's missions build real logic on the answer an upstream task left
+   open; two tasks park the same question with **different** placeholders (the codebase gets
+   two conflicting defaults); or a task's `If the answer differs` blast radius names work that
+   a *different* task owns, so answering it later reopens a plan nobody flagged. Do not propose
+   the answer — say which plans collide and that resolving `UQ-n` before execution is cheaper
+   than after.
 
 For each finding, return: **What** (the tasks/missions involved), **Discrepancy** (the exact
 mismatch, citing *both* sides — `task-slug` + the mission on each), **Why it matters** (the
