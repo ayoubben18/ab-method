@@ -9,13 +9,13 @@ findings, edit nothing.
 This lens reuses the language already defined for this repo. Read these before you start and use their
 terms (don't drift into "component / service / boundary"):
 
-- [../improve-codebase-architecture/LANGUAGE.md](../improve-codebase-architecture/LANGUAGE.md) —
+- [../codebase-design/SKILL.md](../codebase-design/SKILL.md) —
   **module, interface, implementation, depth, seam, adapter, leverage, locality**, the **deletion test**.
-- [../improve-codebase-architecture/DEEPENING.md](../improve-codebase-architecture/DEEPENING.md) — how to
+- [../codebase-design/DEEPENING.md](../codebase-design/DEEPENING.md) — how to
   deepen a cluster safely given its dependency category (in-process / local-substitutable / remote-owned
   / true-external), and seam discipline (**one adapter = hypothetical seam; two = real**).
 
-Speak the **domain** in `CONTEXT.md` terms and the **architecture** in `LANGUAGE.md` terms — "the Order
+Speak the **domain** in `CONTEXT.md` terms and the **architecture** in `codebase-design` terms — "the Order
 intake module," not "the FooBarHandler."
 
 ## What to look for — in the diff only
@@ -39,12 +39,16 @@ intake module," not "the FooBarHandler."
 - Anything an ADR already settled.
 - Depth for depth's sake — if the current shape is already deep enough, say nothing.
 - Style, naming aesthetics, perf — not this lens (naming-as-slop belongs to `slop-defender`).
+- A **recorded black box** — a seam marked `TODO(UQ-n)` with a matching entry in the task's
+  `unresolved-questions.md`. It will look shallow (a module wrapping one placeholder constant), and it is:
+  on purpose. The seam exists so the real answer can drop in later without touching call sites. Flag only
+  a `TODO(UQ-n)` with no entry behind it, or a placeholder that spread past its seam.
 
 ## Output
 
 For each real finding:
 - **Files** — the modules involved.
-- **Problem** — why it's shallow / where locality or leverage is lost, in `LANGUAGE.md` terms.
+- **Problem** — why it's shallow / where locality or leverage is lost, in `codebase-design` terms.
 - **Deletion-test result** — vanishes (shallow) vs concentrates (keep).
 - **Suggested deepening** — plain English: what merges behind what interface, what sits at the seam,
   which dependency category it is (so the tester knows adapter vs stand-in vs direct).

@@ -25,8 +25,11 @@ are user-configurable.
 - If the user passed a roadmap name or a path to its `roadmap.md`, use it.
 - Otherwise list folders under `docs/roadmaps/` and ask which to start.
 
-Read `roadmap.md`: the Objective, the task list with `depends-on` edges,
-and each task's `plan:` and `status:` fields. Build the DAG in memory.
+Read `roadmap.md`: the Objective (the destination), the task list with
+`depends-on` edges, each task's `plan:` and `status:` fields, and — when
+present — `## Open decisions`, `## Not yet specified`, and
+`## Out of scope`. Build the DAG in memory. Those three sections are
+usually absent; that means the roadmap is fully charted, which is normal.
 
 **`status:` is a hint; the tracker is the truth.** A task truly "needs
 work" when its `docs/tasks/<slug>/progress-tracker.md` has **any
@@ -48,8 +51,8 @@ down:
 
 - A task is **runnable** only if it **has a plan** (`plan: ✅ planned` —
   confirm its `docs/tasks/<slug>/progress-tracker.md` actually exists with
-  missions) **and** all of its `depends-on` tasks are truly done (no
-  unchecked missions in their trackers).
+  missions), all of its `depends-on` tasks are truly done (no unchecked
+  missions in their trackers), **and no open decision `blocks:` it**.
 - A task **needs work** if its tracker has any unchecked mission — whether
   it's a never-run task or a `done` task reopened by `/extend-task`.
   Already-done tasks with everything checked are skipped.
@@ -74,8 +77,33 @@ down:
   Then re-run /start-roadmap <Name>.
   ```
 
+- If an **open decision blocks a task that would otherwise run**, stop.
+  The decision was recorded precisely because the shape of that work isn't
+  settled, and an autonomous run cannot resolve it — resolving one is a
+  grilling, research, or prototype session with the user:
+
+  ```
+  Cannot start roadmap: <Name>
+
+  Task 'refund-api' is blocked by an open decision:
+    D1 (grilling) — fixed refund window, or per-merchant?
+
+  Resolve it first (see create-roadmap.md § 2b), then re-run
+  /start-roadmap <Name>.
+  ```
+
+  An open decision that blocks nothing on the executable frontier is not a
+  stop condition — mention it in the announcement and carry on.
+
 - If the graph has a cycle, or a `depends-on` names a task not in the
   roadmap, stop and report it — the roadmap is malformed.
+
+**Fog is never a stop condition.** `## Not yet specified` describes work
+that isn't charted yet; the planned prefix still runs. And the run must
+**never graduate fog, add tasks, or edit `## Out of scope` itself** —
+reshaping the roadmap is a planning act belonging to `/create-roadmap` and
+`/create-task`. When a finished task's summaries clearly sharpen a fog
+patch, say so in the final report as a *candidate*; don't act on it.
 
 Only when the verification pass succeeds (every task on the executable
 frontier is planned and its deps are satisfiable) do you continue. If
@@ -161,6 +189,17 @@ nested.
 - On green completion, set `status:` to `done` in `roadmap.md` and check
   off its line.
 
+**Unresolved questions are inherited per task, too.** A task whose tracker
+carries `⚠️ UQ-n` markers runs under the same `start-task` rules: the black
+box recorded in its `docs/tasks/<slug>/unresolved-questions.md` gets built,
+the run does **not** stop, and no subagent answers a parked question or
+"improves" a placeholder on its own. Two things the roadmap orchestrator
+owes on top: surface every open UQ across the eligible tasks **in the
+pre-run announcement** (an afk user gets one chance to say "actually, we
+decided that last week"), and list them again, per task with their seam
+paths, in the final report. A marker with no matching entry is a planning
+gap — treat it like an unplanned task and stop before running that task.
+
 **Post-implementation review is inherited per task.** Because each task
 runs by `start-task` rules, its Step 5b runs the `review-implementation`
 skill on that task's diff — three read-only critics
@@ -245,6 +284,20 @@ Reviews: docs/tasks/<slug>/review.md per task — <total> safe fixes applied, <t
 List each task's `review.md` with its open-finding count so the afk user
 can jump straight to the ones that want their judgment.
 
+If the roadmap carried fog or open decisions, close the report with what
+the run *didn't* touch — the user is coming back to a finished run and
+needs to know the map isn't finished:
+
+```
+Still uncharted:
+  Fog: refund flow — 'charge-api' landed partial captures per line item,
+       which likely sharpens this. Graduate it with /create-roadmap.
+  Open decisions: D2 (research) — blocks nothing that ran.
+```
+
+These are **candidates, not changes.** The run reports them; graduating
+them is the user's next planning session.
+
 If execution stopped at an unplanned frontier rather than finishing,
 report what ran and what still needs planning:
 
@@ -279,7 +332,13 @@ Same discipline as `/start-task`, one level up:
   Parallelism mode comes from the invocation (sequential by default,
   worktrees only when explicitly asked), not from a prompt
 - **Executor, not producer** — never define or reshape tasks; run what
-  `/create-roadmap` + `/create-task` planned
+  `/create-roadmap` + `/create-task` planned. That includes the map: the
+  run never graduates fog, adds tasks, or rules anything out of scope — it
+  reports candidates and leaves the reshaping to a planning session
+- **An open decision blocks its tasks; fog blocks nothing** — a decision
+  that gates a frontier task halts the run (only a session with the user
+  can resolve it); uncharted fog just means the map is unfinished, and the
+  planned prefix still runs
 - **Each task runs by `start-task` rules** — same subagent-per-mission,
   tdd, commit trail, and post-implementation `review-implementation` pass
   (safe fixes applied, `review.md` written per task)

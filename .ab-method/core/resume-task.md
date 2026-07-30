@@ -17,6 +17,7 @@ Open `docs/tasks/<task>/progress-tracker.md`. From it, identify:
 - Which missions are completed (with their technical summaries)
 - Which mission is next (or in progress)
 - Any `[pp-x]` parallel-group tags on pending missions (same tag = user-approved concurrent batch; untagged missions are sequential barriers)
+- Any `⚠️ UQ-n` markers on pending missions — those missions build on a black box; read `unresolved-questions.md` in the same folder for the question and its agreed placeholder
 - Any constraints/notes from the original grill-with-docs session
 
 ### 3. Display Resume Context
@@ -42,6 +43,28 @@ Missions 3–4 are grouped [pp-1] — run them in parallel in subagents, or one 
 ```
 If some missions in a group are already completed, only the remaining ones form the batch. The tag records *permission*, not *obligation* — the user may still choose sequential.
 
+#### Open unresolved questions — ask once, then move on
+
+If `unresolved-questions.md` exists with `OPEN` entries that any *remaining* mission is marked
+`⚠️ UQ-n` for, surface them before starting — a resumed session is the natural moment for an answer
+that arrived since the grill:
+
+```
+2 open questions feed the remaining missions
+(docs/tasks/<task>/unresolved-questions.md):
+  UQ-1 Which currencies at launch?           → placeholder: USD only     (Mission 4)
+  UQ-2 Refund window fixed or per-merchant?  → placeholder: fixed 30 days (Mission 6)
+
+Answer either one now and I'll build the real thing — otherwise we ship the placeholders.
+```
+
+Ask **once**. If the user answers, mark that entry `RESOLVED <date>` with the answer, drop the
+`⚠️ UQ-n` marker from the affected mission lines **and its line from the tracker's Unresolved
+Questions section** (remove the section when the last one closes), then implement the real behaviour
+(if the answer grows the scope beyond a seam swap, say so and point at `/extend-task`). If they don't, proceed on
+the placeholders without re-asking each mission — nagging is worse than the black box. Questions
+whose missions are already completed stay in the file; mention them only in the closing summary.
+
 ### 4. Load the `tdd` Skill — STEP ZERO, before anything else for the mission
 
 Invoke the `tdd` skill via the Skill tool: `Skill("tdd")`.
@@ -58,6 +81,7 @@ Read (paths from `.ab-method/structure/index.yaml`):
 
 ### 6. Run the Mission Through `tdd` (red-green-refactor)
 - If the mission's one-line description is vague → invoke `grill-with-docs` first
+- If the mission carries `⚠️ UQ-n` → implement the **recorded placeholder** behind one named seam marked `TODO(UQ-n)`, with a test naming the UQ, per `create-task.md` § 9.2b. Never invent the answer mid-mission; never fabricate data to route around it
 - Run red-green-refactor under the already-loaded `tdd` skill — consult the companion files, don't improvise
 - Optionally deploy a subagent if the mission warrants it (large surface, specialized domain). Pick by need, not by mission type. A subagent does not exempt you from Step 4 — load `tdd` in the parent context first.
 
@@ -87,3 +111,4 @@ skill owns the review logic; don't duplicate it here. Then set status to `Comple
 - Tests + technical summaries are the persistent context across sessions
 - Always `Skill("tdd")` first, before any other mission work — never skip the load, even when you "know" how to TDD
 - `[pp-x]` tags exist only because the user opted in when the missions were defined — still confirm before launching a group in parallel, and never invent new tags during resume without asking
+- `⚠️ UQ-n` means a black box: ask once at resume whether the answer arrived, then build the recorded placeholder and stop asking. Open questions never block completion — they ship, recorded, in `unresolved-questions.md`

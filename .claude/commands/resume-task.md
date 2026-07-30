@@ -24,6 +24,7 @@ This workflow will:
 - Tests + summaries are the persistent artifacts across sessions
 - Always TDD via the `tdd` skill, never skip it
 - Group-aware resume — if the next mission carries a `[pp-x]` tag, the remaining missions in that group are offered as one concurrent subagent batch (the user can still choose sequential)
+- Black-box aware — if remaining missions are marked `⚠️ UQ-n`, the open questions from `unresolved-questions.md` are surfaced once at resume (answer now, or keep shipping the placeholder); answering one closes the entry and drops the marker
 
 ## Examples
 ```

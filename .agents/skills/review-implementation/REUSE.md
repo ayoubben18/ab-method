@@ -39,6 +39,10 @@ A duplication finding is only credible once you've found the thing being duplica
 - Trivial two-line similarities that a shared helper would only obscure.
 - Cross-context reuse that would couple two bounded contexts the domain model keeps apart — that coupling
   is worse than the duplication.
+- A **recorded black box** — a placeholder behind a `TODO(UQ-n)` seam with a matching entry in the task's
+  `unresolved-questions.md`. Don't propose folding it into an existing util that already "does this
+  properly": that util encodes an answer the user hasn't given. Two black boxes for the *same* `UQ-n`
+  with different placeholders is a real finding — they must collapse to one seam.
 
 ## Output
 

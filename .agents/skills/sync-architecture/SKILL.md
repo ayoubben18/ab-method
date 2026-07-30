@@ -40,8 +40,8 @@ whole-repo doc audit.
 
 ### 2. Spin up ONE read-only detector subagent
 
-Spawn a single subagent — `architecture-sync` — with the diff, the mission summaries, and the current
-docs. It is **read-only**: it returns a routed findings list (often empty) and edits nothing. Isolating it
+Spawn a single subagent — `architecture-sync` — with the diff, the mission summaries, the current
+docs, and the task's `unresolved-questions.md` if it has one. It is **read-only**: it returns a routed findings list (often empty) and edits nothing. Isolating it
 keeps the doc analysis out of the orchestrator's context. On **Codex** (`spawn_agent` is one level deep)
 spawn it at the orchestrator's own level; on **Claude** it may nest. One detector is enough — the whole
 point is a single sweep of the change.
@@ -64,6 +64,15 @@ add), **Class** (see Step 3).
 > Example: *"New endpoint `POST /charges` (src/api/charges.ts, mission 2) — not in tech-stack.md Entry
 > Points. Proposed delta: add `POST /charges — create a charge (auth: bearer)` under Entry Points.
 > Class: safe-add."*
+
+**Never document a black box as established practice.** If the diff contains `TODO(UQ-n)` seams recorded
+in the task's `unresolved-questions.md`, the placeholder behind them is provisional by construction — do
+not write it into `tech-stack.md` as a constraint, into a patterns doc as "the way we do this", or into
+`UBIQUITOUS_LANGUAGE.md` as a term. A parked question is also **never** an ADR candidate: an ADR records a
+decision that was made, and this one wasn't. The real thing the docs may be missing is what the change
+built *around* the black box (the new endpoint, the new dependency, the seam's existence) — route that
+normally, and describe the placeholder only as what it is, e.g. "currency is fixed to USD pending UQ-1".
+When the question is later answered via `/extend-task`, the resulting decision syncs like any other.
 
 **Out of scope** — do not raise: code-quality issues (that's `review-implementation`), whole-repo
 deepening opportunities (that's `/improve-codebase-architecture`), or rewrites of existing prose. With

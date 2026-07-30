@@ -28,6 +28,7 @@ This workflow will:
 - **Feedback loops steer the run** — the grill captures the checks (tests, type-check, build, visual checks) the `/goal` loop runs every iteration to self-correct
 - **The loop is told about the tracker** — `goal.md` explicitly instructs the `/goal` loop to maintain `progress-tracker.md`, logging only important discovered facts (no generic narration)
 - **References docs, doesn't inline them** — the loop reads UBIQ/CONTEXT/architecture in-repo
+- **Black boxes are briefed, never decided (rare)** — a question you genuinely can't answer yet is parked in `docs/goals/<goal-name>/unresolved-questions.md`, and `goal.md` gets a **Black boxes** section telling the loop to build the agreed placeholder behind a `TODO(UQ-n)` seam and never to answer the question itself. The measurable end state may never depend on an open question — if it does, the goal isn't ready
 
 ## Examples
 ```

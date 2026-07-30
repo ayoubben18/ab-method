@@ -23,6 +23,37 @@ Missions:
 [ ] Mission 3 — Pending
 ```
 
+### 2.5 Resolving an Unresolved Question — the swap-the-black-box case
+
+If the task has an `unresolved-questions.md` with `OPEN` entries, show them alongside the missions:
+
+```
+Open questions (docs/tasks/<task>/unresolved-questions.md):
+  UQ-1 Which currencies at launch?  → shipped placeholder: USD only, src/billing/currency.ts:8
+```
+
+**This is the main reason a task gets extended** — the answer finally arrived and the placeholder has to
+become real. When the user is here to resolve one:
+
+1. **Grill the answer, don't just take it.** Invoke `grill-with-docs` on that question — an answer that
+   was too hard to give at creation time usually brings its own branches.
+2. **Size the swap honestly** using the entry's *If the answer differs* line:
+   - **Constant swap** — the recorded seam takes the real value, its placeholder test becomes the real
+     test, the `TODO(UQ-n)` comment goes. One new mission, sometimes none if it's a one-liner you do
+     right here.
+   - **Real work** — the answer invalidates the shape, not just the value. Draft proper missions for it
+     like any other extension; `grep -rn 'TODO(UQ-n)'` gives you the blast radius.
+3. **Close the entry**: mark it `RESOLVED <date>` with the answer and where it was applied. The entry
+   stays in the file — the record of what was guessed and what it became is the point. Drop the
+   `⚠️ UQ-n` markers from the affected mission lines and the tracker's Unresolved Questions section
+   (remove the section when the last one closes).
+4. **Consider an ADR.** A question hard enough to park, once answered, often clears the ADR bar (hard to
+   reverse, surprising without context, a real trade-off). `grill-with-docs` offers it — take the offer
+   when all three hold.
+
+Leaving a question open is a fine outcome too: extending a task for *other* reasons doesn't oblige the
+user to resolve anything. Never resolve one on their behalf.
+
 ### 3. Gather New Mission Requirements
 - If the user's description is clear → add the missions as one-line entries
 - If vague → invoke the `grill-with-docs` skill before drafting them
@@ -79,6 +110,7 @@ When the user confirms, choose how to run the new missions:
 - Add to `progress-tracker.md`, never create separate mission files
 - Sequential numbering, no gaps
 - Use `grill-with-docs` whenever the new mission descriptions are vague
+- `/extend-task` is where a parked `UQ-n` gets answered: grill the answer, swap the `TODO(UQ-n)` seam (or plan missions if it's more than a swap), mark the entry `RESOLVED` — never resolve one the user didn't answer
 - The `tdd` skill runs on every mission, including extensions
 - `[pp-x]` tags on new missions only with the user's explicit yes — sequential is the default
 - If the task is in a roadmap, reopen its `roadmap.md` entry (`status: done → pending`) so a `/start-roadmap` re-run picks up the new missions in dependency order

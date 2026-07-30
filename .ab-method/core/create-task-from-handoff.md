@@ -28,7 +28,7 @@ Invoke the `grill-with-docs` skill, **seeded with the handoff**. The grill picks
 - Drive down only the branches the handoff left open.
 - Read `UBIQUITOUS_LANGUAGE.md` / `CONTEXT.md` so the resulting task speaks canonical domain language.
 
-By the end the grill must have resolved every open branch and covered problem framing, scope, behavior, constraints, and existing-code anchors — the same bar as `create-task`.
+By the end the grill must have resolved every open branch — or parked it as an unresolved question with an agreed placeholder (`create-task.md` § 1) — and covered problem framing, scope, behavior, constraints, and existing-code anchors: the same bar as `create-task`.
 
 ### 4. Hand off to the create-task flow
 

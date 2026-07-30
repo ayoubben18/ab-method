@@ -14,6 +14,7 @@ Loads and executes the extend-task workflow from `.ab-method/core/extend-task.md
 This workflow will:
 1. Select a task to extend
 2. Review current mission progress
+2b. Surface any open unresolved questions (`⚠️ UQ-n`) — **this is where a parked question gets answered**: the workflow grills the answer, swaps the `TODO(UQ-n)` placeholder (or plans real missions if it's more than a seam swap), and marks the entry `RESOLVED`
 3. Gather requirements for new missions (grills if vague)
 4. Append the new missions as one-line entries in `progress-tracker.md` (no mission docs)
 5. **Run `critique-plan` on the new missions** — the pre-implementation domain critic pushes back only on genuine conflicts before you confirm

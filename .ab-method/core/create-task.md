@@ -30,19 +30,39 @@ documents the task↔roadmap link in its `relationships` section), scan
 
 - **Roadmap task** — the requested task matches a `roadmap.md` entry
   marked `plan: ⬜ unplanned` (by slug, or clearly by scope). Then:
-  1. Read that roadmap's **Objective** and the entry's `depends-on` list.
-  2. Read the `progress-tracker.md` (Mission Summaries) of each **already
+  1. Read that roadmap's **Objective** (its destination) and the entry's
+     `depends-on` list.
+  2. **Check `## Open decisions` for anything that `blocks:` this task.**
+     A blocking decision means the graph around this task isn't settled —
+     planning now produces missions the decision may invalidate. Say so and
+     offer to resolve it first (`create-roadmap.md` § 2b): *"'refund-api'
+     is blocked by D1 (fixed vs per-merchant refund window) — that decides
+     what the missions even are. Resolve D1 first, or plan anyway?"* The
+     user may still choose to plan anyway; that's their call, not a silent
+     default.
+  3. **Read `## Not yet specified`** — the roadmap's fog. If a patch names
+     an area this task touches, the grill is the moment it may sharpen.
+  4. Read the `progress-tracker.md` (Mission Summaries) of each **already
      planned** upstream dep — seed the grill with them so this task builds
      on what they established. If an upstream dep is still unplanned, note
      it: "‘charge-api’ depends on ‘stripe-schema’, which isn't planned
      yet — planning it first gives a better grill. Continue anyway?"
-  3. Proceed through the normal steps below (grill → missions → tracker),
+  5. Proceed through the normal steps below (grill → missions → tracker),
      writing the task under `docs/tasks/<slug>/` as usual.
-  4. **On completion**, flip that task's line in `roadmap.md` from
+  6. **On completion**, flip that task's line in `roadmap.md` from
      `plan: ⬜ unplanned` to `plan: ✅ planned`. If every task in the
-     roadmap is now planned, set the roadmap **Status** to `Ready`. This
-     keeps `create-roadmap` / `start-roadmap` in sync automatically — the
-     user never hand-edits the roadmap.
+     roadmap is now planned *and* no open decision blocks a task, set the
+     roadmap **Status** to `Ready`. This keeps `create-roadmap` /
+     `start-roadmap` in sync automatically — the user never hand-edits the
+     roadmap.
+  7. **Graduate any fog this grill cleared.** If the grill sharpened a
+     `## Not yet specified` patch into something you can now state as a
+     task, add it to `## Tasks` (`plan: ⬜`, with its edges) and delete the
+     patch from the fog. If it sharpened into a question rather than a
+     task, it becomes an `## Open decisions` entry instead. If it turned
+     out to sit past the destination, move it to `## Out of scope` with one
+     line of why. Tell the user what graduated — never reshape the roadmap
+     silently.
 
 - **Standalone task** — no roadmap matches, or the user is clearly
   starting fresh. Proceed exactly as before; ignore roadmaps entirely.
@@ -85,10 +105,20 @@ Grills wander. When a question opens a tangent that clearly deserves its **own**
 
 This keeps the current task tightly scoped while guaranteeing the tangent isn't lost. The handoff later becomes a task via the `create-task-from-handoff` workflow, which continues the grill exactly where the handoff left off.
 
+#### Parking a question the user genuinely can't answer yet
+**Rare — most tasks park nothing.** Sometimes a grill question can't be closed right now: the decision belongs to someone else, waits on data that doesn't exist, or is a product call that hasn't happened. The feature still has to get built. `grill-with-docs` handles this by **parking** the question — recording it in `docs/tasks/<task-name>/unresolved-questions.md` and agreeing a **black box**: a generic-or-empty placeholder behind a single named seam, marked `TODO(UQ-n)` in the code, that gets swapped when the answer arrives.
+
+The skill owns the bar for parking (asked-and-recommended, real external blocker, a wrong guess would be costly, the rest of the work survives) and the file format — do not duplicate them here. What `/create-task` owes it:
+
+- **Never park on the user's behalf.** A parked question is agreed out loud, and what the user approves is the *placeholder*, not the answer. Anything you could sanely default is not parked — it's a default, noted in the tracker's Constraints / Notes.
+- **Write the file when the task folder is created** (Step 4) if the grill parked anything while the folder didn't exist yet.
+- **Mark the missions** that build on a black box with `⚠️ UQ-n` (Step 5), so every later workflow can see a placeholder is in play.
+- **Parking is not a handoff.** A parked question is an open decision *inside* this task, routed around now. A handoff is a tangent that becomes its *own* task. Pick by scope, not by how awkward the question feels.
+
 #### Proceed when:
-- The grill has resolved every branch it walked down
+- Every branch the grill walked down is resolved — or explicitly parked as an unresolved question with an agreed placeholder
 - Problem, scope, behavior, constraints, and existing-code anchors are all on the table
-- The user has confirmed the gathered understanding
+- The user has confirmed the gathered understanding, including any black boxes being shipped
 
 ### 2. Analyze Project Context
 
@@ -159,8 +189,11 @@ Based on `.ab-method/structure/index.yaml`, create a task folder with:
 ```
 tasks/[task-name]/
   progress-tracker.md
+  unresolved-questions.md   ← ONLY if the grill parked something; omit otherwise
   sub-agents-outputs/
 ```
+
+If `grill-with-docs` parked any question in Step 1, write `unresolved-questions.md` now, in the format the skill defines (`UNRESOLVED-QUESTIONS-FORMAT.md`). Never create the file empty or with a "none yet" placeholder — its absence is the normal state and means "nothing is unresolved".
 
 ### 5. Initialize Progress Tracker with All Missions
 
@@ -182,6 +215,11 @@ Create `progress-tracker.md` — slim, no empty placeholder sections:
 ## Constraints / Notes
 [Only the non-obvious ones surfaced by grill-with-docs. Skip the section if there's nothing to say. Common contents: patterns to follow, libraries to use/avoid, perf budgets, files-to-touch hints.]
 
+## Unresolved Questions
+[ONLY if the grill parked something. One line per open question, pointing at the file:
+`⚠️ UQ-1 — which currencies at launch? Placeholder: USD only. See unresolved-questions.md`
+Omit the whole section when nothing was parked — the common case.]
+
 ## Missions
 - [ ] Mission 1: [Layer] — [one-line specific description]
 - [ ] Mission 2: [Layer] — [one-line specific description]
@@ -192,6 +230,11 @@ _Filled in as each mission completes. Future missions read these for context._
 ```
 
 Mission lines may carry an optional `[pp-x]` parallel-group tag (see Step 7) — only when the user explicitly opted in.
+
+Mission lines that build on a parked question carry a `⚠️ UQ-n` marker, e.g.
+`- [ ] Mission 4: Backend — refund endpoint ⚠️ UQ-2`. The marker is the signal to every later
+workflow (`/resume-task`, `/start-task`, `/start-roadmap`) that this mission ships a placeholder.
+Both markers can coexist: `... [pp-1] ⚠️ UQ-2`.
 
 **Status flow**: Brainstormed → Validated → In dev → Testing → Completed
 
@@ -307,6 +350,16 @@ The skill owns the critique logic — do not duplicate it here. It reads
 Show the progress tracker with all missions defined (reflecting any changes from Step 7.5) and ask:
 "Task created with status 'Brainstormed'. Missions: [list, one line each]. Ready to validate and start Mission 1?"
 
+If any question was parked in Step 1, restate the black boxes in the same breath — the user is
+approving them, not just the missions:
+
+```
+2 unresolved questions — building on placeholders (docs/tasks/<task>/unresolved-questions.md):
+  UQ-1 Which currencies at launch?      → USD only            (Missions 2, 4)
+  UQ-2 Refund window fixed or per-merchant? → fixed 30 days   (Mission 6)
+Answer either one now and I'll fold it in; otherwise we ship the placeholders.
+```
+
 When the user confirms, update status to 'Validated' and proceed to Step 9.
 
 ### 9. Execute Missions — ALWAYS via the `tdd` skill
@@ -330,6 +383,23 @@ After the skill is loaded:
 
 2. **Grill if vague** — if the mission's one-line description is fuzzy, invoke the `grill-with-docs` skill before implementing.
 
+2b. **If the mission carries `⚠️ UQ-n` — build the black box, don't improvise it.** Read that
+   question's entry in `unresolved-questions.md` first. Ask the user once whether the answer landed
+   since the task was created; if it did, resolve the entry (mark it `RESOLVED`, record the answer)
+   and implement the real thing. If it's still open, implement the **agreed placeholder exactly** —
+   the one recorded in the file, not a better idea you had mid-mission. Then:
+   - Put it behind **one named seam** (constant, function, config value), never inlined at call sites.
+   - Mark it `// TODO(UQ-n): <question> — docs/tasks/<task>/unresolved-questions.md`, so
+     `grep -rn 'TODO(UQ-'` finds every site.
+   - Write the test against the placeholder behaviour and name the UQ in it
+     (`describe('refund window (placeholder, UQ-2)')`) — a placeholder is still test-first work.
+   - Update the entry's **Marker** line with the real paths once written. *In a `[pp-x]` group,
+     don't* — group siblings never write `unresolved-questions.md` (concurrent writes conflict);
+     report the paths in your summary and the parent writes them.
+
+   Never fabricate data to route around a black box. If the mission can't proceed without inventing
+   records or behaviour, stop and tell the user the question is blocking after all.
+
 3. **Run red-green-refactor under the loaded `tdd` skill:**
    - Write the failing test first (uses framework + patterns from `tech-stack.md` Testing section)
    - Make it pass with the smallest change
@@ -349,6 +419,7 @@ After the skill is loaded:
    - **Tests**: [test files added; framework]
    - **Patterns**: [non-obvious patterns or libraries — skip if obvious]
    - **Integrates with**: [what next missions need to know]
+   - **Placeholders**: [only if the mission shipped a black box: `UQ-n → <seam>` at `<path:line>` — skip the bullet otherwise]
    - **Gotchas**: [only real ones — skip the bullet otherwise]
    ```
    Skip any bullet with nothing real to say. A 4-line summary for trivial work is correct.
@@ -358,6 +429,17 @@ After the skill is loaded:
 8. **Prompt the user** before moving to the next mission: "Mission N completed. Ready to start Mission N+1?"
 
 When all missions are done, run the **post-implementation review** (below), then set task status to `Completed`.
+
+**Open questions don't block completion — they travel with it.** A task whose missions are all green is
+`Completed` even with open `UQ-n` entries; the placeholders are shipped, deliberate, and recorded. Say so
+in the closing message and point at the file:
+
+```
+Task completed — 2 black boxes still open (docs/tasks/<task>/unresolved-questions.md):
+  UQ-1 currencies → USD only        src/billing/currency.ts:8
+  UQ-2 refund window → fixed 30 days  src/billing/refund.ts:14
+Answer either one and run /extend-task to swap it in.
+```
 
 #### Post-implementation review — invoke the `review-implementation` skill
 
@@ -395,9 +477,10 @@ When the next uncompleted mission is tagged `[pp-x]`, collect **all uncompleted 
    - The instruction to follow the `tdd` red-green-refactor discipline: failing test first, smallest change to green, refactor
    - Which architecture/domain docs to read (paths from `.ab-method/structure/index.yaml`)
    - The hard boundary: touch **only this mission's files** — its group siblings are running concurrently
+   - If the mission carries `⚠️ UQ-n`: that question's entry from `unresolved-questions.md` verbatim, plus the instruction to implement the **recorded placeholder** behind one named seam marked `TODO(UQ-n)` — never to invent an answer or fabricate data (§ 9.2b) — and to report the seam's path in its summary **without editing `unresolved-questions.md`** (same reason siblings don't touch the tracker: concurrent writes conflict)
    - Where to write its detailed output: `docs/tasks/[task-name]/sub-agents-outputs/mission-N-[slug].md`, returning only a tight technical summary
 4. **Verify the merge** when all subagents return: run the test suite once at the parent level to catch cross-mission breakage. If anything conflicts, fix it in the parent context before proceeding.
-5. **Append each mission's technical summary** to the tracker (same format as § 9.6, one block per mission) and mark every mission in the group complete.
+5. **Append each mission's technical summary** to the tracker (same format as § 9.6, one block per mission) and mark every mission in the group complete. If any sibling built a black box, write its reported seam paths into that entry's **Marker** line in `unresolved-questions.md` now — the parent is the only writer of that file during a group, for the same reason it's the only writer of the tracker.
 6. **Prompt the user once per group**, not per mission: "Missions N–M (`[pp-x]`) completed in parallel. Ready to continue with Mission M+1?"
 
 ## Key Principles
@@ -410,6 +493,7 @@ When the next uncompleted mission is tagged `[pp-x]`, collect **all uncompleted 
 - **Backend first for full-stack** — types and data ready for the frontend
 - **Subagents only when warranted** — direct implementation is the default; pick agents by need, not by mission type
 - **Parallel groups are opt-in** — never tag missions `[pp-x]` without asking the user; sequential is the default, untagged missions are barriers, group siblings must touch disjoint files
+- **Park, never guess** — the rare question the user genuinely can't answer yet is parked in `unresolved-questions.md` with an agreed placeholder and a `TODO(UQ-n)` seam, so the build proceeds without a silent invented decision. Parking is agreed out loud and stays rare; anything with a sane default is a default, not a black box
 
 ## Vague vs. specific
 
@@ -430,4 +514,5 @@ Specific requests skip `grill-with-docs` and go straight to Step 2:
 - Every mission must specify a layer (Frontend/Backend/Full-stack) and a concrete one-line objective
 - Backend-first for full-stack tasks (types feed the frontend)
 - `[pp-x]` tags only exist because the user said yes in Step 7 — and even then, confirm again before launching a group in parallel
+- `unresolved-questions.md` exists only when the grill actually parked something; its absence means nothing is unresolved. Missions building on one are marked `⚠️ UQ-n` and ship the recorded placeholder behind a `TODO(UQ-n)` seam
 - Each mission's tests + technical summary together carry the context forward — no other artifacts

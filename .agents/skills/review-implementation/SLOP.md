@@ -5,7 +5,7 @@ over-production that models add when left unsupervised: abstraction nothing aske
 carries no weight, comments that restate the obvious. You are read-only: return findings, edit nothing.
 
 > This is the *code* counterpart of prose "slop." The test for every item below is the **deletion test**
-> (see [../improve-codebase-architecture/LANGUAGE.md](../improve-codebase-architecture/LANGUAGE.md)):
+> (see [../codebase-design/SKILL.md](../codebase-design/SKILL.md)):
 > delete it — does anything real break, or does the code get simpler and just as correct? If deleting it
 > loses nothing, it's slop.
 
@@ -40,6 +40,11 @@ carries no weight, comments that restate the obvious. You are read-only: return 
 - A comment that explains a non-obvious *why*, a hack, or a gotcha — keep it.
 - Anything an ADR blessed.
 - Deep abstractions that already earn their keep across multiple callers.
+- A **recorded black box** — a placeholder behind a `TODO(UQ-n)` seam with a matching entry in the task's
+  `unresolved-questions.md`. It looks like slop (a constant nobody varies, a near-empty function, a TODO
+  in shipped code) and it isn't: the user chose the placeholder because the real answer isn't available
+  yet. Flag only the orphan case — a `TODO(UQ-n)` with no entry behind it — or a placeholder that escaped
+  its single seam into multiple call sites.
 
 ## Output
 

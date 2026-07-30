@@ -23,11 +23,14 @@ Ask: "Which goal should we extend?" If unsure, list folders under
 
 ### 2. Read the Existing Goal State
 
-Open both files in `docs/goals/<goal-name>/`:
+Open the files in `docs/goals/<goal-name>/`:
 
-- `goal.md` — the current objective, measurable end state, constraints
+- `goal.md` — the current objective, measurable end state, constraints,
+  and any **Black boxes** the earlier run built on
 - `progress-tracker.md` — the **Notes** log: what the earlier run
   discovered and what is already implemented
+- `unresolved-questions.md`, if present — the parked questions behind
+  those black boxes
 
 Then check the actual code state. The Notes are a record, not a
 guarantee — confirm against the codebase what genuinely exists so the
@@ -51,8 +54,20 @@ terms. It must pin down, before exiting:
   a new visual check). These keep the loop self-correcting.
 - **Any new constraints** the extended work must respect
 
+#### Open black boxes — offer them, don't force them
+If `unresolved-questions.md` has `OPEN` entries, surface them at the start
+of the grill with their shipped placeholders: an extension is a natural
+moment for an answer that has since arrived. Resolving one follows
+`extend-task.md` § 2.5 — grill the answer, swap the `TODO(UQ-n)` seam (or
+add real work if it's more than a swap), mark the entry `RESOLVED`, and
+drop it from `goal.md`'s **Black boxes** section. Still open is fine:
+carry the section forward into the updated `goal.md` unchanged, so the
+next loop is briefed too.
+
 #### Proceed when:
-- The grill has resolved every branch it walked down
+- Every branch the grill walked down is resolved — or parked as an
+  unresolved question whose placeholder the user approved, with the new
+  measurable end state not depending on it
 - The extension, new measurable end state, feedback loops, and
   constraints are concrete
 - The end state is verifiable by a command or observable check

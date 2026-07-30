@@ -25,6 +25,7 @@ This workflow will:
 - **No mission docs** — missions live as one-line entries in `progress-tracker.md`; tight technical summaries are appended on completion
 - **Subagents only when warranted** — direct implementation by default; pick agents by need (backend / UI / testing / quality / research), not by mission type
 - **Optional parallel groups** — independent missions can be tagged `[pp-1]`, `[pp-2]`, ... and run concurrently in subagents; untagged missions stay sequential and act as barriers. Strictly opt-in: the workflow always asks before tagging anything
+- **Unresolved questions (rare)** — a question you genuinely can't answer yet gets parked in `docs/tasks/<task>/unresolved-questions.md` with an agreed placeholder, instead of stalling the task or letting the agent guess. Missions that build on one are marked `⚠️ UQ-n` and ship the placeholder behind a single `TODO(UQ-n)` seam; answer it later and `/extend-task` swaps it in
 
 ## Examples
 ```

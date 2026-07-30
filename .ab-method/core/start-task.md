@@ -27,9 +27,16 @@ Use this when the task is already well-defined (it was grilled at creation) and 
 Open `docs/tasks/<task>/progress-tracker.md`. From it, identify:
 - Task status and which missions are completed (with their technical summaries)
 - The remaining missions, in order, including any `[pp-x]` parallel-group tags
+- Any `⚠️ UQ-n` markers on remaining missions, and the matching entries in `unresolved-questions.md`
 - Constraints/notes from the original grill-with-docs session
 
 **Vagueness gate**: an autonomous run cannot stop to ask questions. If any remaining mission's one-line description is too vague to execute without judgment calls, say so now and grill it (`grill-with-docs`) **before** the run starts — never mid-run.
+
+**An open `UQ-n` is not vagueness — do not stop for it.** A parked question is a *decided* way to proceed: the placeholder was agreed with the user at task creation and recorded in `unresolved-questions.md`. The run builds the black box exactly as recorded and keeps going. Only two things turn a parked question into a stop:
+- The tracker marks a mission `⚠️ UQ-n` but the file has no entry for it (or the entry records no placeholder) — there is nothing to build. Say so and grill it before starting.
+- The entry itself says the placeholder can't carry the mission. Same treatment.
+
+Never resolve an open question on the user's behalf mid-run, and never upgrade a placeholder to a "better" answer because it looked obvious once the code was in front of you. Answering is the user's call; the run's job is to ship the recorded black box and report it.
 
 ### 3. Announce the Run — then start immediately, no confirmation
 
@@ -45,7 +52,10 @@ Remaining missions:
 [ ] Mission 3: [Name]
 [ ] Mission 4: [Name] [pp-1]
 [ ] Mission 5: [Name] [pp-1]
-[ ] Mission 6: [Name]
+[ ] Mission 6: [Name] ⚠️ UQ-2
+
+Open questions (building on placeholders, not stopping):
+  UQ-2 Refund window fixed or per-merchant? → fixed 30 days (Mission 6)
 
 Running autonomously now:
 - each mission in a subagent (tdd discipline, updates the tracker itself)
@@ -53,6 +63,8 @@ Running autonomously now:
 - one commit per mission (one per [pp-x] group)
 - no prompts unless something goes red
 ```
+
+Drop the "Open questions" block entirely when nothing is parked — the usual case. When something is, it belongs in the announcement: the user Esc-interrupts here if an answer has since arrived.
 
 Set the task status to `In dev` and proceed straight into Step 4 — do
 not wait for a reply. (The only thing that can pause a run before it
@@ -76,12 +88,13 @@ Spawn **one subagent** for the mission. Its prompt must include:
 - The mission's one-line objective plus the relevant constraints/notes from the tracker
 - The instruction to follow the `tdd` red-green-refactor discipline: failing test first, smallest change to green, refactor
 - Which architecture/domain docs to read (paths from `.ab-method/structure/index.yaml`) and the prior mission summaries from the tracker
+- If the mission carries `⚠️ UQ-n`: that entry from `unresolved-questions.md` verbatim, plus the instruction to build the **recorded placeholder** behind one named seam marked `TODO(UQ-n)` with a test naming the UQ (`create-task.md` § 9.2b) — never to invent the answer, upgrade the placeholder, or fabricate data around it, and to update the entry's **Marker** line with the paths it wrote
 - The instruction to **update `progress-tracker.md` itself on completion**: check off its mission line and append the technical summary (same format as `create-task.md` § 9.6 — Files / Built / Tests / Patterns / Integrates with / Gotchas, skip empty bullets)
 - To return a tight technical summary as its final message
 
 #### Parallel group (`[pp-x]`)
 
-Follow **Parallel group execution** in `create-task.md` § 9 — all uncompleted missions sharing the tag, one subagent each, spawned in a single message, disjoint files — with **one exception**: group siblings must **NOT** write to `progress-tracker.md` (concurrent writes to the same file conflict). They write detailed output to `docs/tasks/<task>/sub-agents-outputs/mission-N-<slug>.md` and return summaries; the **parent** checks off the group's missions and appends their summaries after all return.
+Follow **Parallel group execution** in `create-task.md` § 9 — all uncompleted missions sharing the tag, one subagent each, spawned in a single message, disjoint files — with **one exception**: group siblings must **NOT** write to `progress-tracker.md` — nor to `unresolved-questions.md` (concurrent writes to the same file conflict). They write detailed output to `docs/tasks/<task>/sub-agents-outputs/mission-N-<slug>.md` and return summaries; the **parent** checks off the group's missions, appends their summaries, and writes any reported `TODO(UQ-n)` seam paths into the matching **Marker** lines after all return.
 
 #### After each mission (or group) — verify, then commit
 
@@ -147,7 +160,11 @@ Missions run: 3, 4-5 [pp-1], 6
 Commits: <n> (<short hashes>)
 Tests: <command> green
 Review: docs/tasks/<task>/review.md — <k> safe fixes applied, <m> open for you
+Black boxes: UQ-2 refund window → fixed 30 days, src/billing/refund.ts:14
+             (docs/tasks/<task>/unresolved-questions.md — answer it, then /extend-task)
 ```
+
+Open questions never block completion — the placeholders are deliberate, tested, and recorded. But an afk user must not discover them by accident: list every still-open `UQ-n` the run built on, with its seam's path, in the final report. Omit the line when there are none.
 
 ### 7. On Failure — Stop Loudly, Never Plough On
 
@@ -165,6 +182,7 @@ If a mission subagent fails, tests stay red, or a merge conflict can't be resolv
 - **Every mission in a subagent** — the subagent runs tdd and updates the tracker itself; the parent verifies and commits
 - **Commit after each mission** — green tests are the gate; one commit per mission, one per `[pp-x]` group
 - **Review before completion** — after the last green mission, `review-implementation` runs in autonomous mode: safe fixes auto-applied (tests-green-gated, own commit), everything written to `review.md` for the afk user; open findings are never silently changed
+- **A black box is not a blocker** — an open `⚠️ UQ-n` mission builds the placeholder recorded in `unresolved-questions.md` and the run continues. The run never answers a parked question, never "improves" a placeholder, and never hides one: every open UQ it built on goes in the final report
 - **Red stops the run** — exactly like a `/goal` feedback loop: a failing check takes priority over progress
 - **Tracker is the single source of truth** — same as every task workflow; subagent updates for sequential missions, parent updates for parallel groups
 

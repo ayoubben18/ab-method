@@ -67,8 +67,27 @@ prompt needs:
 Plus: existing-code anchors (similar implementations to mirror, types/
 services to reuse).
 
+#### Parking a question the user can't answer yet — tighter bar than a task
+`grill-with-docs` can park a genuinely unanswerable question as a black box
+(see `create-task.md` § 1). It works the same here — record it in
+`docs/goals/<goal-name>/unresolved-questions.md`, build the agreed
+placeholder behind a `TODO(UQ-n)` seam — but a `/goal` loop runs for hours
+with nobody watching, so two extra rules apply:
+
+- **The measurable end state may never depend on an open question.** If
+  "done" can't be defined without the answer, the goal is not ready:
+  resolve it, or fall back to `/create-task` where the black box ships
+  inside a mission you review.
+- **`goal.md` must tell the loop about the black boxes** — list each open
+  `UQ-n`, its placeholder, and the instruction to *build the placeholder
+  and keep going, never to answer the question or upgrade the placeholder*.
+  An unbriefed loop will happily invent the answer and spend an hour
+  building on it.
+
 #### Proceed when:
-- The grill has resolved every branch it walked down
+- Every branch the grill walked down is resolved — or parked as an
+  unresolved question whose placeholder the user approved, and which the
+  measurable end state does not depend on
 - Objective, measurable end state, feedback loops, and constraints are
   all concrete
 - The end state is verifiable by a command or observable check
@@ -94,8 +113,9 @@ Based on `.ab-method/structure/index.yaml`, create:
 
 ```
 docs/goals/[goal-name]/
-  goal.md               ← paste this into /goal
-  progress-tracker.md    ← the loop maintains this while it runs
+  goal.md                    ← paste this into /goal
+  progress-tracker.md        ← the loop maintains this while it runs
+  unresolved-questions.md    ← ONLY if the grill parked something; omit otherwise
 ```
 
 `[goal-name]` is kebab-case, derived from the objective.
@@ -131,6 +151,20 @@ A red feedback loop takes priority: stop adding scope and fix it first.
 ## Constraints
 - [Rules that must hold — dirs/files not to touch, libs to avoid,
   patterns to follow, perf budgets. Only real ones; skip filler.]
+
+## Black boxes — build the placeholder, do NOT decide these
+[ONLY if the grill parked something; omit the whole section otherwise.
+These questions are unanswered on purpose — the answer is not yours to
+pick, and a confident guess here is worse than the placeholder.]
+- **UQ-1 [the question]** — build exactly this: [the agreed placeholder],
+  behind one named seam, marked
+  `// TODO(UQ-1): [question] — docs/goals/[goal-name]/unresolved-questions.md`.
+  Test the placeholder behaviour and name the UQ in the test.
+Do not answer these, do not "improve" a placeholder mid-loop, and never
+fabricate data to route around one. If you cannot make progress without
+the answer, stop and say so — that is a better outcome than an invented
+decision buried in an hour of work. Full entries:
+`./unresolved-questions.md`.
 
 ## Context
 Read these before starting, and again whenever unsure. Paths come from
@@ -197,6 +231,10 @@ works correctly. Use /goal clear to stop it.
 - **Always grill** — `grill-with-docs` runs on every invocation, no skip
 - **Verifiable end state or it is not a goal** — if "done" cannot be
   checked by a command, keep grilling or fall back to `/create-task`
+- **A black box never defines "done"** — a question the user can't answer
+  yet can be parked (placeholder + `TODO(UQ-n)` seam, briefed in
+  `goal.md`), but if the measurable end state depends on the answer, the
+  goal isn't ready
 - **Feedback loops steer the loop** — the grill captures the checks the
   loop runs every iteration; they are how it self-corrects toward the
   goal instead of drifting

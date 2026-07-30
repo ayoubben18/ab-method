@@ -60,6 +60,7 @@ Common routes:
 | Run an existing task autonomously to completion | `start-task` |
 | Run a whole roadmap of tasks in dependency order | `start-roadmap` |
 | Continue a tangent that got parked mid-grill | `create-task-from-handoff` |
+| Answer a question that was parked as a black box (`UQ-n`) | `extend-task` (or `extend-goal`) |
 | Stress-test a plan against the domain model (standalone) | `critique-plan` skill |
 | Review a completed diff for architecture / slop / reuse (standalone) | `review-implementation` skill |
 | Understand the codebase (arch / domain) | `analyze-project` / `analyze-frontend` / `analyze-backend` |
@@ -103,6 +104,9 @@ Keep it short. Point them at `/ab-master` for the full workflow menu.
 ## Principles mastermind upholds
 
 - **Always grill before defining work** (`grill-with-docs`).
+- **Park, never guess** — the rare question the user genuinely can't answer
+  yet becomes a recorded black box (`unresolved-questions.md` + a
+  `TODO(UQ-n)` seam), not a silent invented decision.
 - **Every mission runs through `tdd`** (the test is the spec).
 - **`progress-tracker.md` is the single source of truth** per task.
 - **One task at a time** to conserve context.

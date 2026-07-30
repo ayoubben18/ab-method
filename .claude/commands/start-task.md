@@ -29,6 +29,7 @@ This workflow will:
 - **Group-aware** — `[pp-x]` missions run concurrently in subagents; siblings skip the tracker (the parent merges their summaries) to avoid write conflicts
 - **Green tests gate every commit** — a red feedback loop takes priority over progress, exactly like `/goal`
 - **Executor, not producer** — missions are defined by `/create-task` / `/extend-task`; this workflow only runs them
+- **A black box doesn't stop the run** — a mission marked `⚠️ UQ-n` builds the placeholder recorded in `unresolved-questions.md` and keeps going; the run never answers a parked question, and every open one it built on is listed in the announcement and the final report
 
 ## Examples
 ```

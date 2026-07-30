@@ -49,6 +49,15 @@ section / `ADR-NNNN`), **Why it matters** (concrete cost, not taste), **Suggeste
 > only — this mission also stops billing, which is **Cancellation**. Rename to `cancelOrder` so the code
 > matches the domain, or the two concepts will blur across the codebase."*
 
+**A parked question is not a gap.** If the plan carries `⚠️ UQ-n` markers, read the task's
+`unresolved-questions.md` and pass it to the critic as context. A recorded black box is a *decision the
+user made* — to ship a placeholder rather than guess — so the critic must not fire on "this mission is
+underspecified" or "the answer to UQ-1 should be X". It fires only if the **placeholder itself** conflicts
+with the domain model: it contradicts an ADR, quietly redefines a canonical term, or the parked question
+turns out to be a terminology question wearing a behaviour costume (those aren't parkable — they belong in
+`CONTEXT.md`). A marker with no matching entry is worth one line: the plan claims a black box that isn't
+recorded anywhere.
+
 **Out of scope for this critic:** implementation quality, performance, tests, code style, "you could
 also…" ideas — anything not anchored in the domain model. Those belong to the post-implementation
 [review-implementation](../review-implementation/SKILL.md) skill. With nothing anchored, the critic

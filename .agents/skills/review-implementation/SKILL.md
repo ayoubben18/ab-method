@@ -23,7 +23,16 @@ for the commit range). This is not a whole-codebase audit; that's `/improve-code
 
 The changed files and their `git diff`, plus (read only what exists): `UBIQUITOUS_LANGUAGE.md` /
 `CONTEXT.md` (canonical terms, spotting reinvented concepts), `docs/architecture/*` (the documented way
-things are built here), `docs/adr/` (don't propose what an ADR settled).
+things are built here), `docs/adr/` (don't propose what an ADR settled), and the task's
+`unresolved-questions.md` if it has one.
+
+**Black boxes are deliberate — seed every critic with the file.** A `TODO(UQ-n)` seam whose entry is
+recorded there is a decision the user signed off on: ship a placeholder rather than guess. No lens may
+flag it as slop, a shallow module, a speculative abstraction, or dead code, and none may propose
+"just implement it properly" — the answer isn't theirs to pick. Two things *are* fair game and should be
+reported: a `TODO(UQ-n)` marker with **no matching entry** (an orphan black box nobody recorded), and a
+placeholder that leaked past its named seam into several call sites — the seam was supposed to contain
+it, and containing it again is a safe fix.
 
 ### 2. Spin up THREE read-only critics — in parallel
 
@@ -36,7 +45,8 @@ Spawn three subagents **in one batch**, named exactly:
 | `reusability-inspector` | duplication / reuse | [REUSE.md](REUSE.md) |
 
 Each is **read-only** — analyses the diff, returns a findings list (often empty), edits nothing. Seed
-each with the diff + context + its lens file. On **Codex** (`spawn_agent` is one level deep) spawn them
+each with the diff + context + its lens file — including the task's `unresolved-questions.md` when it
+exists, since every lens would otherwise read its placeholders as defects (each lens file says so too). On **Codex** (`spawn_agent` is one level deep) spawn them
 at the orchestrator's own level — flat; on **Claude** they may nest. Flat works on both.
 
 ### 3. Collect + classify
