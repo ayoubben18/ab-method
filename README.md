@@ -21,7 +21,7 @@ It also installs in every case:
 
 - `.ab-method/` — workflow definitions and the structure index
 - `docs/architecture/` and `docs/tasks/` — output scaffolding
-- Helper skills: `grill-with-docs`, `grill-me`, `tdd`, `domain-model`, `ubiquitous-language`, `critique-plan`, `reconcile-roadmap`, `review-implementation`, `sync-architecture`, `improve-codebase-architecture`, `request-refactor-plan`, `to-issues`, `to-prd`, `write-a-skill`
+- Helper skills: `grill-with-docs`, `grill-me`, `tdd`, `domain-model`, `codebase-design`, `ubiquitous-language`, `critique-plan`, `reconcile-roadmap`, `review-implementation`, `sync-architecture`, `improve-codebase-architecture`, `request-refactor-plan`, `to-issues`, `to-prd`, `write-a-skill`
 - Workflow skills: `ab-create-task`, `ab-create-goal`, `ab-analyze-project`, and one per workflow
 - Slash commands (Claude only): `/ab-master` plus one per workflow
 - `AGENTS.md` (Codex only): orients Codex and lists the workflow skills
@@ -85,15 +85,33 @@ If the runtime can't be determined it falls back to flat, which runs correctly o
 6. Never lose a tangent — when a grill surfaces a side-topic that deserves its own task, the `handoff` skill captures it under `docs/handoffs/` instead of derailing the current grill; `/create-task-from-handoff` resumes it later.
 7. Parallel only by consent — independent missions can be tagged `[pp-1]`, `[pp-2]`, ... and run concurrently in subagents; untagged missions are sequential barriers. The workflow always asks before tagging — sequential is the default.
 8. Critique before, review after — `critique-plan` stress-tests the drafted plan against the domain model before coding, and `review-implementation` runs three critics on the diff after. Both push back **only on real issues** — a sound plan or a clean diff produces nothing. No suggestion-for-its-own-sake.
+9. Park, never guess — the rare question you genuinely can't answer yet becomes a recorded black box, not a silent invented decision (below).
 
 `grill-with-docs` reads `UBIQUITOUS_LANGUAGE.md` and `CONTEXT.md`, challenges terminology against them, and updates `CONTEXT.md` and `docs/adr/` inline as decisions crystallise.
+
+### One design vocabulary
+
+`codebase-design` is the single source of the architecture language — **module, interface, implementation, depth, seam, adapter, leverage, locality** — plus the principles that go with it (the deletion test; "the interface is the test surface"; "one adapter = hypothetical seam, two = real"). Three skills consume it rather than restating it: `improve-codebase-architecture` when proposing deepenings, `review-implementation`'s **cleaner-architecture** lens when judging a diff, and `tdd` when agreeing which seams to test at. One glossary, so a "shallow module" means the same thing whether you're planning, testing, or reviewing.
+
+`/improve-codebase-architecture` renders its candidates as a **self-contained HTML report** in the OS temp directory (never the repo) — before/after diagrams per candidate, `Strong` / `Worth exploring` / `Speculative` badges, and a top recommendation — then grills through whichever one you pick. It falls back to a markdown list when there's no network for the Tailwind/Mermaid CDNs.
+
+### Unresolved questions — building around what you can't answer yet
+
+A grill sometimes hits a question you can't close: the decision belongs to someone else, waits on data that doesn't exist, or is a product call that hasn't happened. The feature still has to get built. Rather than stalling the task or letting the agent quietly invent an answer, the grill **parks** the question:
+
+- It goes in `docs/tasks/<task>/unresolved-questions.md` — the question, why it's blocked, the placeholder shipping in its place, and the honest blast radius if the real answer differs.
+- The build proceeds on a **black box**: a generic or empty placeholder behind a *single named seam*, marked `// TODO(UQ-1): … — docs/tasks/<task>/unresolved-questions.md`, so `grep -rn 'TODO(UQ-'` finds every site. The placeholder gets a test like anything else.
+- Missions that build on one are marked `⚠️ UQ-n` in the tracker. `/resume-task` asks once whether the answer arrived; `/start-task` and `/start-roadmap` build the placeholder without stopping and list every open question in the final report. None of them ever answer a parked question for you.
+- When the answer lands, `/extend-task` grills it, swaps the seam (or plans real missions if it's more than a swap), and marks the entry `RESOLVED` — the entry stays, so the record of what was guessed and what it became survives.
+
+**This is rare and meant to stay rare.** Anything with a sane default is a default, not a black box; a tangent that deserves its own task is a `handoff`; and a question that changes the domain language can't be parked at all — it gets settled in `CONTEXT.md`.
 
 ### Pre- and post-implementation analysis
 
 Critic layers bracket every implementation, all anchored in the domain model and all **opt-in-silent** — they speak only when there is a genuine problem:
 
 - **`critique-plan` (pre-implementation, advisory).** Before missions are validated (in `/create-task`) or the task graph is handed off (in `/create-roadmap`), a read-only domain critic challenges the plan against `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, and `docs/adr/`. It pushes back on genuine conflicts — terminology drift, wrong bounded context, an ADR contradiction, a reinvented concept, a bad seam in the DAG — and stays silent otherwise. You resolve each pushback (amend the plan, or dismiss with a load-bearing reason that may become an ADR).
-- **`reconcile-roadmap` (pre-execution, roadmap-level, advisory).** Once a roadmap's tasks are all planned, this read-only critic reads *every* planned task's `progress-tracker.md` **together** and checks the finished plans cohere as a system — catching discrepancies only visible *between* plans that `critique-plan` structurally can't see (it judges one plan at a time). It fires on a consumer with no producer, a coverage gap, duplicated work, a reversed/missing edge, cross-task terminology drift, or conflicting assumptions. Standalone (`/reconcile-roadmap <name>`), run before `/start-roadmap`; silent when the plans line up.
+- **`reconcile-roadmap` (pre-execution, roadmap-level, advisory).** Once a roadmap's tasks are all planned, this read-only critic reads *every* planned task's `progress-tracker.md` **together** and checks the finished plans cohere as a system — catching discrepancies only visible *between* plans that `critique-plan` structurally can't see (it judges one plan at a time). It fires on a consumer with no producer, a coverage gap, duplicated work, a reversed/missing edge, cross-task terminology drift, conflicting assumptions, a black box one task ships that another builds real logic on, or a map gone stale against its plans (fog a task already covers, an out-of-scope item a task implements, a `plan: ✅` task planned around a still-open decision). Standalone (`/reconcile-roadmap <name>`), run before `/start-roadmap`; silent when the plans line up.
 - **`review-implementation` (post-implementation).** After a task's missions are done, three read-only critics run in parallel on the task's diff: **cleaner-architecture** (shallow modules the change introduced, via the deletion test), **slop-defender** (AI code-slop — speculative generality, pass-through wrappers, dead code, comments that restate code), and **reusability-inspector** (logic that duplicates an existing util/service/type). Each returns nothing when the diff is clean. In autonomous runs (`/start-task`, `/start-roadmap`) the orchestrator auto-applies only **safe** fixes (mechanical, test-covered, no behavior change — each gated on green tests) and writes **everything** to `docs/tasks/<task>/review.md` next to the tracker: safe fixes marked applied, riskier findings left open for you to read afk. Interactive runs present the findings for you to pick instead.
 - **`sync-architecture` (post-implementation, docs).** Right after the review, a single read-only detector runs on the same diff — asking not "is this good code?" but "does this diff introduce anything the docs don't yet know about?" It finds new endpoints, patterns, dependencies, domain terms, and ADR-worthy decisions the change added, and routes each to the exact doc it belongs in (reusing `/update-architecture`'s routing). Autonomous runs apply only **append-only** safe additions (a new Entry Points line, a new dependency, a new pattern section — committed as `docs(<task>): sync architecture docs`) and defer anything that rewrites prose, reshapes the domain, or is ADR-worthy to `/update-architecture` / `/domain-model`. This is the automated detection half of `/update-architecture`, so the architecture docs stay live instead of drifting until someone refreshes them by hand. Silent when the task introduced nothing doc-worthy.
 
@@ -106,6 +124,23 @@ Critic layers bracket every implementation, all anchored in the domain model and
 - `/start-roadmap` is the same idea one level up: it verifies every task's plan exists, then runs the whole graph in dependency order — each task by `/start-task` rules, independent tasks optionally parallelized in git worktrees. Its **execution shape is runtime-adaptive** (see below): nested subagents on Claude Code, flat one-level orchestration on Codex.
 
 The method is **fractal**: `roadmap → tasks` mirrors `task → missions`. `depends-on` edges between tasks are the task-level counterpart of `[pp-x]` groups between missions — independent units run concurrently, dependent ones wait.
+
+### A roadmap may be deliberately incomplete
+
+Requiring the whole DAG upfront forces one session to resolve everything, which is how you get confident-looking tasks nobody can plan. `/create-roadmap` names the **destination** first, then charts only what it can actually see. Four optional sections carry the rest — all omitted when empty, which is the common case:
+
+| Section | What lands here |
+|---|---|
+| `## Open decisions` | A question you can phrase sharply but haven't answered, whose answer shapes the graph. Typed `grilling` (default) / `research` (subagent, AFK) / `prototype` / `task` (manual work that makes a decision *possible*), with a `blocks:` list. |
+| `## Decisions` | The index of resolved ones — one line pointing at where the answer actually lives (an ADR, a `CONTEXT.md` term, a task's scope). Never restated here. |
+| `## Not yet specified` | The **fog**: in-scope areas you can tell are coming but can't phrase sharply yet. |
+| `## Out of scope` | Work ruled beyond the destination. Never graduates — a redrawn destination is a fresh roadmap. |
+
+The test between a decision and fog is whether you can state the question precisely **now** — not whether you can answer it. As answers land, fog **graduates** into tasks (or into new decisions, or out of scope).
+
+Two rules keep it honest. **Graduation is a planning act**: `/create-roadmap` and `/create-task` reshape the map, `/start-roadmap` never does — it reports candidates. And **an open decision blocks its tasks while fog blocks nothing**: a decision gating a frontier task halts the run, because only a session with you can resolve it; uncharted fog just means the map isn't finished, and the planned prefix still runs.
+
+*(Adapted from the map / fog-of-war / out-of-scope model in Matt Pocock's `wayfinder` skill, folded into `roadmap.md` rather than shipped as a second planning system.)*
 
 `/start-roadmap` is **re-runnable and incremental**. After a long roadmap run (e.g. a PRD-sized build), use `/extend-task` to add missions to any task — it reopens that task in `roadmap.md`. Re-running `/start-roadmap` then executes only the tasks that have unfinished work, in dependency order, and skips everything already done. A task counts as "needs work" whenever its tracker has an unchecked mission, so tweaks flow through the same dependency discipline as the original build.
 
@@ -133,6 +168,7 @@ docs/
   adr/                   Decision records, created lazily by /domain-model
   tasks/<task-name>/     progress-tracker.md (single source of truth)
                          review.md (post-implementation review; autonomous runs)
+                         unresolved-questions.md (black boxes; rare, absent by default)
   goals/<goal-name>/     goal.md + progress-tracker.md
   handoffs/<slug>.md     Tangents spun off mid-grill, awaiting their own task
 ```
