@@ -84,8 +84,9 @@ If the runtime can't be determined it falls back to flat, which runs correctly o
 5. Backend-first for full-stack tasks — types feed the frontend.
 6. Never lose a tangent — when a grill surfaces a side-topic that deserves its own task, the `handoff` skill captures it under `docs/handoffs/` instead of derailing the current grill; `/create-task-from-handoff` resumes it later.
 7. Parallel only by consent — independent missions can be tagged `[pp-1]`, `[pp-2]`, ... and run concurrently in subagents; untagged missions are sequential barriers. The workflow always asks before tagging — sequential is the default.
-8. Critique before, review after — `critique-plan` stress-tests the drafted plan against the domain model before coding, and `review-implementation` runs three critics on the diff after. Both push back **only on real issues** — a sound plan or a clean diff produces nothing. No suggestion-for-its-own-sake.
-9. Park, never guess — the rare question you genuinely can't answer yet becomes a recorded black box, not a silent invented decision (below).
+8. Map the blast radius twice — every task predicts which modules it will land in *before* implementation, and derives the same map from the real diff *after*. The drift between them is the method's only measurement of whether a plan understood its own reach (below).
+9. Critique before, review after — `critique-plan` stress-tests the drafted plan against the domain model before coding, and `review-implementation` runs three critics on the diff after. Both push back **only on real issues** — a sound plan or a clean diff produces nothing. No suggestion-for-its-own-sake.
+10. Park, never guess — the rare question you genuinely can't answer yet becomes a recorded black box, not a silent invented decision (below).
 
 `grill-with-docs` reads `UBIQUITOUS_LANGUAGE.md` and `CONTEXT.md`, challenges terminology against them, and updates `CONTEXT.md` and `docs/adr/` inline as decisions crystallise.
 
@@ -114,6 +115,26 @@ Critic layers bracket every implementation, all anchored in the domain model and
 - **`reconcile-roadmap` (pre-execution, roadmap-level, advisory).** Once a roadmap's tasks are all planned, this read-only critic reads *every* planned task's `progress-tracker.md` **together** and checks the finished plans cohere as a system — catching discrepancies only visible *between* plans that `critique-plan` structurally can't see (it judges one plan at a time). It fires on a consumer with no producer, a coverage gap, duplicated work, a reversed/missing edge, cross-task terminology drift, conflicting assumptions, a black box one task ships that another builds real logic on, or a map gone stale against its plans (fog a task already covers, an out-of-scope item a task implements, a `plan: ✅` task planned around a still-open decision). Standalone (`/reconcile-roadmap <name>`), run before `/start-roadmap`; silent when the plans line up.
 - **`review-implementation` (post-implementation).** After a task's missions are done, three read-only critics run in parallel on the task's diff: **cleaner-architecture** (shallow modules the change introduced, via the deletion test), **slop-defender** (AI code-slop — speculative generality, pass-through wrappers, dead code, comments that restate code), and **reusability-inspector** (logic that duplicates an existing util/service/type). Each returns nothing when the diff is clean. In autonomous runs (`/start-task`, `/start-roadmap`) the orchestrator auto-applies only **safe** fixes (mechanical, test-covered, no behavior change — each gated on green tests) and writes **everything** to `docs/tasks/<task>/review.md` next to the tracker: safe fixes marked applied, riskier findings left open for you to read afk. Interactive runs present the findings for you to pick instead.
 - **`sync-architecture` (post-implementation, docs).** Right after the review, a single read-only detector runs on the same diff — asking not "is this good code?" but "does this diff introduce anything the docs don't yet know about?" It finds new endpoints, patterns, dependencies, domain terms, and ADR-worthy decisions the change added, and routes each to the exact doc it belongs in (reusing `/update-architecture`'s routing). Autonomous runs apply only **append-only** safe additions (a new Entry Points line, a new dependency, a new pattern section — committed as `docs(<task>): sync architecture docs`) and defer anything that rewrites prose, reshapes the domain, or is ADR-worthy to `/update-architecture` / `/domain-model`. This is the automated detection half of `/update-architecture`, so the architecture docs stay live instead of drifting until someone refreshes them by hand. Silent when the task introduced nothing doc-worthy.
+
+- **`change-map` (pre *and* post-implementation).** The only skill that runs on both sides of the work, because it is one artifact asked twice (below).
+
+### Pre- and post-implementation change map
+
+`docs/tasks/<task>/change-map.md` answers **"where in the codebase does this task live?"** — before and after:
+
+- **`## Planned`** is drawn at plan time (`/create-task` § 7.6, after `critique-plan` and before you validate the missions), from the missions alone. One row per module the task expects to add, change, or brush against, with its predicted verdict (`[NEW]` / `[extended]` / `[rewritten]` / `[touched]`), the missions that reach it, the interfaces the plan commits to, the seams it crosses, and one sentence on what it will do that it doesn't today.
+- **`## Actual`** is derived after the post-implementation reviewers have run — `review-implementation` and `sync-architecture` both commit changes of their own, so the diff isn't final until they're done — from the task's real commit range. Same shape, but every verdict, symbol and arrow is derived from `git diff` rather than predicted.
+- **`## Drift`** is the difference, and the reason the other two exist. It names the modules the task **reached that nobody planned for** (usually a real requirement found mid-mission, occasionally a leak), the modules **the plan named and it never touched** (either the scope was over-drawn, or a mission claimed that module and didn't deliver), and the verdicts that came in **heavier than predicted**.
+
+Rows are **modules, not directories** — the map partitions the codebase the way `CONTEXT.md` and the architecture docs already do, so it speaks the project's ubiquitous language and an unplanned row reads as *a bounded context being crossed*. Reduction is the point: 10 rows maximum, siblings sharing a cause collapsed to one, everything else on an `also touched:` tail. The `## Actual` block is what you paste at the top of the task's PR.
+
+Three rules keep the file honest:
+
+- **The planned map is never edited to match reality.** It records what was believed before anyone knew; being wrong on the page is exactly what makes drift measurable. `/extend-task` appends a dated `## Planned (extension N)` block rather than merging into it.
+- **A planned map is never back-filled from a diff.** A task created before the map existed simply records `no planned map — nothing to compare`; a prediction reverse-engineered from the answer would poison every drift computation that reads the file afterwards.
+- **The map reports; it never fixes.** Drift routes — a module several tasks keep leaking into is a locality problem for `/improve-codebase-architecture`, an unplanned row crossing a context boundary is one for `/domain-model`, and a claimed-but-untouched module means re-reading that mission before closing the task. Autonomous runs (`/start-task`, `/start-roadmap`) put every drift line in the final report so an afk user never discovers an unplanned module by accident; `/start-roadmap` also collects unplanned modules across the whole run, where the same one appearing in four tasks is a finding the task level structurally can't see.
+
+Drawing the planned map is also a **second read on the missions from the codebase's side**: a module you can't attribute to any mission, or a mission whose row you can't place, is a planning gap `critique-plan` can't catch — it judges the plan against the domain model, not against the file system. A task that lands exactly where it was planned produces one line of drift, and that's the good, common outcome.
 
 ## Task vs Goal vs Roadmap
 
@@ -148,7 +169,7 @@ Two rules keep it honest. **Graduation is a planning act**: `/create-roadmap` an
 
 1. Baseline — `/analyze-project` produces `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, and three lean architecture docs.
 2. Sharpen — the `domain-model` skill grills the domain language and captures ADRs.
-3. Build — `/create-task` or `/create-goal` grills, `critique-plan` stress-tests the plan against the domain model, then either TDD-loops missions or hands off a goal prompt, and `review-implementation` critiques the resulting diff. For multi-task efforts, `/create-roadmap` draws the task graph and `/start-roadmap` runs it in dependency order.
+3. Build — `/create-task` or `/create-goal` grills, `critique-plan` stress-tests the plan against the domain model, then either TDD-loops missions or hands off a goal prompt, and `review-implementation` critiques the resulting diff, `sync-architecture` catches what the docs missed, and `change-map` measures where the change actually landed against where the plan said it would. For multi-task efforts, `/create-roadmap` draws the task graph and `/start-roadmap` runs it in dependency order.
 4. Maintain — `/update-architecture` keeps the baseline fresh.
 
 ## File layout
@@ -168,6 +189,7 @@ docs/
   adr/                   Decision records, created lazily by /domain-model
   tasks/<task-name>/     progress-tracker.md (single source of truth)
                          review.md (post-implementation review; autonomous runs)
+                         change-map.md (planned vs actual blast radius + drift)
                          unresolved-questions.md (black boxes; rare, absent by default)
   goals/<goal-name>/     goal.md + progress-tracker.md
   handoffs/<slug>.md     Tangents spun off mid-grill, awaiting their own task

@@ -18,6 +18,7 @@ This workflow will:
 3. Gather requirements for new missions (grills if vague)
 4. Append the new missions as one-line entries in `progress-tracker.md` (no mission docs)
 5. **Run `critique-plan` on the new missions** — the pre-implementation domain critic pushes back only on genuine conflicts before you confirm
+5b. **Extend the planned change map** — `change-map` appends a dated `## Planned (extension N)` block for the new missions' blast radius; the original planned map is never edited or merged into
 6. Reopen the task if it was `Completed` — and, if it belongs to a roadmap, reopen its `roadmap.md` entry too (`status: done → pending`) so a `/start-roadmap` re-run picks up the new work in dependency order
 
 ## Workflow Details

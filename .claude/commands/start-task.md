@@ -18,7 +18,8 @@ This workflow will:
 4. **Run every remaining mission in a subagent** through the `tdd` discipline; the subagent checks off its mission and appends its technical summary to the tracker
 5. Verify the test suite after each mission, then **commit** (one commit per mission, one per `[pp-x]` group)
 6. **Run `review-implementation` after the last mission (autonomous mode)** — three critics (cleaner-architecture, slop-defender, reusability-inspector) on the task diff; safe fixes auto-applied (tests-green-gated, own commit), everything written to `docs/tasks/<task>/review.md` for you to read afk
-7. Stop loudly on red — never commits broken work, never starts the next mission on a broken state
+7. **Run `change-map` last (autonomous mode)** — after the reviewers' commits, it derives the task's real blast radius from its commit range, appends `## Actual` + `## Drift` to `docs/tasks/<task>/change-map.md`, and puts every drift line in the final report so you don't discover an unplanned module by accident
+8. Stop loudly on red — never commits broken work, never starts the next mission on a broken state
 
 ## `/start-task` vs `/resume-task`
 - **`/start-task`** — trust the roadmap, walk away, review commits instead of missions
@@ -29,6 +30,7 @@ This workflow will:
 - **Group-aware** — `[pp-x]` missions run concurrently in subagents; siblings skip the tracker (the parent merges their summaries) to avoid write conflicts
 - **Green tests gate every commit** — a red feedback loop takes priority over progress, exactly like `/goal`
 - **Executor, not producer** — missions are defined by `/create-task` / `/extend-task`; this workflow only runs them
+- **Drift is reported, never acted on** — modules the run reached that the plan never named (and planned ones it never touched) are named in the final report and routed to `/improve-codebase-architecture` or `/domain-model`; the run itself changes nothing because of them
 - **A black box doesn't stop the run** — a mission marked `⚠️ UQ-n` builds the placeholder recorded in `unresolved-questions.md` and keeps going; the run never answers a parked question, and every open one it built on is listed in the announcement and the final report
 
 ## Examples

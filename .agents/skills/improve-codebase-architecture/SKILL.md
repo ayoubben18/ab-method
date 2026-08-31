@@ -20,6 +20,7 @@ This skill is built on a shared design vocabulary and _informed_ by the project'
 
 - If the user named a direction — a module, a subsystem, a pain point — take it and skip the inference below.
 - Otherwise walk back a good stretch of history (`git log --oneline`) to find the hot spots — the files and areas that keep coming up — and let those paths pull your attention first. If the changes are scattered with no clear hot spot, widen the net.
+- **Read the accumulated drift first if the project has it.** Every task's `docs/tasks/*/change-map.md` records the modules that task *planned* to touch and the ones it *actually* touched. A module that shows up as **unplanned** across several tasks is a sharper hot-spot signal than raw commit frequency: it isn't just where changes land, it's where changes land that nobody expected them to. That is a locality problem by definition, and it's the highest-value place to start. (`change-map` only reports it — acting on it is this skill's job.)
 
 Read the existing documentation first:
 

@@ -23,6 +23,7 @@ It will:
 
 ## Notes
 - **Post-implementation review per task:** each task runs by `/start-task` rules, so `review-implementation` runs on its diff after the last mission — safe fixes auto-applied, everything written to `docs/tasks/<slug>/review.md`. The critic subagents follow the same nest-on-Claude / flat-on-Codex rule as the mission subagents. The final report lists each task's `review.md` with its open-finding count.
+- **Change map per task, drift collected across the roadmap:** each task also gets `change-map`'s actual pass after its reviewers, writing `docs/tasks/<slug>/change-map.md`. The orchestrator collects the **unplanned modules across every task in the run** into the final report — one task reaching an unmapped module is a discovery, four tasks reaching the *same* one is a locality finding for `/improve-codebase-architecture`. Reported, never acted on mid-run.
 - Re-runs resume from `roadmap.md` — re-verifies and continues from the frontier.
 - **Incremental / extend case:** after a roadmap completes, use `/extend-task` to add missions to any task (it reopens that task in `roadmap.md`), then re-run `/start-roadmap` — it runs only the tasks that now have unchecked missions, in dependency order, and skips finished ones. A task "needs work" whenever its tracker has an unchecked mission, regardless of its `status:` flag. Common after long PRD-driven builds you want to tweak.
 - Stops loudly on red (never commits broken work), exactly like `/start-task`, one level up.

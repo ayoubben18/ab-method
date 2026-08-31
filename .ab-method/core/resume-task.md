@@ -19,6 +19,8 @@ Open `docs/tasks/<task>/progress-tracker.md`. From it, identify:
 - Any `[pp-x]` parallel-group tags on pending missions (same tag = user-approved concurrent batch; untagged missions are sequential barriers)
 - Any `⚠️ UQ-n` markers on pending missions — those missions build on a black box; read `unresolved-questions.md` in the same folder for the question and its agreed placeholder
 - Any constraints/notes from the original grill-with-docs session
+- The `## Planned` section of `change-map.md` if the task has one — where the plan expects the remaining
+  missions to land. Read it for orientation; never edit it
 
 ### 3. Display Resume Context
 ```
@@ -93,7 +95,7 @@ Append a tight technical summary to the progress tracker (same format as `create
 
 For a parallel group: append one summary block per mission, mark the whole group complete, and prompt once per group — "Missions N–M (`[pp-x]`) completed in parallel. Ready to continue with Mission M+1?"
 
-When all missions are done, run the **post-implementation review**, then set task status to `Completed`.
+When all missions are done, run the **post-implementation review** and then the **actual change map**, and only then set task status to `Completed`.
 
 ### 8. Post-Implementation Review — invoke the `review-implementation` skill
 
@@ -104,10 +106,27 @@ cohesive change across all its missions). Three read-only critics — `cleaner-a
 `/resume-task` keeps you in the loop, so run it in **interactive mode**: it presents findings grouped by
 lens (each marked `safe-fix` / `needs-judgment`) and you apply what you approve, keeping tests green.
 (The autonomous `/start-task` variant instead auto-applies safe fixes and writes a `review.md`.) The
-skill owns the review logic; don't duplicate it here. Then set status to `Completed`.
+skill owns the review logic; don't duplicate it here.
+
+### 9. Actual Change Map + Drift — invoke the `change-map` skill
+
+After the review (and `sync-architecture`, if you ran it) — their fixes are part of the diff — **invoke the
+`change-map` skill** in its *actual* pass. It derives the task's real blast radius from its commit range
+and appends `## Actual` and `## Drift` to `docs/tasks/<task>/change-map.md`, leaving the `## Planned`
+section from task creation untouched.
+
+`/resume-task` keeps you in the loop, so walk the drift with the user before closing the task: modules the
+task reached that the plan never named, modules the plan named that it never touched (re-read that
+mission's summary — a claimed-but-untouched module means the mission may not have done what it says), and
+verdicts heavier than predicted. The skill **reports only** — route what it finds to
+`/improve-codebase-architecture` or `/domain-model` rather than fixing it here. A task with no `## Planned`
+section records `no planned map — nothing to compare`; never back-fill one from the diff.
+
+Then set status to `Completed`.
 
 ## Remember
 - The progress tracker carries everything you need; there are no mission docs by design
+- `change-map.md`'s `## Planned` section is read-only from here on — the actual pass appends to it, never rewrites it
 - Tests + technical summaries are the persistent context across sessions
 - Always `Skill("tdd")` first, before any other mission work — never skip the load, even when you "know" how to TDD
 - `[pp-x]` tags exist only because the user opted in when the missions were defined — still confirm before launching a group in parallel, and never invent new tags during resume without asking

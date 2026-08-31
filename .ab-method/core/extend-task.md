@@ -99,6 +99,30 @@ drift, wrong context, an ADR contradiction, a reinvented concept). Advisory and 
 additions are sound. Resolve any real pushback (amend a mission, or dismiss with a load-bearing reason
 that may become an ADR) and update the tracker before Step 6.
 
+### 5.6 Extend the Planned Change Map — invoke the `change-map` skill (planned pass)
+
+New missions mean new blast radius. **Invoke the `change-map` skill** in its *planned* pass, scoped to the
+**new** missions, and append the result to `docs/tasks/<task>/change-map.md` as a dated extension block:
+
+```markdown
+## Planned (extension 1) — YYYY-MM-DD, missions 4–5
+```
+
+**Never edit the original `## Planned` section**, and never fold the new rows into it. Each block records
+what was believed at the moment those missions were drafted; merging them would silently rewrite a
+prediction the task has already been measured against. The actual pass computes drift against the union of
+the blocks.
+
+Two cases worth calling out when you draw it:
+
+- **The extension lands entirely inside modules the original map already covers** — good sign, and worth
+  saying: the task grew in depth, not in reach.
+- **The extension reaches a module the original never named** — the task's scope genuinely widened. Ask
+  whether this is still one task or two; a `handoff` is often the honest answer.
+
+Skip this step only when the task has no `change-map.md` at all (it predates the map). Never back-fill one
+from what the completed missions already did.
+
 ### 6. Confirm with User
 "Added [N] missions. Ready to start Mission X?"
 
@@ -108,6 +132,7 @@ When the user confirms, choose how to run the new missions:
 
 ## Remember
 - Add to `progress-tracker.md`, never create separate mission files
+- New missions get their own dated `## Planned (extension N)` block in `change-map.md` — the original block is never edited or merged into
 - Sequential numbering, no gaps
 - Use `grill-with-docs` whenever the new mission descriptions are vague
 - `/extend-task` is where a parked `UQ-n` gets answered: grill the answer, swap the `TODO(UQ-n)` seam (or plan missions if it's more than a swap), mark the entry `RESOLVED` — never resolve one the user didn't answer

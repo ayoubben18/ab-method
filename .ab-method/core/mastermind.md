@@ -63,6 +63,7 @@ Common routes:
 | Answer a question that was parked as a black box (`UQ-n`) | `extend-task` (or `extend-goal`) |
 | Stress-test a plan against the domain model (standalone) | `critique-plan` skill |
 | Review a completed diff for architecture / slop / reuse (standalone) | `review-implementation` skill |
+| Map where a task landed vs where it was planned to land (standalone) | `change-map` skill |
 | Understand the codebase (arch / domain) | `analyze-project` / `analyze-frontend` / `analyze-backend` |
 | Refresh architecture docs after big changes | `update-architecture` |
 | Backfill tests for code written without them | `test-mission` |

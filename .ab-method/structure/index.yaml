@@ -47,6 +47,16 @@ project_structure:
                                   # skill); written by autonomous runs (start-task /
                                   # start-roadmap): safe fixes marked applied, the rest
                                   # left open for the user. Absent until a review runs.
+          - change-map.md         # the task's blast radius, drawn TWICE (change-map skill,
+                                  # format: DIAGRAM-FORMAT.md). `## Planned` is written at
+                                  # plan time from the missions — which modules the task
+                                  # expects to add / change / touch — and is NEVER edited
+                                  # afterwards. `## Actual` + `## Drift` are appended after
+                                  # the post-impl reviewers pass, derived from the real
+                                  # commit range. Drift (unplanned modules, predicted-but-
+                                  # untouched ones, escalated verdicts) is the deliverable;
+                                  # it routes to /improve-codebase-architecture or
+                                  # /domain-model, and is never acted on here.
         folders:
           - sub-agents-outputs/   # only created when a subagent runs
 
@@ -123,12 +133,21 @@ workflow_outputs:
   test-mission: docs/tasks/[task-name]/progress-tracker.md   # backfills tests for code written
                         # without them; appends its mission + summary to the tracker like any other
   mastermind: []   # router only — explains the method and delegates to a workflow; writes nothing
-  create-task: docs/tasks/[task-name]/progress-tracker.md   # runs critique-plan (pre-impl, advisory) before validating missions, then review-implementation + sync-architecture (post-impl, interactive) after the last mission
+  create-task:   # runs critique-plan (pre-impl, advisory) then change-map's PLANNED pass before validating
+    - docs/tasks/[task-name]/progress-tracker.md   # missions; then review-implementation + sync-architecture
+    - docs/tasks/[task-name]/change-map.md         # + change-map's ACTUAL pass (post-impl, interactive)
   grill-with-docs: docs/tasks/[task-name]/unresolved-questions.md   # ONLY when the grill had to park a
                           # question the user genuinely can't answer yet; the file is absent otherwise.
                           # Also updates CONTEXT.md / docs/adr/ inline as decisions crystallise.
   critique-plan: []   # pre-implementation critic; read-only, surfaces domain-model pushbacks only (may prompt an ADR under docs/adr/ on a load-bearing dismissal). Invoked by create-task / create-roadmap, or standalone
   review-implementation: docs/tasks/[task-name]/review.md   # post-implementation review; three critics on the task diff. Writes review.md on autonomous runs; interactive runs present findings instead
+  change-map: docs/tasks/[task-name]/change-map.md   # the task's blast radius, drawn twice. PLANNED pass
+                        # (create-task § 7.6, extend-task) predicts the modules the missions will add /
+                        # change / touch, from the plan only — never from code. ACTUAL pass (after
+                        # review-implementation AND sync-architecture, so their commits are in range)
+                        # derives the same map from `git diff <task commit range>`, then computes DRIFT.
+                        # Never rewrites `## Planned`, never back-fills one from the diff, never edits
+                        # code or docs — it describes shape, it does not judge it
   sync-architecture:   # post-implementation documentation-sync detector; read-only. ONE subagent finds what
     - docs/architecture/tech-stack.md        # the task diff introduced that the docs don't capture (endpoints,
     - docs/architecture/frontend-patterns.md # patterns, deps, terms, ADR candidates) and routes each to its doc
@@ -155,11 +174,15 @@ workflow_outputs:
   create-task-from-handoff: docs/tasks/[task-name]/progress-tracker.md   # reads docs/handoffs/[slug].md, deletes it once the task exists
   extend-task:
     - docs/tasks/[task-name]/progress-tracker.md
+    - docs/tasks/[task-name]/change-map.md   # change-map PLANNED pass appended for the NEW missions only,
+                          # as a dated `## Planned (extension N)` block — the original `## Planned` stays
+                          # untouched, so drift is still measured against what was believed at the time
     - docs/tasks/[task-name]/unresolved-questions.md   # where a parked UQ-n gets answered: entry marked
                           # RESOLVED, the TODO(UQ-n) seam swapped, ⚠️ UQ-n markers dropped from missions
   resume-task:
     - docs/tasks/[task-name]/progress-tracker.md
     - docs/tasks/[task-name]/unresolved-questions.md   # only if an open question is answered at resume
+    - docs/tasks/[task-name]/change-map.md   # change-map ACTUAL pass when the last mission closes the task
   handoff: docs/handoffs/[slug].md   # `handoff` skill; falls back to OS temp dir outside an AB Method project
   create-goal:
     - docs/goals/[goal-name]/goal.md
@@ -172,11 +195,13 @@ workflow_outputs:
     - docs/tasks/[task-name]/unresolved-questions.md   # Marker lines updated with the paths the placeholders
                           # landed at; the run never resolves an open question — it reports them instead
     - docs/tasks/[task-name]/review.md   # post-impl review-implementation pass after the last mission: safe fixes applied, open findings recorded
+    - docs/tasks/[task-name]/change-map.md   # post-impl change-map ACTUAL pass (Step 5d, after the reviewers): appends `## Actual` + `## Drift`, committed as docs(<task>): change map
     - docs/architecture/*   # post-impl sync-architecture pass (Step 5c): append-only doc safe-adds committed as docs(<task>): sync architecture docs
   start-roadmap:
     - docs/roadmaps/[roadmap-name]/roadmap.md   # statuses updated as tasks run; verifies plans exist before executing
     - docs/tasks/[task-name]/progress-tracker.md   # each task executes like start-task (subagent per mission, commit per green mission)
     - docs/tasks/[task-name]/review.md   # each task's post-impl review (inherited from start-task rules)
+    - docs/tasks/[task-name]/change-map.md   # each task's post-impl change-map ACTUAL pass (inherited from start-task rules)
     - docs/architecture/*   # each task's post-impl sync-architecture pass (inherited from start-task rules)
 
 # How the workflows and their artifacts reference each other. Any workflow
@@ -236,6 +261,19 @@ relationships:
     applies: "append-only safe-adds to docs/architecture/* + UBIQUITOUS_LANGUAGE.md/CONTEXT.md (autonomous) or presents them (interactive)"
     defers_to: "/update-architecture (prose deprecation + improve-codebase-architecture deepening loop) and /domain-model (ADRs, new bounded contexts)"
     reuses: "/update-architecture routing table (2a endpoints, 2b patterns, 2c stack/deps, 2d domain, 2e ADR)"
+  change_map_brackets_the_task:
+    # change-map is the only skill that runs on BOTH sides of the implementation,
+    # and the two halves are one artifact: docs/tasks/<slug>/change-map.md.
+    # `## Planned` is a prediction made from the missions before any code exists;
+    # `## Actual` is derived from the real commit range once the reviewers are done.
+    # The gap between them (DRIFT) is what the feature is for — it is the only
+    # measurement in the method of whether a plan understood its own blast radius.
+    planned_pass: "create-task § 7.6 (after critique-plan, before the user validates) and extend-task (a dated extension block)"
+    actual_pass: "after review-implementation AND sync-architecture — their commits belong to the diff it maps — and before the task is set Completed"
+    scope: "the task's commit range, never the working tree; rows are modules named by CONTEXT.md / docs/architecture, not directories"
+    immutable: "`## Planned` is never edited to match reality, and is never back-filled from a diff — a prediction reverse-engineered from the answer measures nothing"
+    routes_to: "/improve-codebase-architecture (a module changes keep leaking into = a locality problem), /domain-model (an unplanned row crossing a bounded context), or a re-read of a mission whose claimed module went untouched"
+    complements: "review-implementation (is the diff good code?) and sync-architecture (do the docs know about it?) — change-map only describes the change's SHAPE, and never edits code or docs"
 
 # Inputs that downstream workflows should read for domain context
 domain_inputs:

@@ -18,12 +18,14 @@ This workflow will:
 4. **Run the next mission through the `tdd` skill** (red-green-refactor)
 5. Append a tight technical summary on completion
 6. **Run `review-implementation` after the last mission (interactive)** — three critics (cleaner-architecture, slop-defender, reusability-inspector) on the task diff; findings presented for you to apply before status → Completed
+7. **Run `change-map` last** — derives the task's actual blast radius from its commits and walks the drift against the map drawn at plan time with you, before status → Completed
 
 ## Workflow Details
 - The progress tracker carries the mission list and per-mission technical summaries from prior sessions — that's the entire context
 - Tests + summaries are the persistent artifacts across sessions
 - Always TDD via the `tdd` skill, never skip it
 - Group-aware resume — if the next mission carries a `[pp-x]` tag, the remaining missions in that group are offered as one concurrent subagent batch (the user can still choose sequential)
+- Change-map aware — the `## Planned` map written at task creation is read for orientation while missions run, and never edited; the actual pass appends to it once the task closes
 - Black-box aware — if remaining missions are marked `⚠️ UQ-n`, the open questions from `unresolved-questions.md` are surfaced once at resume (answer now, or keep shipping the placeholder); answering one closes the entry and drops the marker
 
 ## Examples

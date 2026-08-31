@@ -29,6 +29,8 @@ Open `docs/tasks/<task>/progress-tracker.md`. From it, identify:
 - The remaining missions, in order, including any `[pp-x]` parallel-group tags
 - Any `⚠️ UQ-n` markers on remaining missions, and the matching entries in `unresolved-questions.md`
 - Constraints/notes from the original grill-with-docs session
+- The `## Planned` section of `change-map.md` if the task has one — the modules the plan expects this run
+  to land in. Read it, don't edit it: it is the prediction Step 5d measures the run against
 
 **Vagueness gate**: an autonomous run cannot stop to ask questions. If any remaining mission's one-line description is too vague to execute without judgment calls, say so now and grill it (`grill-with-docs`) **before** the run starts — never mid-run.
 
@@ -150,6 +152,28 @@ Because this is an afk run, the skill:
 The skill never prompts and never writes an ADR or deprecates prose on its own — that keeps the docs live
 without filling them with noise. It owns the detection + routing logic; don't duplicate it here.
 
+### 5d. Actual Change Map + Drift — invoke the `change-map` skill (autonomous mode)
+
+**Last in the post-implementation phase**, once the review and doc-sync commits are in, **invoke the
+`change-map` skill** in its *actual* pass. Both earlier steps commit changes of their own, so the task's
+diff isn't final until they're done — mapping before them describes a diff that no longer exists.
+
+The skill derives the map from the task's commit range (first mission commit's parent .. HEAD), appends
+`## Actual` and `## Drift` to `docs/tasks/<task>/change-map.md` — never touching the `## Planned` section
+written at plan time — and commits it as `docs(<task>): change map` (repo convention).
+
+Because this is an afk run, the skill:
+1. **Never prompts.** It reports; it does not act on what it finds. No code edit, no doc edit, no reshaped
+   plan — those belong to `/improve-codebase-architecture`, `/domain-model`, or `/extend-task`.
+2. **Puts every drift line in the final report** (§ 6). An afk user must not discover that the run reached
+   four modules the plan never mentioned by reading a file they didn't know exists.
+3. **Never back-fills a `## Planned` section** for a task that has none. Such a task simply records
+   `no planned map — nothing to compare`; a prediction reverse-engineered from the diff would poison every
+   drift computation that reads the file later.
+
+A task that landed where its plan said produces one line of drift — the common outcome for a well-grilled
+task, and worth saying out loud rather than omitting.
+
 ### 6. On Full Completion
 
 Set the task status to `Completed` in the tracker (include it in the final mission's commit, or a final `chore` commit if needed). Report:
@@ -160,9 +184,16 @@ Missions run: 3, 4-5 [pp-1], 6
 Commits: <n> (<short hashes>)
 Tests: <command> green
 Review: docs/tasks/<task>/review.md — <k> safe fixes applied, <m> open for you
+Change map: docs/tasks/<task>/change-map.md — 4 modules planned, 5 touched
+  drift: platform/audit unplanned — mission 2 made every charge write an audit row
+         billing/invoice unplanned seam — it now reads charges through billing/charge
 Black boxes: UQ-2 refund window → fixed 30 days, src/billing/refund.ts:14
              (docs/tasks/<task>/unresolved-questions.md — answer it, then /extend-task)
 ```
+
+Drift never blocks completion either — it is a finding, not a failure. But it is the one thing an afk user
+cannot reconstruct from the commit log, so every drift line goes in the report; drop the block entirely
+when the change landed exactly where it was planned.
 
 Open questions never block completion — the placeholders are deliberate, tested, and recorded. But an afk user must not discover them by accident: list every still-open `UQ-n` the run built on, with its seam's path, in the final report. Omit the line when there are none.
 
@@ -181,6 +212,7 @@ If a mission subagent fails, tests stay red, or a merge conflict can't be resolv
 - **Executor, not producer** — `/start-task` does not define or reshape missions; that's `/create-task` and `/extend-task`. The vagueness gate is the only place grilling happens, and only before the run
 - **Every mission in a subagent** — the subagent runs tdd and updates the tracker itself; the parent verifies and commits
 - **Commit after each mission** — green tests are the gate; one commit per mission, one per `[pp-x]` group
+- **Map before completion** — after the review and doc sync, `change-map`'s actual pass derives the task's real blast radius from its commit range and diffs it against the map drawn at plan time. Drift is reported and routed, never acted on, and never blocks the run
 - **Review before completion** — after the last green mission, `review-implementation` runs in autonomous mode: safe fixes auto-applied (tests-green-gated, own commit), everything written to `review.md` for the afk user; open findings are never silently changed
 - **A black box is not a blocker** — an open `⚠️ UQ-n` mission builds the placeholder recorded in `unresolved-questions.md` and the run continues. The run never answers a parked question, never "improves" a placeholder, and never hides one: every open UQ it built on goes in the final report
 - **Red stops the run** — exactly like a `/goal` feedback loop: a failing check takes priority over progress

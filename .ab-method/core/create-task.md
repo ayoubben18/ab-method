@@ -190,6 +190,7 @@ Based on `.ab-method/structure/index.yaml`, create a task folder with:
 tasks/[task-name]/
   progress-tracker.md
   unresolved-questions.md   ← ONLY if the grill parked something; omit otherwise
+  change-map.md             ← written in Step 7.6, once the missions are settled
   sub-agents-outputs/
 ```
 
@@ -345,10 +346,37 @@ load-bearing reason the skill may capture as an ADR), then update the tracker to
 The skill owns the critique logic — do not duplicate it here. It reads
 `.ab-method/structure/index.yaml` for where the domain model lives.
 
+### 7.6 Planned Change Map — ALWAYS invoke the `change-map` skill
+
+With the missions settled (post-critique), draw the task's **planned blast radius**: which modules it
+expects to add, change, or brush against. **Invoke the `change-map` skill** in its *planned* pass. It
+writes `docs/tasks/<task-name>/change-map.md` with a `## Planned` section only — a plain-text diagram of
+one row per module, its predicted verdict (`[NEW]` / `[extended]` / `[rewritten]` / `[touched]`), the
+missions that reach it, the interfaces the plan commits to, the seams it crosses, and one sentence per
+module on what it will do that it doesn't today.
+
+This is not decoration — it is a **second read on the missions from the codebase's side**:
+
+- A module you can't attribute to any mission means the plan reaches somewhere nobody accounted for.
+- A mission whose row you can't place means the mission doesn't say where it lands.
+- A module the map has to *invent* to stay coherent is a planning gap `critique-plan` structurally can't
+  see — it judges the plan against the domain model, not against the file system.
+
+Fix the missions when the map exposes one of these, before Step 8. Predict **only** what the plan actually
+commits to: an invented module or symbol makes the later drift measurement meaningless, which costs more
+than a thin map does.
+
+The skill owns the diagram format (`DIAGRAM-FORMAT.md`) and the 10-row cap — do not duplicate them here.
+
 ### 8. Confirm with User
 
-Show the progress tracker with all missions defined (reflecting any changes from Step 7.5) and ask:
-"Task created with status 'Brainstormed'. Missions: [list, one line each]. Ready to validate and start Mission 1?"
+Show the progress tracker with all missions defined (reflecting any changes from Step 7.5) **and the
+planned change map from Step 7.6**, then ask: "Task created with status 'Brainstormed'. Missions: [list,
+one line each]. Blast radius: [n modules — k new]. Ready to validate and start Mission 1?"
+
+The map goes in the same breath as the missions on purpose — the user is validating **where the task
+lands**, not only what it says. "Wait, why does this touch billing?" is a question worth getting before
+Mission 1, not after Mission 4.
 
 If any question was parked in Step 1, restate the black boxes in the same breath — the user is
 approving them, not just the missions:
@@ -428,7 +456,7 @@ After the skill is loaded:
 
 8. **Prompt the user** before moving to the next mission: "Mission N completed. Ready to start Mission N+1?"
 
-When all missions are done, run the **post-implementation review** (below), then set task status to `Completed`.
+When all missions are done, run the **post-implementation phase** below — `review-implementation`, then `sync-architecture`, then `change-map`'s actual pass — and only then set task status to `Completed`.
 
 **Open questions don't block completion — they travel with it.** A task whose missions are all green is
 `Completed` even with open `UQ-n` entries; the placeholders are shipped, deliberate, and recorded. Say so
@@ -466,6 +494,27 @@ deprecation, domain reshapes, ADRs) are pointed at `/update-architecture` / `/do
 applied. This replaces the ad-hoc "remember to update the docs" step — the skill owns the detection and
 routing logic. (Autonomous runs via `/start-task` apply append-only safe-adds and defer the rest.)
 
+#### Actual change map + drift — invoke the `change-map` skill (actual pass)
+
+**Last**, after the review and the doc sync — both of which commit changes of their own, so the diff isn't
+final until they're done — **invoke the `change-map` skill** in its *actual* pass. It derives the same
+diagram from the task's real commit range and appends `## Actual` and `## Drift` to
+`docs/tasks/<task-name>/change-map.md`, leaving the `## Planned` section from Step 7.6 untouched.
+
+**The drift is the point.** Walk it with the user before setting the task `Completed`:
+
+- **Unplanned modules** — the task reached somewhere the plan didn't. Usually a real requirement found
+  mid-mission (and often worth a `CONTEXT.md` line); occasionally a leak worth undoing.
+- **Predicted but untouched** — either the plan over-drew the scope, or a mission claimed that module and
+  didn't deliver. Re-read that mission's summary before closing the task.
+- **Escalated verdicts** — a `[touched]` that became a `[rewritten]`; the plan under-read the work.
+
+The skill only reports; it never fixes. Route what it finds (`/improve-codebase-architecture` for a module
+changes keep leaking into, `/domain-model` for a crossed context boundary) rather than acting inside it. A
+task that landed where it was planned produces one line of drift — that's the common, good outcome.
+
+The `## Actual` block is also what goes at the top of this task's PR body.
+
 #### Parallel group execution (`pp-x` missions)
 
 When the next uncompleted mission is tagged `[pp-x]`, collect **all uncompleted missions sharing that tag** and run them as one concurrent batch:
@@ -486,6 +535,7 @@ When the next uncompleted mission is tagged `[pp-x]`, collect **all uncompleted 
 ## Key Principles
 
 - **Always grill** — `/create-task` invokes `grill-with-docs` on every invocation, no skip
+- **Map the blast radius twice** — `change-map` predicts which modules the missions will land in *before* the user validates the plan, and derives the same map from the real diff *after* the reviewers pass. The drift between the two is the method's only measurement of whether a plan understood its own reach; it is reported and routed, never silently fixed
 - **Always TDD, skill loaded first** — every mission begins with `Skill("tdd")` before any other tool call; the playbook in the companion files is what makes it TDD, not the act of writing a test first
 - **No mission docs** — missions live as one-line entries in `progress-tracker.md`, completion summaries are tight bullets
 - **One task at a time** — focus, conserve context
@@ -509,6 +559,7 @@ Specific requests skip `grill-with-docs` and go straight to Step 2:
 ## Remember
 
 - Always grill, always TDD, never write a mission doc
+- The planned change map is drawn from the plan only, never from code, and is never edited afterwards — being wrong on the page is what makes drift measurable
 - Check `.ab-method/structure/index.yaml` for paths
 - Read UBIQ + CONTEXT + architecture docs before defining missions, and again before each mission's TDD loop
 - Every mission must specify a layer (Frontend/Backend/Full-stack) and a concrete one-line objective

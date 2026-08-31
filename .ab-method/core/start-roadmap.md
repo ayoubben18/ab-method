@@ -222,6 +222,19 @@ reshapes, and ADRs to the user. It also comes for free with running each
 task as a `start-task`; the docs stay live across the whole roadmap instead
 of drifting until someone runs `/update-architecture` by hand.
 
+**The change map is inherited per task, and its drift is worth reading
+across the roadmap.** Each task's `start-task` Step 5d runs the
+`change-map` skill on that task's commit range, appending `## Actual` and
+`## Drift` to `docs/tasks/<slug>/change-map.md` (committed as
+`docs(<slug>): change map`). Nothing extra to wire — but the roadmap
+orchestrator owes one thing the task level structurally can't see: collect
+the **unplanned modules across every task in the run** and report them
+together. One task reaching an unmapped module is a discovery; four tasks
+all reaching the *same* unmapped module is a finding — that module is where
+this roadmap's changes keep leaking, and it belongs in
+`/improve-codebase-architecture` or, when it crosses a bounded context,
+`/domain-model`. Report it; never reshape anything mid-run.
+
 #### Running independent tasks concurrently
 
 - **Sequential mode (default):** run eligible tasks one after another in
@@ -340,8 +353,12 @@ Same discipline as `/start-task`, one level up:
   can resolve it); uncharted fog just means the map is unfinished, and the
   planned prefix still runs
 - **Each task runs by `start-task` rules** — same subagent-per-mission,
-  tdd, commit trail, and post-implementation `review-implementation` pass
-  (safe fixes applied, `review.md` written per task)
+  tdd, commit trail, and post-implementation `review-implementation` +
+  `sync-architecture` + `change-map` passes (safe fixes applied,
+  `review.md` and `change-map.md` written per task)
+- **Drift is collected across the roadmap** — the same unplanned module
+  showing up in several tasks' drift is a locality finding the task level
+  can't see; the orchestrator reports it and reshapes nothing
 - **Execution shape is runtime-adaptive** — on **Claude Code, nest by
   default** (task-subagent → mission-subagents) for per-task context
   isolation; on **Codex** stay flat (parent → mission-subagents) because
