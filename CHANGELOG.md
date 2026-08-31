@@ -1,3 +1,9 @@
+## [3.9.0](https://github.com/ayoubben18/ab-method/compare/v3.8.0...v3.9.0) (2026-08-31)
+
+### ✨ Features
+
+* **change-map:** map a task's blast radius before and after implementation ([42dcf88](https://github.com/ayoubben18/ab-method/commit/42dcf88ddbc66bfabb3ec1e3560875915776e6a7))
+
 ## [3.8.0](https://github.com/ayoubben18/ab-method/compare/v3.7.1...v3.8.0) (2026-07-30)
 
 ### ✨ Features
