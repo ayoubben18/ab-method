@@ -14,6 +14,12 @@ skill produces **pushbacks, not suggestions** — it never gold-plates a plan th
 **ALWAYS check `.ab-method/structure/index.yaml` FIRST** for where the domain model lives — paths are
 user-configurable.
 
+Look for it under the project root (the current working directory) first — a project's own copy is how it
+customises its paths, so it always wins. Only if the project has none (AB Method installed as a plugin rather than
+with `npx ab-method`), read the bundled default: `../../../.ab-method/structure/index.yaml` relative to this
+`SKILL.md`. Either way, every path the index names is relative to the **project root**, never to the folder the
+bundled file lives in.
+
 "The plan" is the drafted **mission list** (from create-task), the **task DAG** (from create-roadmap), or
 whatever the user pastes in (standalone).
 

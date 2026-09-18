@@ -18,6 +18,12 @@ together.
 **ALWAYS check `.ab-method/structure/index.yaml` FIRST** for where roadmaps, tasks, and the
 domain model live — paths are user-configurable, never hardcode them.
 
+Look for it under the project root (the current working directory) first — a project's own copy is how it
+customises its paths, so it always wins. Only if the project has none (AB Method installed as a plugin rather than
+with `npx ab-method`), read the bundled default: `../../../.ab-method/structure/index.yaml` relative to this
+`SKILL.md`. Either way, every path the index names is relative to the **project root**, never to the folder the
+bundled file lives in.
+
 ## Where this sits (and what it is NOT)
 
 Three critics guard a roadmap at three different moments. Keep them distinct:

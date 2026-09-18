@@ -1,0 +1,17 @@
+{
+  "name": "ab-method",
+  "owner": {
+    "name": "Ayoub"
+  },
+  "description": "The AB Method plugin for Claude Code.",
+  "plugins": [
+    {
+      "name": "ab-method",
+      "source": "./",
+      "description": "Incremental task management for coding agents: grill the problem, plan test-driven missions, bracket every implementation with critics.",
+      "author": {
+        "name": "Ayoub"
+      }
+    }
+  ]
+}

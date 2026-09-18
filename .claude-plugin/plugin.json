@@ -1,0 +1,12 @@
+{
+  "name": "ab-method",
+  "description": "Incremental task management for coding agents: grill the problem, plan test-driven missions, bracket every implementation with critics.",
+  "author": {
+    "name": "Ayoub"
+  },
+  "homepage": "https://github.com/ayoubben18/ab-method",
+  "repository": "https://github.com/ayoubben18/ab-method",
+  "license": "MIT",
+  "keywords": ["task-management", "tdd", "incremental-development", "subagents"],
+  "skills": "./.agents/skills/"
+}

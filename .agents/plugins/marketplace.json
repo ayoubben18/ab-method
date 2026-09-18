@@ -1,0 +1,20 @@
+{
+  "name": "ab-method",
+  "interface": {
+    "displayName": "AB Method"
+  },
+  "plugins": [
+    {
+      "name": "ab-method",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering"
+    }
+  ]
+}

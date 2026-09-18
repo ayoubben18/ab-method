@@ -28,6 +28,12 @@ docs.
 live — paths are user-configurable. The rendering rules, the line types, and a full worked file live in
 [DIAGRAM-FORMAT.md](DIAGRAM-FORMAT.md); read it before drawing either pass.
 
+Look for it under the project root (the current working directory) first — a project's own copy is how it
+customises its paths, so it always wins. Only if the project has none (AB Method installed as a plugin rather than
+with `npx ab-method`), read the bundled default: `../../../.ab-method/structure/index.yaml` relative to this
+`SKILL.md`. Either way, every path the index names is relative to the **project root**, never to the folder the
+bundled file lives in.
+
 ## What counts as a module here
 
 Not "a directory". The map partitions the codebase the way **this project** partitions it, in this order:

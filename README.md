@@ -29,6 +29,56 @@ It also installs in every case:
 
 Skills are copied as real files, not symlinks — portable across OS and CI.
 
+### As a plugin (Claude Code and Codex)
+
+This repository is also a plugin marketplace for both harnesses. Nothing is copied into your project: the workflows and skills live in the plugin and update with it.
+
+Claude Code:
+
+```bash
+/plugin marketplace add ayoubben18/ab-method
+/plugin install ab-method@ab-method
+```
+
+Codex:
+
+```bash
+codex plugin marketplace add ayoubben18/ab-method
+codex plugin add ab-method@ab-method
+```
+
+Every skill is namespaced the same way on both sides — `ab-method:<name>`. Run a workflow with `/ab-method:ab-create-task` (Claude Code) or `$ab-method:ab-create-task` (Codex), or describe what you want and the matching skill fires.
+
+| | `npx ab-method` | Plugin |
+|---|---|---|
+| Where it lives | Copied into the project (`.ab-method/`, `.claude/`, `.agents/`) | In the harness's plugin cache, shared by every project |
+| Updates | Re-run the installer | With the plugin |
+| Trigger (Claude Code) | `/create-task`, `/ab-master`, ... | `/ab-method:ab-create-task`, ... |
+| Trigger (Codex) | `$ab-create-task` | `$ab-method:ab-create-task` |
+| Custom paths | Edit `.ab-method/structure/index.yaml` | Create that same file in the project — it overrides the bundled default |
+| Built-in subagents | Optional, prompted | Not included |
+
+The plugin ships the skills only. The slash commands under `.claude/commands/` are thin pointers at the same workflows the `ab-*` skills already run, so shipping both would list every workflow twice; the eight built-in subagents are stack-specific and stay an `npx` opt-in.
+
+**How a plugin install finds `.ab-method/`.** Workflows and skills name `.ab-method/core/<workflow>.md` and `.ab-method/structure/index.yaml`. Each is looked up in the project first and, when the project has none, in the copy bundled with the plugin. So a project-level `index.yaml` always wins, and a project with no `.ab-method/` at all just works. Paths inside the index (`docs/...`, `CONTEXT.md`) are always relative to the project, never to the plugin.
+
+To set it up for a whole team, commit this to the repo's `.claude/settings.json` — the marketplace registers when a teammate trusts the folder:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "ab-method": {
+      "source": { "source": "github", "repo": "ayoubben18/ab-method" }
+    }
+  },
+  "enabledPlugins": {
+    "ab-method@ab-method": true
+  }
+}
+```
+
+Don't mix the two installs in one project on Claude Code — you would get each workflow twice (`ab-create-task` from `.claude/skills/` and `ab-method:ab-create-task` from the plugin).
+
 ## Claude Code vs Codex
 
 The workflows are identical; only the trigger differs.
@@ -179,6 +229,7 @@ Two rules keep it honest. **Graduation is a planning act**: `/create-roadmap` an
 .ab-method/
   core/                  Workflow definitions
   structure/index.yaml   Configurable paths and outputs
+                         (plugin installs: bundled; add this file to override)
 
 UBIQUITOUS_LANGUAGE.md   Domain glossary
 CONTEXT.md               Bounded-context overview
@@ -198,6 +249,35 @@ docs/
 ## Configuration
 
 All paths are configurable in `.ab-method/structure/index.yaml`. Every workflow checks this file first to know where to read from and write to. `workflow_outputs` maps each workflow to its output destinations.
+
+## Developing the plugin
+
+The repository root *is* the plugin — there is no second copy of the skills to keep in sync. Both manifests point at the tree the `npx` installer already ships:
+
+```
+.claude-plugin/marketplace.json     Claude Code marketplace manifest
+.claude-plugin/plugin.json          Claude Code plugin manifest   (skills → ./.agents/skills/)
+.agents/plugins/marketplace.json    Codex marketplace manifest
+.codex-plugin/plugin.json           Codex plugin manifest         (skills → ./.agents/skills/)
+.agents/skills/                     SHARED — read by both, and by the npx installer
+.ab-method/                         Bundled workflows + default index.yaml
+```
+
+```bash
+claude plugin validate .                          # marketplace + plugin manifests
+claude --plugin-dir .                             # load without installing; /reload-plugins after edits
+
+codex plugin marketplace add .                    # a local path works too
+codex debug prompt-input | grep -o "ab-method:[a-z-]*" | sort -u   # confirm the model sees the skills
+```
+
+Two rules keep a plugin install working:
+
+- A skill that names a `.ab-method/...` path must carry the lookup rule — project root first, then `../../../.ab-method/` relative to its `SKILL.md`. That relative path is the same in all three layouts (plugin, `.claude/skills/`, `.agents/skills/`), which is why it is written that way. Copy the paragraph from any `ab-*` skill.
+- Never reference another skill's files by install path (`.claude/skills/...`). Name the skill instead — the path differs per install.
+- Keep `package.json` free of `dependencies` and `devDependencies`. Claude Code runs `npm install` on a plugin whose root has any, and the root *is* the plugin — semantic-release alone put 226 packages (60 MB) into every user's plugin cache. The release workflow fetches its tooling with `npx -p` instead.
+
+**Versioning is deliberately asymmetric.** `.codex-plugin/plugin.json` carries `version`, because Codex requires it and uses it as the cache directory name; `scripts/sync-plugin-version.js` sets it from `package.json` on every release (it runs as the npm `version` script, which semantic-release triggers). `.claude-plugin/plugin.json` omits `version`: Claude Code treats it as a pin, so leaving it out makes the commit SHA the version and every push reaches users. `claude plugin validate` warns about the missing field; the warning is expected.
 
 ## Examples
 

@@ -1,0 +1,16 @@
+{
+  "name": "ab-method",
+  "version": "3.9.0",
+  "description": "Incremental task management for coding agents: grill the problem, plan test-driven missions, bracket every implementation with critics.",
+  "author": {
+    "name": "Ayoub"
+  },
+  "repository": "https://github.com/ayoubben18/ab-method",
+  "skills": "./.agents/skills/",
+  "interface": {
+    "displayName": "AB Method",
+    "shortDescription": "Grill, plan test-driven missions, review every implementation",
+    "developerName": "Ayoub",
+    "category": "Engineering"
+  }
+}

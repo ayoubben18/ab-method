@@ -8,9 +8,9 @@ Write a handoff document summarising the current conversation (or a specific sid
 
 ## Where to save it
 
-**Check `.ab-method/structure/index.yaml` first.** In an AB Method project, handoffs are a tracked artifact, not throwaway scratch — save to `docs/handoffs/[slug].md` (the location the index defines). The slug is a short kebab-case summary of the topic, e.g. `rate-limit-redis-vs-token-bucket.md`.
+**Check `.ab-method/structure/index.yaml` first** — the project's own copy if it has one; otherwise (a plugin install) the bundled default at `../../../.ab-method/structure/index.yaml` relative to this `SKILL.md`, whose paths are still relative to the project root. In an AB Method project, handoffs are a tracked artifact, not throwaway scratch — save to `docs/handoffs/[slug].md` (the location the index defines). The slug is a short kebab-case summary of the topic, e.g. `rate-limit-redis-vs-token-bucket.md`.
 
-If the project is **not** an AB Method project (no `.ab-method/`), fall back to the temporary directory of the user's OS — do not pollute the workspace.
+If the project is **not** an AB Method project (no `.ab-method/`, and none of the index's `docs/` folders — tasks, roadmaps, goals, handoffs — exist), fall back to the temporary directory of the user's OS — do not pollute the workspace.
 
 ## The spin-off-mid-grill case
 
