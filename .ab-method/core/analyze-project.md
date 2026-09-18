@@ -41,9 +41,9 @@ Deploy 4 Task calls in a single message:
        Extract the project's domain language from the codebase.
        Produce TWO root-level files:
        - UBIQUITOUS_LANGUAGE.md  (flat glossary — follow the format
-         in .claude/skills/ubiquitous-language/SKILL.md, keep as-is)
+         in the `ubiquitous-language` skill's SKILL.md, keep as-is)
        - CONTEXT.md              (bounded-context overview — follow
-         .claude/skills/domain-model/CONTEXT-FORMAT.md)
+         CONTEXT-FORMAT.md in the `domain-model` skill's folder)
        If you detect multiple bounded contexts (e.g. /src/ordering,
        /src/billing as distinct domains), produce CONTEXT-MAP.md at
        root + a CONTEXT.md inside each context folder instead.
@@ -108,7 +108,8 @@ Deploy: Domain Extractor.
 - Agents run in parallel; each writes to its own file (no contention).
 - `UBIQUITOUS_LANGUAGE.md` follows the format defined by the
   `ubiquitous-language` skill — do not modify that format here.
-- `CONTEXT.md` follows the format in
-  `.claude/skills/domain-model/CONTEXT-FORMAT.md`.
+- `CONTEXT.md` follows the format in `CONTEXT-FORMAT.md`, in the
+  `domain-model` skill's folder (wherever skills are installed —
+  `.claude/skills/`, `.agents/skills/`, or the plugin).
 - ADRs (`docs/adr/`) are NOT created here — they're created lazily
   by `/domain-model` when a real trade-off is recorded.

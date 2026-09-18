@@ -43,7 +43,7 @@ If endpoint conventions shifted (e.g. moved from REST to RPC, or added a new ver
 - New bounded context emerged → suggest `/domain-model` instead of editing freehand
 
 #### 2e. Hard-to-reverse decisions  →  `docs/adr/`
-Only if the change carries a real trade-off, was surprising, and is hard to reverse (the bar from `.claude/skills/domain-model/ADR-FORMAT.md`). If the bar is met, suggest the user run `/domain-model` to capture the ADR properly rather than writing it inline here.
+Only if the change carries a real trade-off, was surprising, and is hard to reverse (the bar from `ADR-FORMAT.md` in the `domain-model` skill's folder). If the bar is met, suggest the user run `/domain-model` to capture the ADR properly rather than writing it inline here.
 
 ### 3. Update Strategy
 - Add new content; don't delete existing prose
