@@ -1,3 +1,17 @@
+## [3.10.0](https://github.com/ayoubben18/ab-method/compare/v3.9.0...v3.10.0) (2026-09-18)
+
+### ✨ Features
+
+* **plugin:** ship ab-method as a Claude Code and Codex plugin ([06063bb](https://github.com/ayoubben18/ab-method/commit/06063bb3c8f248665064965538ead7c996ceeec8))
+
+### 🐛 Bug Fixes
+
+* **core:** reference skill files by skill name, not by .claude/skills path ([c4a5c18](https://github.com/ayoubben18/ab-method/commit/c4a5c18f9db5b723a460f34299f5c3060f6b0d60))
+
+### 👷 CI/CD
+
+* **release:** fetch release tooling with npx and version the Codex manifest ([7291f5f](https://github.com/ayoubben18/ab-method/commit/7291f5f7e92c13afecdaa512f3ff81dfcb5929d5))
+
 ## [3.9.0](https://github.com/ayoubben18/ab-method/compare/v3.8.0...v3.9.0) (2026-08-31)
 
 ### ✨ Features
