@@ -27,12 +27,20 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
+      # The release tooling is fetched here instead of living in package.json's
+      # devDependencies: this repo's root is also the Claude Code plugin, and
+      # Claude Code runs `npm install` on a plugin whose root has dependencies —
+      # which would pull all of this into every user's plugin cache.
+      # (@semantic-release/npm and /github ship inside semantic-release.)
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release
+        run: >-
+          npx --yes
+          -p semantic-release@24
+          -p @semantic-release/changelog@6
+          -p @semantic-release/git@10
+          -p conventional-changelog-conventionalcommits@9
+          semantic-release
