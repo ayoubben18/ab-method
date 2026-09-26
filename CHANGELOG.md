@@ -1,3 +1,9 @@
+## [3.11.0](https://github.com/ayoubben18/ab-method/compare/v3.10.0...v3.11.0) (2026-09-26)
+
+### ✨ Features
+
+* **tdd:** reshape into a reference-only red → green skill ([6c89955](https://github.com/ayoubben18/ab-method/commit/6c89955239b27ed3014b54c92ba11dede5b42dd8))
+
 ## [3.10.0](https://github.com/ayoubben18/ab-method/compare/v3.9.0...v3.10.0) (2026-09-18)
 
 ### ✨ Features
