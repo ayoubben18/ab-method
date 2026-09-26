@@ -128,7 +128,7 @@ If the runtime can't be determined it falls back to flat, which runs correctly o
 ## Core principles
 
 1. Always grill — `/create-task` and `/create-goal` invoke `grill-with-docs` on every run, no skip.
-2. Always TDD — every mission runs red-green-refactor through the `tdd` skill; the test is the spec.
+2. Always TDD — every mission runs red → green through the `tdd` skill; the test is the spec. Refactoring is left to `review-implementation`, once the task's missions are green.
 3. No mission docs — missions are one-line entries in `progress-tracker.md`; tight summaries on completion.
 4. One task at a time — focus, conserve context.
 5. Backend-first for full-stack tasks — types feed the frontend.

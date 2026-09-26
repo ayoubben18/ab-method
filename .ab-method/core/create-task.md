@@ -398,7 +398,7 @@ Walk through the missions list in `progress-tracker.md` from top to bottom. When
 
 > Invoke the `tdd` skill via the Skill tool: `Skill("tdd")`.
 
-Do this **first**, every mission, no exceptions. The skill loads `SKILL.md` plus its companions (`tests.md`, `mocking.md`, `interface-design.md`, `refactoring.md`, `deep-modules.md`) which drive every subsequent decision in the mission. Writing the test first is not enough — the discipline lives in the companion files. Skipping the Skill call means writing tests from instinct instead of from the playbook; that is a workflow violation, not a shortcut. If you find yourself about to read a source file or write a test without having called `Skill("tdd")` for this mission, stop and call it.
+Do this **first**, every mission, no exceptions. The skill loads `SKILL.md` (seams, anti-patterns, rules of the loop) plus its companions (`tests.md`, `mocking.md`), which drive every subsequent decision in the mission. Writing the test first is not enough — the discipline lives in that playbook. Skipping the Skill call means writing tests from instinct instead of from the playbook; that is a workflow violation, not a shortcut. If you find yourself about to read a source file or write a test without having called `Skill("tdd")` for this mission, stop and call it.
 
 After the skill is loaded:
 
@@ -428,11 +428,11 @@ After the skill is loaded:
    Never fabricate data to route around a black box. If the mission can't proceed without inventing
    records or behaviour, stop and tell the user the question is blocking after all.
 
-3. **Run red-green-refactor under the loaded `tdd` skill:**
-   - Write the failing test first (uses framework + patterns from `tech-stack.md` Testing section)
+3. **Run red → green under the loaded `tdd` skill:**
+   - Write the failing test first, at a seam the plan agreed (uses framework + patterns from `tech-stack.md` Testing section)
    - Make it pass with the smallest change
-   - Refactor with tests green
-   - The `tdd` skill's companion files drive the loop — consult them, don't improvise
+   - No refactor step — cleanup belongs to the post-implementation `review-implementation` pass, over the whole task's diff
+   - The `tdd` skill drives the loop — consult it, don't improvise
 
 4. **Optionally deploy a subagent** if the mission warrants it (large surface, specialized domain, infra). Pick by need — backend/UI/testing/quality/research — not by mission type. Default is direct implementation inside the `tdd` loop. A subagent does not exempt you from Step Zero — load `tdd` in the parent context first so the summary you receive can be evaluated against the playbook.
 
@@ -523,7 +523,7 @@ When the next uncompleted mission is tagged `[pp-x]`, collect **all uncompleted 
 2. **Confirm with the user** before launching: "Missions N–M are grouped `[pp-x]` — run them in parallel now, or one at a time?" The tag records *permission*, not *obligation*; the user may still choose sequential.
 3. **Load shared context once** (UBIQ, CONTEXT, tech-stack, relevant patterns, ADRs, prior mission summaries), then **spawn one subagent per mission in a single message** so they actually run concurrently. Each subagent prompt must include:
    - The mission's one-line objective plus the relevant constraints/notes from the tracker
-   - The instruction to follow the `tdd` red-green-refactor discipline: failing test first, smallest change to green, refactor
+   - The instruction to follow the `tdd` red → green discipline: failing test first at a seam the plan agreed, smallest change to green, no refactor step (cleanup is `review-implementation`'s job)
    - Which architecture/domain docs to read (paths from `.ab-method/structure/index.yaml`)
    - The hard boundary: touch **only this mission's files** — its group siblings are running concurrently
    - If the mission carries `⚠️ UQ-n`: that question's entry from `unresolved-questions.md` verbatim, plus the instruction to implement the **recorded placeholder** behind one named seam marked `TODO(UQ-n)` — never to invent an answer or fabricate data (§ 9.2b) — and to report the seam's path in its summary **without editing `unresolved-questions.md`** (same reason siblings don't touch the tracker: concurrent writes conflict)
@@ -536,7 +536,7 @@ When the next uncompleted mission is tagged `[pp-x]`, collect **all uncompleted 
 
 - **Always grill** — `/create-task` invokes `grill-with-docs` on every invocation, no skip
 - **Map the blast radius twice** — `change-map` predicts which modules the missions will land in *before* the user validates the plan, and derives the same map from the real diff *after* the reviewers pass. The drift between the two is the method's only measurement of whether a plan understood its own reach; it is reported and routed, never silently fixed
-- **Always TDD, skill loaded first** — every mission begins with `Skill("tdd")` before any other tool call; the playbook in the companion files is what makes it TDD, not the act of writing a test first
+- **Always TDD, skill loaded first** — every mission begins with `Skill("tdd")` before any other tool call; the playbook (seams, anti-patterns, loop rules, `tests.md`, `mocking.md`) is what makes it TDD, not the act of writing a test first
 - **No mission docs** — missions live as one-line entries in `progress-tracker.md`, completion summaries are tight bullets
 - **One task at a time** — focus, conserve context
 - **All missions defined upfront** — full roadmap at task creation

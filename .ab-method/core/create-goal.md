@@ -18,7 +18,7 @@ written. It does NOT execute the goal — `/goal` does that.
   loop and walk away (migrations, large refactors, "make all tests
   pass", build-and-verify-a-feature).
 - **`/create-task`** — you want to stay in the loop, review each
-  mission, and run red-green-refactor yourself.
+  mission, and run red → green yourself.
 
 A good goal is **bigger than one prompt but smaller than an open-ended
 backlog**. If the request is genuinely several unrelated pieces of work,

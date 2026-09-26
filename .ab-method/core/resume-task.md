@@ -71,7 +71,7 @@ whose missions are already completed stay in the file; mention them only in the 
 
 Invoke the `tdd` skill via the Skill tool: `Skill("tdd")`.
 
-Do this **first**, every resumed mission, no exceptions — before reading mission context, before grilling, before any Read / Edit / Write / Bash for the mission's work. The skill loads `SKILL.md` plus its companions (`tests.md`, `mocking.md`, `interface-design.md`, `refactoring.md`, `deep-modules.md`) which drive every subsequent decision. Writing the test first is not enough; the discipline lives in those companion files. If you catch yourself about to touch the codebase without having called `Skill("tdd")` for this mission, stop and call it.
+Do this **first**, every resumed mission, no exceptions — before reading mission context, before grilling, before any Read / Edit / Write / Bash for the mission's work. The skill loads `SKILL.md` (seams, anti-patterns, rules of the loop) plus its companions (`tests.md`, `mocking.md`), which drive every subsequent decision. Writing the test first is not enough; the discipline lives in that playbook. If you catch yourself about to touch the codebase without having called `Skill("tdd")` for this mission, stop and call it.
 
 ### 5. Load Context for the Next Mission
 Read (paths from `.ab-method/structure/index.yaml`):
@@ -81,10 +81,10 @@ Read (paths from `.ab-method/structure/index.yaml`):
 - `docs/adr/`
 - Mission summaries already in the progress tracker
 
-### 6. Run the Mission Through `tdd` (red-green-refactor)
+### 6. Run the Mission Through `tdd` (red → green)
 - If the mission's one-line description is vague → invoke `grill-with-docs` first
 - If the mission carries `⚠️ UQ-n` → implement the **recorded placeholder** behind one named seam marked `TODO(UQ-n)`, with a test naming the UQ, per `create-task.md` § 9.2b. Never invent the answer mid-mission; never fabricate data to route around it
-- Run red-green-refactor under the already-loaded `tdd` skill — consult the companion files, don't improvise
+- Run red → green under the already-loaded `tdd` skill — consult it, don't improvise. No refactor step: cleanup belongs to `review-implementation` once the task's missions are green
 - Optionally deploy a subagent if the mission warrants it (large surface, specialized domain). Pick by need, not by mission type. A subagent does not exempt you from Step 4 — load `tdd` in the parent context first.
 
 **If the mission is tagged `[pp-x]` and the user confirmed the parallel run:** follow **Parallel group execution** in `.ab-method/core/create-task.md` (§ 9) — one subagent per remaining mission in the group, spawned in a single message, each running tdd on disjoint files and writing its detailed output to `sub-agents-outputs/`; then run the test suite once at the parent level to verify the merge.

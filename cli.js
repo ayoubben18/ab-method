@@ -202,7 +202,7 @@ async function install() {
         '- `ab-update-architecture` — refresh architecture docs',
         '',
         'Principles: always grill before defining work (`grill-with-docs`); every',
-        'mission runs through `tdd` (red-green-refactor); `progress-tracker.md` is',
+        'mission runs through `tdd` (red → green); `progress-tracker.md` is',
         'the single source of truth per task.',
         '',
         'Critics bracket every implementation, and all of them stay silent unless',

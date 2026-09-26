@@ -15,7 +15,7 @@ This workflow will:
 1. Identify the task and read its `progress-tracker.md` (single source of truth — there are no mission docs)
 2. Show progress: which missions are done, which is next
 3. Load UBIQ + CONTEXT + tech-stack + patterns + ADRs for the next mission
-4. **Run the next mission through the `tdd` skill** (red-green-refactor)
+4. **Run the next mission through the `tdd` skill** (red → green)
 5. Append a tight technical summary on completion
 6. **Run `review-implementation` after the last mission (interactive)** — three critics (cleaner-architecture, slop-defender, reusability-inspector) on the task diff; findings presented for you to apply before status → Completed
 7. **Run `change-map` last** — derives the task's actual blast radius from its commits and walks the drift against the map drawn at plan time with you, before status → Completed

@@ -88,7 +88,7 @@ Walk the remaining missions top to bottom. No user prompts between missions.
 Spawn **one subagent** for the mission. Its prompt must include:
 
 - The mission's one-line objective plus the relevant constraints/notes from the tracker
-- The instruction to follow the `tdd` red-green-refactor discipline: failing test first, smallest change to green, refactor
+- The instruction to follow the `tdd` red → green discipline: failing test first at a seam the plan agreed, smallest change to green, no refactor step (cleanup is `review-implementation`'s job after the loop)
 - Which architecture/domain docs to read (paths from `.ab-method/structure/index.yaml`) and the prior mission summaries from the tracker
 - If the mission carries `⚠️ UQ-n`: that entry from `unresolved-questions.md` verbatim, plus the instruction to build the **recorded placeholder** behind one named seam marked `TODO(UQ-n)` with a test naming the UQ (`create-task.md` § 9.2b) — never to invent the answer, upgrade the placeholder, or fabricate data around it, and to update the entry's **Marker** line with the paths it wrote
 - The instruction to **update `progress-tracker.md` itself on completion**: check off its mission line and append the technical summary (same format as `create-task.md` § 9.6 — Files / Built / Tests / Patterns / Integrates with / Gotchas, skip empty bullets)

@@ -73,7 +73,7 @@ Common routes:
 The most common fork. Decide it with the user, don't guess blindly:
 
 - **`create-task`** — you want to **stay in the loop**: review each
-  mission, drive red-green-refactor yourself. Bounded, focused scope
+  mission, drive red → green yourself. Bounded, focused scope
   broken into TDD missions. Pick this when the work is a single feature
   or fix you want to shepherd.
 - **`create-goal`** — one continuous objective with a verifiable stop
@@ -97,7 +97,7 @@ grounded in the actual files, not from memory:
 1. **Baseline** — `analyze-project` → UBIQ + CONTEXT + architecture docs.
 2. **Sharpen** — `domain-model` grills the language, captures ADRs.
 3. **Build** — `create-task` grills, then drives each mission through the
-   `tdd` skill (red-green-refactor). Or `create-goal` for autonomous runs.
+   `tdd` skill (red → green). Or `create-goal` for autonomous runs.
 4. **Maintain** — `update-architecture` keeps the baseline fresh.
 
 Keep it short. Point them at `/ab-master` for the full workflow menu.

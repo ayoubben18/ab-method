@@ -17,7 +17,7 @@ This workflow will:
 3. Write a slim `progress-tracker.md` with all missions defined as one-line entries
 4. **Run `critique-plan`** on the drafted missions — a read-only domain critic that pushes back only on genuine conflicts with the domain model (advisory; silent when the plan is sound)
 4b. **Draw the planned change map** — `change-map` predicts which modules the missions will add / change / touch, so you validate the task's blast radius alongside its mission list
-5. **Run every mission through the `tdd` skill** (red-green-refactor) — no separate mission docs are created
+5. **Run every mission through the `tdd` skill** (red → green) — no separate mission docs are created
 6. **Run `review-implementation`** after the last mission — three critics (cleaner-architecture, slop-defender, reusability-inspector) on the task diff; interactive here, so findings are presented for you to apply
 7. **Draw the actual change map** last — after the reviewers, `change-map` derives the real blast radius from the task's commits and diffs it against the plan; the drift is walked with you before the task closes
 

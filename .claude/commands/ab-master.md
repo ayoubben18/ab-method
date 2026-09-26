@@ -57,7 +57,7 @@ Loads and executes the specified workflow from `.ab-method/core/[workflow-name].
 The AB Method runs in four phases:
 1. **Baseline** — `/analyze-project` produces UBIQ + CONTEXT + 3 lean architecture docs
 2. **Sharpen** — `/domain-model` (skill) grills the language and captures ADRs
-3. **Build** — `/create-task` always grills, then drives every mission through the `tdd` skill (red-green-refactor). No mission docs.
+3. **Build** — `/create-task` always grills, then drives every mission through the `tdd` skill (red → green). No mission docs.
 4. **Maintain** — `/update-architecture` keeps the baseline fresh
 
 ## Examples
