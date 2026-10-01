@@ -15,6 +15,8 @@ Do not act on the plan until I confirm we have reached a shared understanding.
 
 A branch is closed when it is answered — or, rarely, when it is **parked** as an unresolved question (see below). Parking is the only sanctioned way to leave a branch open; never leave one silently unresolved.
 
+When a question has options, explain every option so I can choose without looking anything up — see **Presenting choices** below.
+
 </what-to-do>
 
 <supporting-info>
@@ -56,6 +58,21 @@ If a `CONTEXT-MAP.md` exists at the root, the repo has multiple contexts. The ma
 Create files lazily — only when you have something to write. If no `CONTEXT.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
 
 ## During the session
+
+### Presenting choices
+
+When a question has options to pick from, do this for **every** option:
+
+1. **Show it in code first** — a short, simplified snippet of what that option looks like in practice. Use the project's real names (files, functions, tables, domain terms) when you know them; otherwise a tiny made-up example. A few lines: just enough to see the difference, not a full implementation.
+2. **Explain it in plain words** — one or two short sentences on what it means for the user: what gets easier, what gets harder, when you'd pick it.
+
+Keep the language simple:
+
+- No vague or buzzword-only terms ("more scalable", "cleaner", "decoupled", "idiomatic"). Say what actually happens instead.
+- If a technical term is unavoidable, explain it in the same sentence.
+- Make the options differ visibly — side by side, the snippets should make the trade-off obvious.
+
+Then give your recommendation and the one-line reason. See [EXAMPLES.md](./EXAMPLES.md) for what this looks like.
 
 ### Challenge against the glossary
 
