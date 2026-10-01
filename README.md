@@ -1,5 +1,7 @@
 # AB Method
 
+![AB Method — grill the problem, plan test-driven missions, put critics on both sides of every change](.github/assets/cover.png)
+
 A workflow system for Claude Code and Codex. It grills a problem into a domain-grounded plan, then either drives it through test-driven missions you review one at a time, or hands it to an autonomous `/goal` loop that runs to a verifiable stop condition.
 
 ## Installation

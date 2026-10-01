@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=block" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F3F0E8;
+    --ink: #16150F;
+    --muted: #6E6A5E;
+    --rule: #D6D1C4;
+    --red: #D2462B;
+    --green: #2F7A4B;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 640px; background: var(--paper); }
+  body {
+    position: relative;
+    overflow: hidden;
+    color: var(--ink);
+    font-family: 'Geist', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* faint grid, like engineering paper */
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(22,21,15,.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(22,21,15,.045) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-position: -1px -1px;
+  }
+  .frame { position: absolute; inset: 64px 80px; }
+
+  .meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: 'Geist Mono', monospace; font-size: 15px; letter-spacing: .02em;
+    color: var(--muted);
+    padding-bottom: 16px; border-bottom: 1px solid var(--rule);
+  }
+  .meta b { color: var(--ink); font-weight: 500; }
+
+  h1 {
+    margin-top: 44px;
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: 148px; line-height: .86; letter-spacing: -.02em;
+  }
+  h1 em { font-style: italic; color: var(--red); }
+
+  .tag {
+    margin-top: 26px; max-width: 760px;
+    font-size: 25px; line-height: 1.38; letter-spacing: -.005em; color: #3B392F;
+  }
+
+  .cmd {
+    position: absolute; right: 0; top: 136px;
+    font-family: 'Geist Mono', monospace; font-size: 18px;
+    padding: 12px 18px; border: 1px solid var(--ink); background: var(--paper);
+  }
+  .cmd span { color: var(--muted); margin-right: 10px; }
+
+  svg { position: absolute; left: 0; bottom: 0; overflow: visible; }
+  .lbl { font-family: 'Geist Mono', monospace; font-size: 15px; fill: var(--ink); }
+  .sub { font-family: 'Geist Mono', monospace; font-size: 13px; fill: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="frame">
+    <div class="meta">
+      <div><b>ab-method</b> &nbsp;/&nbsp; workflows for Claude Code &amp; Codex</div>
+      <div>MIT licensed</div>
+    </div>
+
+    <h1>AB <em>Method</em></h1>
+    <p class="tag">Grill the problem into a domain-grounded plan, build it in test&#8209;driven missions, and put critics on both sides of every change.</p>
+
+    <div class="cmd"><span>$</span>npx ab-method</div>
+
+    <!-- pipeline: 1120 wide, sits on the bottom edge of the frame -->
+    <svg width="1120" height="92" viewBox="0 0 1120 92">
+      <line x1="6" y1="20" x2="1114" y2="20" stroke="#16150F" stroke-width="1.5"/>
+
+      <!-- stations -->
+      <g>
+        <circle cx="6" cy="20" r="6" fill="#16150F"/>
+        <text class="lbl" x="0" y="54">grill</text>
+        <text class="sub" x="0" y="76">sharpen the language</text>
+      </g>
+      <g>
+        <circle cx="260" cy="20" r="6" fill="#F3F0E8" stroke="#16150F" stroke-width="1.5"/>
+        <text class="lbl" x="254" y="54">plan</text>
+        <text class="sub" x="254" y="76">missions + critique</text>
+      </g>
+      <g>
+        <!-- red → green pair -->
+        <rect x="514" y="11" width="18" height="18" fill="#D2462B"/>
+        <rect x="538" y="11" width="18" height="18" fill="#2F7A4B"/>
+        <text class="lbl" x="514" y="54">red → green</text>
+        <text class="sub" x="514" y="76">one mission at a time</text>
+      </g>
+      <g>
+        <circle cx="774" cy="20" r="6" fill="#F3F0E8" stroke="#16150F" stroke-width="1.5"/>
+        <text class="lbl" x="768" y="54">review</text>
+        <text class="sub" x="768" y="76">three critics on the diff</text>
+      </g>
+      <g>
+        <circle cx="1114" cy="20" r="6" fill="#16150F"/>
+        <text class="lbl" x="1114" y="54" text-anchor="end">sync docs</text>
+        <text class="sub" x="1114" y="76" text-anchor="end">no drift</text>
+      </g>
+    </svg>
+  </div>
+</body>
+</html>
