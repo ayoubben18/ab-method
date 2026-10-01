@@ -1,3 +1,9 @@
+## [3.11.1](https://github.com/ayoubben18/ab-method/compare/v3.11.0...v3.11.1) (2026-10-01)
+
+### 🐛 Bug Fixes
+
+* **grill:** explain every choice with a code snippet and plain words ([be564aa](https://github.com/ayoubben18/ab-method/commit/be564aa4bd2b930dc12e22b3f2e6f81e9dfdf611))
+
 ## [3.11.0](https://github.com/ayoubben18/ab-method/compare/v3.10.0...v3.11.0) (2026-09-26)
 
 ### ✨ Features
