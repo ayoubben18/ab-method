@@ -1,77 +1,87 @@
-# Good and Bad Tests
+# Worked Examples
 
-## Good Tests
+## Use case first
 
-**Integration-style**: Test through real interfaces, not mocks of internal parts.
+```text
+Starting condition: a cart holding one item priced 10 and one priced 5
+Action:             the user checks out with a valid card
+Observable result:  the order is confirmed with total 15
+What breaks if it regresses: the user is charged the wrong amount, or can't buy at all
+```
+
+The test is written from that statement, not from the code:
 
 ```typescript
-// GOOD: Tests observable behavior
-test("user can checkout with valid cart", async () => {
+test("user can check out a valid cart and is charged its total", async () => {
   const cart = createCart();
-  cart.add(product);
-  const result = await checkout(cart, paymentMethod);
-  expect(result.status).toBe("confirmed");
+  cart.add({ price: 10 });
+  cart.add({ price: 5 });
+
+  const order = await checkout(cart, validCard);
+
+  expect(order.status).toBe("confirmed");
+  expect(order.total).toBe(15);
 });
 ```
 
-Characteristics:
+Two assertions, one use case: together they prove "confirmed **and** charged correctly".
 
-- Tests behavior users/callers care about
-- Uses public API only
-- Survives internal refactors
-- Describes WHAT, not HOW
-- One logical assertion per test
+## Meaningful red
 
-## Bad Tests
+```text
+✗ user can check out a valid cart and is charged its total
+  Expected: 15
+  Received: 10          ← the behavior is broken: only the first item is summed. Good red.
 
-**Implementation-detail tests**: Coupled to internal structure.
+✗ user can check out a valid cart and is charged its total
+  TypeError: checkout is not a function   ← wrong import. Not red yet — fix the test and rerun.
+```
+
+## Assertions independent of the implementation
 
 ```typescript
-// BAD: Tests implementation details
-test("checkout calls paymentService.process", async () => {
-  const mockPayment = jest.mock(paymentService);
-  await checkout(cart, payment);
-  expect(mockPayment.process).toHaveBeenCalledWith(cart.total);
+// WEAK: expected value recomputed the way the code computes it — passes by construction
+const expected = items.reduce((sum, i) => sum + i.price, 0);
+expect(calculateTotal(items)).toBe(expected);
+
+// STRONG: expected value comes from the use case
+expect(calculateTotal([{ price: 10 }, { price: 5 }])).toBe(15);
+```
+
+```typescript
+// WEAK: asserts an internal call — survives a wrong total, breaks on a harmless refactor
+expect(mockPayment.process).toHaveBeenCalledWith(cart.total);
+
+// STRONG: asserts the persisted, observable state through the interface
+const saved = await getOrder(order.id);
+expect(saved.total).toBe(15);
+```
+
+```typescript
+// Exactness where it matters: prompt text must be preserved verbatim
+expect(buildPrompt(input)).toBe("Summarize the following ticket in one sentence:\n\nPrinter jams");
+```
+
+## Challenging a test's value
+
+```typescript
+test("formatPrice returns a string", () => {
+  expect(typeof formatPrice(1999)).toBe("string");
 });
 ```
 
-Red flags:
+- Plausible broken implementation that still passes: `() => ""`. → Weak.
+- Rewrite it against the use case: `expect(formatPrice(1999)).toBe("$19.99")`.
+- If another test already asserts `"$19.99"`, delete this one — it adds no distinct protection.
 
-- Mocking internal collaborators
-- Testing private methods
-- Asserting on call counts/order
-- Test breaks when refactoring without behavior change
-- Test name describes HOW not WHAT
-- Verifying through external means instead of interface
+## Deterministic execution
 
 ```typescript
-// BAD: Bypasses interface to verify
-test("createUser saves to database", async () => {
-  await createUser({ name: "Alice" });
-  const row = await db.query("SELECT * FROM users WHERE name = ?", ["Alice"]);
-  expect(row).toBeDefined();
-});
+// FLAKY: depends on the wall clock and an arbitrary sleep
+await new Promise((r) => setTimeout(r, 500));
+expect(screen.getByText("Expired")).toBeVisible();
 
-// GOOD: Verifies through interface
-test("createUser makes user retrievable", async () => {
-  const user = await createUser({ name: "Alice" });
-  const retrieved = await getUser(user.id);
-  expect(retrieved.name).toBe("Alice");
-});
-```
-
-**Tautological tests**: Expected value restates the implementation, so the test passes by construction.
-
-```typescript
-// BAD: Expected value is recomputed the way the code computes it
-test("calculateTotal sums line items", () => {
-  const items = [{ price: 10 }, { price: 5 }];
-  const expected = items.reduce((sum, i) => sum + i.price, 0);
-  expect(calculateTotal(items)).toBe(expected);
-});
-
-// GOOD: Expected value is an independent, known literal
-test("calculateTotal sums line items", () => {
-  expect(calculateTotal([{ price: 10 }, { price: 5 }])).toBe(15);
-});
+// DETERMINISTIC: control time, wait for the observable outcome
+vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+expect(await screen.findByText("Expired")).toBeVisible();
 ```

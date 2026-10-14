@@ -160,7 +160,7 @@ workflow_outputs:
                         # vocabulary (module / interface / depth / seam / adapter / leverage / locality)
                         # and its principles. Consumed by improve-codebase-architecture, by
                         # review-implementation's cleaner-architecture + slop-defender lenses, and by
-                        # tdd when agreeing seams — they reference it rather than restating it
+                        # tdd when choosing a test boundary — they reference it rather than restating it
   improve-codebase-architecture: []   # writes NOTHING to the repo: the candidate report is a
                         # self-contained HTML file in the OS temp dir ($TMPDIR/architecture-review-<ts>.html),
                         # falling back to a markdown list with no network. The grilling loop that follows

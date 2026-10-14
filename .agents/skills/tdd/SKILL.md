@@ -5,36 +5,52 @@ description: Test-driven development. Use when the user wants to build features 
 
 # Test-Driven Development
 
-TDD is the red → green loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle: consult them before and during the loop, not after.
+Every test must protect a real use case, fail for the right reason before the change, and pass because the production code now does the right thing. Work through the steps below in order, once per use case.
 
-**ALWAYS check `.ab-method/structure/index.yaml` FIRST** for where the domain docs live — paths are user-configurable. Look for it under the project root first; only if the project has none (AB Method installed as a plugin), read the bundled default at `../../../.ab-method/structure/index.yaml` relative to this `SKILL.md`. Every path the index names is relative to the project root. From there, read `CONTEXT.md` and `UBIQUITOUS_LANGUAGE.md` (if they exist) so test names and interface vocabulary match the project's domain language, and respect the ADRs in the area you're touching.
+**ALWAYS check `.ab-method/structure/index.yaml` FIRST** for where the domain docs live — paths are user-configurable. Look for it under the project root first; only if the project has none (AB Method installed as a plugin), read the bundled default at `../../../.ab-method/structure/index.yaml` relative to this `SKILL.md`. Every path the index names is relative to the project root. From there, read `CONTEXT.md` and `UBIQUITOUS_LANGUAGE.md` (if they exist) so test names match the project's domain language, the Testing section of `tech-stack.md` for the framework and conventions, and respect the ADRs in the area you're touching.
 
-## What a good test is
+See [tests.md](tests.md) for worked examples of each step and [mocking.md](mocking.md) for where mocks belong.
 
-Tests verify behavior through public interfaces, not implementation details. Code can change entirely; tests shouldn't. A good test reads like a specification: "user can checkout with valid cart" tells you exactly what capability exists, and it survives refactors because it doesn't care about internal structure.
+## 1. Define the use case before writing the test
 
-See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking guidelines.
+State the starting condition, the action, and the observable result. Ground it in a requirement, actual usage, or a reproduced bug — never in what the code happens to do. The use case is not complete until you can say concretely what breaks for the user if this behavior regresses.
 
-## Seams: where tests go
+## 2. Check existing coverage first
 
-A **seam** is the public boundary you test at: the interface where you observe behavior without reaching inside. Tests live at seams, never against internals.
+Read the nearby tests and the relevant implementation. Extend an existing test when it already exercises the scenario. Add another only when it protects a distinct failure mode.
 
-**Test only at pre-agreed seams.** Before writing any test, write down the seams under test and confirm them with the user. No test is written at an unconfirmed seam. You can't test everything, so agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
+## 3. Choose the smallest realistic test boundary
 
-Ask: "What's the public interface, and which seams should we test?"
+Test calculations directly, component interactions through the component, and critical application wiring through integration or E2E tests. Mock external boundaries only where necessary. Exercise the production code responsible for the behavior — never a copy, a stub of it, or a private helper reached around the interface.
 
-**When no user is there to confirm** (an autonomous run such as `ab-start-task` or `ab-start-roadmap`, or a mission subagent), the plan is the agreement: test at the public interfaces the mission's objective and the grill already settled. If the mission needs a seam the plan never named, take the narrowest public interface that exposes the behavior and name it in the mission summary, so the review stage can challenge it. Never drop to internals to avoid the question.
+When the shape of that boundary is itself in question (how deep the module is, where the seam belongs, what the interface should expose), call the Skill tool with "codebase-design" for the vocabulary. It is a reference to consult, not a session to run.
 
-When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose, how to make it testable), call the Skill tool with "codebase-design" for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
+## 4. Require meaningful red, then green
 
-## Anti-patterns
+Run the test before implementing the change. Confirm it fails **because the required behavior is missing or broken** — not because of a typo, a missing import, a bad fixture or a wrong path. Implement the smallest fix, rerun until green, then refactor the code you just touched with the test as the safety net.
 
-- **Implementation-coupled**: mocks internal collaborators, tests private methods, or verifies through a side channel (querying the database instead of using the interface). The tell: the test breaks when you refactor but behavior hasn't changed.
-- **Tautological**: the assertion recomputes the expected value the way the code does (`expect(add(a, b)).toBe(a + b)`, a snapshot derived by hand the same way, a constant asserted equal to itself), so it passes by construction and can never disagree with the code. Expected values must come from an independent source of truth: a known-good literal, a worked example, the spec.
-- **Horizontal slicing**: writing all tests first, then all implementation. Bulk tests verify _imagined_ behavior: you test the _shape_ of things rather than user-facing behavior, the tests go insensitive to real changes, and you commit to test structure before understanding the implementation. Work in **vertical slices** instead: one test → one implementation → repeat, each test a **tracer bullet** that responds to what the last cycle taught you.
+For a pure refactor, there is no red: establish passing behavior coverage first, then change the implementation and keep it green.
 
-## Rules of the loop
+## 5. Make assertions independent of the implementation
 
-- **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
-- **One slice at a time.** One seam, one test, one minimal implementation per cycle.
-- **Refactoring is not part of the loop.** It belongs to the review stage: the `review-implementation` skill runs over the task's whole diff once its missions are green, and applies cleanups with the tests as the safety net. Not the red → green implementation cycle.
+Derive expected results from the use case, not from the code. Assert the submitted value, the visible result, the persisted state, or a meaningful interaction. Exact values belong where exactness matters, such as preserving prompt text. Multiple assertions are appropriate when they jointly prove one use case.
+
+## 6. Challenge each test's value
+
+For every test, ask:
+
+- What plausible broken implementation would still pass it?
+- Does another test already catch the same failure?
+- Would a harmless refactor break it?
+
+Rewrite weak assertions and remove tests with no distinct protection. For substantial changes, use a second agent to challenge the grouped findings against source evidence.
+
+## 7. Keep execution deterministic and verification bounded
+
+Control external data and time when needed, wait for observable outcomes instead of sleeping, and account for platform differences. Run the focused tests and the relevant integration checks.
+
+Finish with three things stated: the behavior now protected, the evidence of red and green (the failing output, then the passing run), and any verification limits — what you could not run or could not observe.
+
+## Autonomous runs
+
+When no user is there to confirm (`ab-start-task`, `ab-start-roadmap`, a mission subagent), the mission's objective and the grill are the source of the use case and the boundary. If the mission needs a boundary the plan never named, take the narrowest public interface that exposes the behavior and name it in the mission summary so the review stage can challenge it. The red/green evidence and verification limits from step 7 go in that summary too.
