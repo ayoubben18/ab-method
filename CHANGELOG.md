@@ -1,3 +1,9 @@
+## [3.12.0](https://github.com/ayoubben18/ab-method/compare/v3.11.1...v3.12.0) (2026-10-14)
+
+### ✨ Features
+
+* **tdd:** rebuild the skill around use-case-driven, value-challenged tests ([717a769](https://github.com/ayoubben18/ab-method/commit/717a769f174ec5bee266ab191e4eb31e45831ea6))
+
 ## [3.11.1](https://github.com/ayoubben18/ab-method/compare/v3.11.0...v3.11.1) (2026-10-01)
 
 ### 🐛 Bug Fixes
