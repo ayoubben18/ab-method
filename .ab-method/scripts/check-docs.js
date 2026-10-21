@@ -2,8 +2,8 @@
 // Enforces the doc budgets in .ab-method/structure/index.yaml (rules: .ab-method/rules/docs.md).
 // Exits 1 when any doc is over budget, has an overlong line, or leaks task history.
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const DEFAULT_BUDGETS = {
   maxLineWords: 60,
@@ -40,10 +40,9 @@ function parseBudgets(indexPath) {
 
 function globToRegex(glob) {
   const re = glob
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-    .replace(/\*\*\//g, '\u0000')
-    .replace(/\*/g, '[^/]*')
-    .replace(/\u0000/g, '(?:.*/)?');
+    .split('**/')
+    .map(part => part.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*'))
+    .join('(?:.*/)?');
   return new RegExp(`^${re}$`);
 }
 
