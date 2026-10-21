@@ -1,3 +1,19 @@
+## [4.0.0](https://github.com/ayoubben18/ab-method/compare/v3.12.0...v4.0.0) (2026-10-21)
+
+### ⚠ BREAKING CHANGES
+
+* missions no longer all run through tdd; pattern docs moved
+from frontend-patterns.md / backend-patterns.md to docs/architecture/<layer>/
+topic folders; doc writes are budget-gated and edit in place. Untagged
+missions in existing trackers still run as `verify: test`. Run `/ab-cleanup`
+once after upgrading.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+### ✨ Features
+
+* lean method v4 — placement, test plan, UI prototypes, doc budgets, ab-cleanup ([c77de92](https://github.com/ayoubben18/ab-method/commit/c77de92decb214efdd62f4c5425ed638c2e60342))
+
 ## [3.12.0](https://github.com/ayoubben18/ab-method/compare/v3.11.1...v3.12.0) (2026-10-14)
 
 ### ✨ Features
