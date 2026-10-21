@@ -2,285 +2,110 @@
 
 ## Purpose
 
-Execute a **roadmap** autonomously to completion — the layer above
-`/start-task`. Reads `roadmap.md`, verifies the dependency tree is
-planned, then runs each task in dependency order. Each task executes
-exactly like `/start-task` (its missions in subagents under `tdd`, a
-commit per mission), and **independent tasks can run concurrently**.
+Execute a **roadmap** autonomously to completion — the layer above `/start-task`. Read `roadmap.md`, verify the dependency tree is planned, then run each task in dependency order, each exactly like `/start-task` (missions in subagents, `verify:` tags honoured, a commit per mission). **Independent tasks can run concurrently.**
 
-`/start-roadmap` is an **executor** workflow (like `/start-task` and
-`/goal`). It does not define or reshape tasks — that's `/create-roadmap`
-and `/create-task`. It runs what's already planned.
+`/start-roadmap` is an **executor**: it never defines or reshapes tasks — that's `/create-roadmap` and `/create-task`.
 
 ## Critical Step
 
-**ALWAYS check `.ab-method/structure/index.yaml` FIRST** to find where
-roadmaps and tasks are stored and how they reference each other. Paths
-are user-configurable.
+**ALWAYS check `.ab-method/structure/index.yaml` FIRST** for where roadmaps and tasks live and how they reference each other. Paths are user-configurable.
+
+Follow `.ab-method/rules/communication.md` for every message; every task run applies `.ab-method/rules/code.md` (seeded into its subagents by the `start-task` rules).
 
 ## Process
 
 ### 1. Identify the Roadmap
 
-- If the user passed a roadmap name or a path to its `roadmap.md`, use it.
-- Otherwise list folders under `docs/roadmaps/` and ask which to start.
+Use the name or path the user passed; otherwise list `docs/roadmaps/` and ask.
 
-Read `roadmap.md`: the Objective (the destination), the task list with
-`depends-on` edges, each task's `plan:` and `status:` fields, and — when
-present — `## Open decisions`, `## Not yet specified`, and
-`## Out of scope`. Build the DAG in memory. Those three sections are
-usually absent; that means the roadmap is fully charted, which is normal.
+Read `roadmap.md`: the Objective, tasks with `depends-on` edges, each task's `plan:` and `status:`, and — when present — `## Open decisions`, `## Not yet specified`, `## Out of scope`. Build the DAG in memory.
 
-**`status:` is a hint; the tracker is the truth.** A task truly "needs
-work" when its `docs/tasks/<slug>/progress-tracker.md` has **any
-unchecked mission**, regardless of its roadmap `status:`. This matters for
-re-runs: a task marked `done` that was later extended (new missions added
-by `/extend-task`) has unchecked missions again — it's **reopened** and
-must run. Treat `status: done` + all-missions-checked as truly done;
-anything with unchecked missions is pending work. (`/extend-task` flips a
-reopened task's `status:` back to `pending`, but always confirm against
-the tracker rather than trusting the flag.)
+**`status:` is a hint; the tracker is the truth.** A task needs work when its `docs/tasks/<slug>/progress-tracker.md` has **any unchecked mission** — including a `done` task reopened by `/extend-task`. All missions checked = truly done.
 
-### 2. Dependency-Tree Verification Gate — BEFORE anything runs
+### 2. Dependency-Tree Verification Gate — before anything runs
 
-**This whole pass runs to completion before a single task executes.** Its
-job: prove the part of the graph you're about to run is fully planned.
+This pass completes before a single task executes. Walk the DAG from the roots:
 
-Determine the **executable frontier** by walking the DAG from the roots
-down:
+- A task is **runnable** only if it has a plan (`plan: ✅` **and** its tracker exists with missions), all its `depends-on` tasks are truly done, and **no open decision `blocks:` it**.
+- The executable set is the maximal fully-planned prefix in topological order, restricted to tasks that need work.
 
-- A task is **runnable** only if it **has a plan** (`plan: ✅ planned` —
-  confirm its `docs/tasks/<slug>/progress-tracker.md` actually exists with
-  missions), all of its `depends-on` tasks are truly done (no unchecked
-  missions in their trackers), **and no open decision `blocks:` it**.
-- A task **needs work** if its tracker has any unchecked mission — whether
-  it's a never-run task or a `done` task reopened by `/extend-task`.
-  Already-done tasks with everything checked are skipped.
-- Walk down the tree through planned tasks as far as you can. The
-  executable set is the maximal fully-planned prefix in topological order,
-  restricted to tasks that need work.
+**Stop conditions — halt loudly:**
 
-**Stop conditions — halt loudly, never plough on:**
-
-- If a task that something depends on is **unplanned** (`plan: ⬜`) — a
-  live dependency with no `/create-task` plan — **STOP before executing
-  anything**. Name the exact task and tell the user to plan it first:
-
+- A live dependency is **unplanned** (`plan: ⬜`):
   ```
   Cannot start roadmap: <Name>
-
   Task 'charge-api' has no plan yet, and 'checkout-ui' depends on it.
-  Plan it first:
-
-    /create-task  (for charge-api — it belongs to roadmap <Name>)
-
-  Then re-run /start-roadmap <Name>.
+  Plan it first with /create-task, then re-run /start-roadmap <Name>.
   ```
-
-- If an **open decision blocks a task that would otherwise run**, stop.
-  The decision was recorded precisely because the shape of that work isn't
-  settled, and an autonomous run cannot resolve it — resolving one is a
-  grilling, research, or prototype session with the user:
-
+- An **open decision blocks a frontier task** — only a grilling, research or prototype session with the user can resolve it:
   ```
   Cannot start roadmap: <Name>
-
-  Task 'refund-api' is blocked by an open decision:
-    D1 (grilling) — fixed refund window, or per-merchant?
-
-  Resolve it first (see create-roadmap.md § 2b), then re-run
-  /start-roadmap <Name>.
+  Task 'refund-api' is blocked by D1 (grilling) — fixed refund window, or per-merchant?
+  Resolve it first (create-roadmap.md § 2b), then re-run /start-roadmap <Name>.
   ```
+  A decision that blocks nothing on the frontier is mentioned in the announcement, not a stop.
+- A cycle, or a `depends-on` naming a task not in the roadmap — the roadmap is malformed.
 
-  An open decision that blocks nothing on the executable frontier is not a
-  stop condition — mention it in the announcement and carry on.
+**Fog is never a stop condition**, and the run **never graduates fog, adds tasks, or edits `## Out of scope`** — that's a planning act. When a finished task clearly sharpens a fog patch, report it as a *candidate*.
 
-- If the graph has a cycle, or a `depends-on` names a task not in the
-  roadmap, stop and report it — the roadmap is malformed.
+A partly planned tree is fine: run the planned prefix and stop cleanly where planning runs out.
 
-**Fog is never a stop condition.** `## Not yet specified` describes work
-that isn't charted yet; the planned prefix still runs. And the run must
-**never graduate fog, add tasks, or edit `## Out of scope` itself** —
-reshaping the roadmap is a planning act belonging to `/create-roadmap` and
-`/create-task`. When a finished task's summaries clearly sharpen a fog
-patch, say so in the final report as a *candidate*; don't act on it.
+### 3. Announce the Run — then start immediately
 
-Only when the verification pass succeeds (every task on the executable
-frontier is planned and its deps are satisfiable) do you continue. If
-only part of the tree is planned, that's fine — you execute the planned
-prefix and stop cleanly where planning runs out, reporting what remains.
+The invocation is the consent; no "Proceed?".
 
-### 3. Announce the Run — then start immediately, no confirmation
-
-Like `/start-task`, `/start-roadmap` does **not** ask "Proceed?" — the
-invocation is the consent. It announces the plan and begins in the same
-turn.
-
-**Parallelism mode is chosen by the invocation, not by a prompt:**
-- **Default = sequential.** Independent tasks run one at a time. Dead
-  safe, no git collisions. This is what runs unless the user opted into
-  worktrees.
-- **Worktrees = opt-in.** Only when the user invokes it that way (e.g.
-  `/start-roadmap <name> worktrees`, or asks for parallel/worktrees in
-  the request) do independent tasks run concurrently, each in its own git
-  worktree, merged back. Never switch to worktrees on your own — parallel
-  commits to one tree are the hard part, so it stays explicit.
-
-Announce what will happen, then proceed straight into Step 4:
+**Parallelism comes from the invocation:**
+- **Sequential (default)** — independent tasks run one at a time. No git collisions.
+- **Worktrees (opt-in)** — only when invoked that way (`/start-roadmap <name> worktrees`, or the user asks for parallel): each independent task in its own git worktree, merged back. Never switch on your own.
 
 ```
 Starting roadmap: <Name>   (mode: sequential | worktrees)
-Executable now (in dependency order):
-  task-a → (task-b ∥ task-c) → task-d
+Executable now: task-a → (task-b ∥ task-c) → task-d
 Not yet planned (will stop before): task-e
-
-Running autonomously now — commit per mission, no prompts unless red.
+Open questions (building on placeholders): checkout-ui UQ-1 currencies → USD only
+Running now — commit per mission, no prompts unless red.
 ```
 
-Set the roadmap **Status** to `In dev` and continue — do not wait for a
-reply. (The only thing that can stop a run before it starts is the Step 2
-verification gate: a needed-but-unplanned dependency.)
+Set the roadmap **Status** to `In dev` and go to Step 4.
 
 ### 4. Execute in Dependency Order
 
-Walk the DAG topologically. A task becomes eligible the moment all its
-`depends-on` tasks are `done`.
+A task is eligible the moment all its `depends-on` tasks are `done`.
 
-#### Execution shape — nested on Claude by default, flat on Codex
+#### Execution shape — nested on Claude, flat on Codex
 
-The number of subagent levels is decided by the runtime, because the two
-differ in a hard way (verified empirically):
+- **Claude Code — nest by default.** Each eligible task runs in its own **task-subagent** that runs the `start-task` loop and spawns the **mission-subagents**: `roadmap → task-agent → mission-agents`. This keeps the orchestrator's context lean — each task's churn lives in its own window. Go flat only for a trivially small roadmap.
+- **Codex — flat.** `spawn_agent` is one level deep (`NESTING_UNAVAILABLE`), so the parent runs each task's loop and spawns mission-subagents directly.
+- Unknown runtime → flat; it works on both.
 
-- **Claude Code** — nested subagents work: a subagent can spawn its own.
-- **Codex** — nesting is **unavailable**: `multi_agent_v1.spawn_agent` is
-  one level deep; a subagent cannot spawn another (`NESTING_UNAVAILABLE`).
-
-Pick the shape by runtime:
-
-- **On Claude Code — NEST BY DEFAULT.** Wrap each eligible task in its own
-  **task-subagent** that runs that task's mission loop and spawns the
-  **mission-subagents** inside it: `roadmap → task-agent → mission-agents`.
-  This is the fractal shape realized, and its point is **per-task context
-  isolation** — the parent orchestrator's context stays lean no matter how
-  big the roadmap, because each task's mission churn lives in its own
-  window. The task-subagent updates its `progress-tracker.md`, runs the
-  `start-task` loop (tdd, commit per mission), and returns a tight summary;
-  the parent only tracks `roadmap.md` status and commits/merges. Drop to
-  the flat shape only for a trivially small roadmap where a task layer is
-  pure overhead.
-- **On Codex — FLAT (only what works).** The parent `/start-roadmap` run
-  holds the mission loop and spawns each task's **mission-subagents
-  directly** — one subagent level, never a task-subagent-that-spawns-
-  subagents. Task-level structure is bookkeeping in `roadmap.md`, not an
-  extra agent layer.
-
-If you genuinely can't tell which runtime you're on, **fall back to
-flat** — it runs correctly on both. But on Claude Code the default is
-nested.
-
-**For each eligible task (either shape):**
+**For each eligible task:**
 - Set its `status:` to `in-dev` in `roadmap.md`.
-- Run its missions per `.ab-method/core/start-task.md` — each mission in a
-  subagent under `tdd`, the mission's own `[pp-x]` groups honored, the
-  task's `progress-tracker.md` updated per mission, a commit after every
-  green mission. **Who runs this loop is the only difference between the
-  shapes:** on Claude (nested) it's the task-subagent; on Codex (flat)
-  it's the parent directly. The mission subagents are the same either way.
-- On green completion, set `status:` to `done` in `roadmap.md` and check
-  off its line.
+- Run its remaining missions per `.ab-method/core/start-task.md`: one subagent per mission, `verify: test` missions under `tdd`, `verify: build` missions with no new test, `[pp-x]` groups honoured, tracker updated per mission, a commit after every green mission, the full suite once at the end of the task. **Never run `prototype-ui`** — UI missions build to the tracker's `## UI Spec` if present.
+- On green completion, set `status:` to `done` and check off its line.
 
-**Unresolved questions are inherited per task, too.** A task whose tracker
-carries `⚠️ UQ-n` markers runs under the same `start-task` rules: the black
-box recorded in its `docs/tasks/<slug>/unresolved-questions.md` gets built,
-the run does **not** stop, and no subagent answers a parked question or
-"improves" a placeholder on its own. Two things the roadmap orchestrator
-owes on top: surface every open UQ across the eligible tasks **in the
-pre-run announcement** (an afk user gets one chance to say "actually, we
-decided that last week"), and list them again, per task with their seam
-paths, in the final report. A marker with no matching entry is a planning
-gap — treat it like an unplanned task and stop before running that task.
-
-**Post-implementation review is inherited per task.** Because each task
-runs by `start-task` rules, its Step 5b runs the `review-implementation`
-skill on that task's diff — three read-only critics
-(`cleaner-architecture`, `slop-defender`, `reusability-inspector`), safe
-fixes auto-applied and everything written to that task's
-`docs/tasks/<slug>/review.md`. The review's critic subagents follow the
-**same nesting rule as the mission subagents**: on **Claude** the
-task-subagent spawns them (nested); on **Codex** the parent spawns them
-at its own level (flat). Nothing extra to wire here — it comes for free
-with running each task as a `start-task`. The roadmap orchestrator only
-collects the resulting `review.md` locations for the final report.
-
-**Documentation sync is inherited per task too.** Right after the review,
-each task's `start-task` Step 5c runs the `sync-architecture` skill
-(autonomous mode) on that task's diff — a single read-only detector that
-appends any new endpoints/patterns/deps/domain-terms the change introduced
-to the architecture docs (append-only `safe-add`s, committed as
-`docs(<task>): sync architecture docs`), deferring prose deprecation, domain
-reshapes, and ADRs to the user. It also comes for free with running each
-task as a `start-task`; the docs stay live across the whole roadmap instead
-of drifting until someone runs `/update-architecture` by hand.
-
-**The change map is inherited per task, and its drift is worth reading
-across the roadmap.** Each task's `start-task` Step 5d runs the
-`change-map` skill on that task's commit range, appending `## Actual` and
-`## Drift` to `docs/tasks/<slug>/change-map.md` (committed as
-`docs(<slug>): change map`). Nothing extra to wire — but the roadmap
-orchestrator owes one thing the task level structurally can't see: collect
-the **unplanned modules across every task in the run** and report them
-together. One task reaching an unmapped module is a discovery; four tasks
-all reaching the *same* unmapped module is a finding — that module is where
-this roadmap's changes keep leaking, and it belongs in
-`/improve-codebase-architecture` or, when it crosses a bounded context,
-`/domain-model`. Report it; never reshape anything mid-run.
+**Inherited per task from `start-task`** (nothing extra to wire; critic subagents follow the same nesting rule as mission subagents):
+- **Unresolved questions** — black boxes are built as recorded; the run never stops for them and no subagent answers one. The orchestrator surfaces every open UQ in the announcement and again, with seam paths, in the final report. A `⚠️ UQ-n` with no entry is a planning gap: stop before that task.
+- **`review-implementation`** (autonomous) — safe fixes applied, everything in that task's `review.md`.
+- **`sync-architecture`** (autonomous) — in-place doc edits that pass `check-docs`, committed as `docs(<task>): sync architecture docs`; anything over budget or needing judgment is deferred to `review.md`.
+- **`change-map`** actual pass — `## Actual` + `## Drift` per task. The orchestrator owes one thing the task level can't see: collect the **unplanned modules across every task** and report them together. Several tasks reaching the same unmapped module is a locality finding for `/improve-codebase-architecture` (or `/domain-model` if it crosses a bounded context). Report it; reshape nothing.
+- **`prototype/` cleanup** — each task deletes its disposable `prototype/` folder on completion.
 
 #### Running independent tasks concurrently
 
-- **Sequential mode (default):** run eligible tasks one after another in
-  topological order. Simplest, always safe, portable everywhere.
-- **Worktrees mode (opt-in):** give each independent, eligible task its
-  own git worktree. On **Claude** you may run a task-subagent per worktree
-  (which nests its mission-subagents); on **Codex** the parent drives each
-  worktree's mission-subagents directly (flat — no nesting). Either way,
-  when tasks finish green, merge each worktree back in turn, running the
-  test suite after each merge as the integration check. A merge that can't
-  go clean → stop (§ 6). On a runtime without worktree support, fall back
-  to sequential and say so.
+- **Sequential:** eligible tasks one after another in topological order.
+- **Worktrees:** one worktree per independent eligible task (a task-subagent per worktree on Claude; parent-driven on Codex). Merge each back in turn, running the full suite after each merge as the integration check. An unclean merge stops the run (§ 6). No worktree support → sequential, and say so.
 
-**Between tasks:** no user prompts — the run is autonomous from
-invocation, exactly like `/start-task`.
+No prompts between tasks. A **reopened** task runs only its unchecked missions; its finished missions and commits stay untouched. When its tracker is fully checked again, set `status:` back to `done`.
 
-For a **reopened** task (extended after it was done), execute **only its
-unchecked missions** — `start-task` already runs "remaining missions," so
-completed ones are left alone. Its already-done missions and their commits
-stay untouched; only the new missions produce new commits. When its
-tracker is fully checked again, set `status:` back to `done`.
+### 4b. Re-running After Extension
 
-### 4b. Re-running After Extension — the incremental case
+`/start-roadmap` is re-runnable. After `/extend-task` reopens tasks, a re-run:
+1. Re-runs the verification gate.
+2. Finds every task with unchecked missions, including reopened ones.
+3. Executes them in dependency order — an extended upstream task's new missions run before an extended downstream task's.
+4. Skips tasks that are genuinely done.
 
-`/start-roadmap` is **re-runnable**, and this is a first-class use case:
-a big roadmap (often generated from a PRD) runs for hours to completion,
-then you tweak it — `/extend-task` adds a few missions to one or more
-tasks. Those tasks reopen (`status: done → pending`, new unchecked
-missions). Re-running `/start-roadmap <name>` then:
-
-1. Re-runs the **verification gate** — same rules; the graph must still be
-   coherent and any live dependency still planned.
-2. Finds every task that **needs work** (unchecked missions), including
-   reopened ones.
-3. Executes them **in dependency order down the line** — if an extended
-   upstream task and an extended downstream task both have new missions,
-   the upstream one's new missions run first, respecting the same DAG.
-4. Skips tasks that are genuinely done (all missions checked), so it never
-   redoes finished work.
-
-This means the whole roadmap-level dependency discipline applies to
-follow-up tweaks exactly as it did to the first build. Extend the tasks
-you want to change, re-run `/start-roadmap`, and the increment lands in
-the right order with the same commit-per-mission trail. (Extending a task
-does not auto-reopen its dependents; if a tweak changes what a downstream
-task needs, extend that one too and the re-run orders both correctly.)
+Extending a task does not reopen its dependents; extend them too if they're affected.
 
 ### 5. On Full Completion
 
@@ -288,93 +113,43 @@ Set the roadmap **Status** to `Completed`. Report:
 
 ```
 Roadmap completed: <Name>
-Tasks run: task-a, (task-b ∥ task-c), task-d
-Commits: <n> across <m> tasks
+Tasks: task-a, (task-b ∥ task-c), task-d — <n> commits
 Tests: <command> green
-Reviews: docs/tasks/<slug>/review.md per task — <total> safe fixes applied, <total> open for you
+Reviews: task-b/review.md — 2 open; task-d/review.md — 1 open
+Cross-task drift: platform/audit reached by task-b, task-c, task-d (unplanned)
+Still uncharted: fog "refund flow" likely sharpened by charge-api → /create-roadmap
 ```
 
-List each task's `review.md` with its open-finding count so the afk user
-can jump straight to the ones that want their judgment.
+Omit empty lines. Uncharted fog and open decisions are **candidates, not changes** — graduating them is the user's next planning session.
 
-If the roadmap carried fog or open decisions, close the report with what
-the run *didn't* touch — the user is coming back to a finished run and
-needs to know the map isn't finished:
-
-```
-Still uncharted:
-  Fog: refund flow — 'charge-api' landed partial captures per line item,
-       which likely sharpens this. Graduate it with /create-roadmap.
-  Open decisions: D2 (research) — blocks nothing that ran.
-```
-
-These are **candidates, not changes.** The run reports them; graduating
-them is the user's next planning session.
-
-If execution stopped at an unplanned frontier rather than finishing,
-report what ran and what still needs planning:
-
+Stopped at an unplanned frontier:
 ```
 Roadmap partially executed: <Name>
 Done: task-a, task-b, task-c
-Blocked: task-d needs task-e planned first
-Next: plan task-e (/create-task), then /start-roadmap <Name> again
+Blocked: task-d needs task-e planned first → /create-task, then /start-roadmap <Name>
 ```
 
-### 6. On Failure — Stop Loudly, Never Plough On
+### 6. On Failure — Stop Loudly
 
-Same discipline as `/start-task`, one level up:
-
-- A task's mission going red stops that task (per `start-task` rules) and
-  therefore stops the roadmap. Never commit red work; never start a
-  downstream task on a broken dependency.
-- In worktrees mode, an unmergeable worktree stops the run — leave it for
-  inspection.
-- Completed tasks' commits are already safe. `roadmap.md` keeps the truth:
-  `done` tasks are checked off, the failed/blocked one is not.
-- Report precisely: which task, which mission, the failing output. The
-  user fixes or re-plans, then re-runs `/start-roadmap` — it re-verifies
-  and resumes from the frontier.
+- A red mission stops its task and therefore the roadmap. Never commit red work; never start a downstream task on a broken dependency.
+- An unmergeable worktree stops the run; leave it for inspection.
+- Completed tasks' commits are safe; `roadmap.md` keeps the truth.
+- Report which task, which mission, and the failing output. The user fixes or re-plans, then re-runs `/start-roadmap`.
 
 ## Key Principles
 
-- **Verify before you run** — the whole dependency-tree gate passes
-  before any task executes; a needed-but-unplanned task halts the run
-- **No confirmation — starts on invocation** — announces the plan and
-  begins immediately; the only pre-run stop is the verification gate.
-  Parallelism mode comes from the invocation (sequential by default,
-  worktrees only when explicitly asked), not from a prompt
-- **Executor, not producer** — never define or reshape tasks; run what
-  `/create-roadmap` + `/create-task` planned. That includes the map: the
-  run never graduates fog, adds tasks, or rules anything out of scope — it
-  reports candidates and leaves the reshaping to a planning session
-- **An open decision blocks its tasks; fog blocks nothing** — a decision
-  that gates a frontier task halts the run (only a session with the user
-  can resolve it); uncharted fog just means the map is unfinished, and the
-  planned prefix still runs
-- **Each task runs by `start-task` rules** — same subagent-per-mission,
-  tdd, commit trail, and post-implementation `review-implementation` +
-  `sync-architecture` + `change-map` passes (safe fixes applied,
-  `review.md` and `change-map.md` written per task)
-- **Drift is collected across the roadmap** — the same unplanned module
-  showing up in several tasks' drift is a locality finding the task level
-  can't see; the orchestrator reports it and reshapes nothing
-- **Execution shape is runtime-adaptive** — on **Claude Code, nest by
-  default** (task-subagent → mission-subagents) for per-task context
-  isolation; on **Codex** stay flat (parent → mission-subagents) because
-  `spawn_agent` is one level deep (`NESTING_UNAVAILABLE`). If the runtime
-  is unknown, fall back to flat — it works on both
-- **Parallel isolation is the user's call** — worktrees for real
-  concurrency, sequential for zero git risk
-- **`roadmap.md` is the single source of truth** — plan state and
-  execution state live there; re-runs resume from it
+- **Verify before you run** — the whole gate passes before any task executes
+- **Starts on invocation**; parallelism comes from the invocation, sequential by default
+- **Executor, not producer** — never reshapes tasks or the map; reports candidates
+- **An open decision blocks its tasks; fog blocks nothing**
+- **Each task runs by `start-task` rules** — tests only where its Test Plan put them, full suite once per task, review + sync + change map per task
+- **Drift is collected across the roadmap**
+- **Nested on Claude, flat on Codex**
+- **`roadmap.md` is the single source of truth** — re-runs resume from it
 
 ## Remember
 
-- Check `.ab-method/structure/index.yaml` for paths and the
-  `relationships` map
-- Confirm each runnable task's `progress-tracker.md` truly exists — don't
-  trust the `plan: ✅` flag alone
-- Stopped or partial runs resume with `/start-roadmap` again — the
-  roadmap carries everything forward
+- Check `.ab-method/structure/index.yaml` for paths and the `relationships` map
+- Confirm each runnable task's tracker truly exists — don't trust `plan: ✅` alone
+- Stopped runs resume with `/start-roadmap` again
 - Follow the repo's commit conventions (`git log --oneline` first)

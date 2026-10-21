@@ -1,103 +1,58 @@
 # Analyze Backend Workflow
 
 ## Purpose
-Document server-side architecture: API design, data layer, auth, services, background work. External services, testing, deployment, and language/runtime details are out of scope here — they live in `docs/architecture/tech-stack.md`.
+Document server-side architecture as small topic files: API, data, auth, services, background work, errors. Runtime, external services, testing and deployment live in `docs/architecture/tech-stack.md` — link, don't repeat.
 
 ## Configuration
-**ALWAYS check `.ab-method/structure/index.yaml` first** for the output path.
+**ALWAYS check `.ab-method/structure/index.yaml` first** for the output folder and `doc_budgets`. Follow `.ab-method/rules/communication.md` with the user and `.ab-method/rules/docs.md` for every file written.
 
 ## Process
 
 ### 1. Discovery
-- Detect framework (Express, Fastify, Hono, Django, Rails, Spring, etc.)
-- Find entry point (server.js, app.py, main.go, etc.)
+- Framework (Express, Fastify, Hono, Django, Rails, Spring, …) and entry point.
+- Legacy `docs/architecture/backend-patterns.md` present → read it as input; carry over only what is still true in the code, then delete it. Mention `/ab-cleanup` for the rest of the repo.
 
-### 2. API Design
-- Style (REST, GraphQL, gRPC, RPC)
-- Endpoint organization and versioning
-- Middleware chain
-- Request/response conventions
+### 2. Analyze each topic
+- **api** — style (REST/GraphQL/RPC), endpoint organization, versioning, middleware chain, request/response conventions.
+- **data** — databases, access pattern (ORM / query builder / SQL), schema highlights, migrations, caching.
+- **auth** — strategy, roles/permissions, protected-route pattern (pattern, not the list).
+- **services** — layering, business-logic patterns, internal communication, dependency wiring.
+- **background** — queues, schedulers, workers, events.
+- **errors** — error types and propagation, logging, observability.
 
-### 3. Data Layer
-- Database(s) and access pattern (ORM, query builder, raw SQL)
-- Schema/models and relationships
-- Migration strategy
-- Caching layer if any
-
-### 4. Auth
-- Strategy (JWT, sessions, OAuth, API keys)
-- Roles/permissions model
-- Protected endpoints — pattern, not full list
-
-### 5. Service Architecture
-- Layering (controllers / services / repos, hexagonal, vertical slices, etc.)
-- Business logic patterns
-- Internal communication (function calls, events, queues)
-- Dependency wiring (DI container, factories, manual)
-
-### 6. Background Work
-- Queue/scheduler implementation
-- Worker processes
-- Event-driven patterns
-
-### 7. Error Handling
-- Error types and propagation
-- Logging patterns
-- Observability hooks
+Add a topic only when the codebase has a real pattern for it; skip topics with nothing to say.
 
 ## Output
 
-### Location
-Path defined in `.ab-method/structure/index.yaml` → `workflow_outputs.analyze-backend`.
+Folder from `.ab-method/structure/index.yaml` → `workflow_outputs.analyze-backend` (default `docs/architecture/backend/`):
 
-### `backend-patterns.md` Structure
-```markdown
-# Backend Patterns
-
-## Framework
-- Framework + version
-- Entry point
-
-## API
-- Style and conventions
-- Endpoint organization
-- Middleware chain
-
-## Data
-- Database(s)
-- Access pattern (ORM/raw)
-- Schema highlights
-- Caching
-
-## Auth
-- Strategy
-- Roles/permissions
-- Protected-route pattern
-
-## Services
-- Layering
-- Business-logic patterns
-- Internal communication
-- DI/wiring
-
-## Background Work
-- Queues/schedulers
-- Workers
-- Events
-
-## Error Handling
-- Error types
-- Logging
-- Observability
-
-## Cross-references
-- Runtime, external services, testing, deployment → docs/architecture/tech-stack.md
+```
+docs/architecture/backend/
+  index.md        # one line per topic: `- [auth](auth.md) — session auth via middleware; API keys resolve to the same context`
+  api.md
+  data.md
+  auth.md
+  services.md
+  background.md
+  errors.md
 ```
 
+Each topic file:
+
+```markdown
+# <Topic>
+
+- **Rule** — one line. Example: `path/to/exemplar.ts`.
+- **Rule** — one line. Example: `path/to/other.ts`.
+```
+
+Rules plus one exemplar each; no instance lists, no history, the why as an ADR link. Stay within budget (index 300 words, topic 600 by default).
+
+### Gate
+```bash
+node .ab-method/scripts/check-docs.js   # plugin installs: npx ab-method check-docs
+```
+Compact any failing file before reporting.
+
 ## Key Files
-- package.json / requirements.txt / go.mod / pom.xml
-- Main entry point
-- Route/controller definitions
-- Model/schema definitions
-- Database config
-- Middleware config
+Manifest (package.json / requirements.txt / go.mod / pom.xml) · entry point · routes/controllers · models/schema · DB config · middleware config

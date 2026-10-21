@@ -1,7 +1,7 @@
 # Start Task
 
 ## Description
-Run an existing task autonomously to completion — `/resume-task` with the `/goal` philosophy. Each remaining mission runs in a subagent that follows `tdd` and updates the progress tracker itself; the parent verifies tests and commits after every finished mission. Starts immediately on invocation — no "Proceed?" prompt — then no prompts until done (or something goes red).
+Run an existing task autonomously to completion — `/resume-task` with the `/goal` philosophy. Each remaining mission runs in a subagent that updates the tracker itself; the parent verifies and commits after every mission. Starts on invocation, then no prompts until done (or red).
 
 ## Usage
 ```
@@ -9,43 +9,24 @@ Run an existing task autonomously to completion — `/resume-task` with the `/go
 ```
 
 ## Behavior
-Loads and executes the start-task workflow from `.ab-method/core/start-task.md`
-
-This workflow will:
-1. Identify the task and read its `progress-tracker.md` (single source of truth)
-2. Gate on vagueness — any mission too fuzzy to run without judgment calls gets grilled **before** the run, never mid-run
-3. Announce the plan (missions, parallel groups, commit-per-mission) and **start immediately** — no "Proceed?"; invoking the command is the consent
-4. **Run every remaining mission in a subagent** through the `tdd` discipline; the subagent checks off its mission and appends its technical summary to the tracker
-5. Verify the test suite after each mission, then **commit** (one commit per mission, one per `[pp-x]` group)
-6. **Run `review-implementation` after the last mission (autonomous mode)** — three critics (cleaner-architecture, slop-defender, reusability-inspector) on the task diff; safe fixes auto-applied (tests-green-gated, own commit), everything written to `docs/tasks/<task>/review.md` for you to read afk
-7. **Run `change-map` last (autonomous mode)** — after the reviewers' commits, it derives the task's real blast radius from its commit range, appends `## Actual` + `## Drift` to `docs/tasks/<task>/change-map.md`, and puts every drift line in the final report so you don't discover an unplanned module by accident
-8. Stop loudly on red — never commits broken work, never starts the next mission on a broken state
+Loads and executes the start-task workflow from `.ab-method/core/start-task.md`:
+1. Read `progress-tracker.md`; grill any mission too vague to run — before the run, never mid-run
+2. Announce the plan and start immediately — invoking the command is the consent
+3. One subagent per mission: `verify: test` missions run through `tdd`, `verify: build` missions add no test; placement decisions and `.ab-method/rules/code.md` applied while writing
+4. Focused checks after each mission, then a commit (one per mission, one per `[pp-x]` group); the full suite once after the last mission
+5. `review-implementation` (autonomous) → `review.md`; `sync-architecture` edits docs in place within the `check-docs` budget; `change-map` reports drift
+6. Deletes the disposable `prototype/` folder; stops loudly on red, never commits broken work
 
 ## `/start-task` vs `/resume-task`
-- **`/start-task`** — trust the roadmap, walk away, review commits instead of missions
-- **`/resume-task`** — stay in the loop, review each mission before moving on
+- **`/start-task`** — walk away, review commits instead of missions
+- **`/resume-task`** — stay in the loop per mission
 
-## Workflow Details
-- **No confirmation — starts immediately, then autonomous** — no "Proceed?" gate, no prompting between missions
-- **Group-aware** — `[pp-x]` missions run concurrently in subagents; siblings skip the tracker (the parent merges their summaries) to avoid write conflicts
-- **Green tests gate every commit** — a red feedback loop takes priority over progress, exactly like `/goal`
-- **Executor, not producer** — missions are defined by `/create-task` / `/extend-task`; this workflow only runs them
-- **Drift is reported, never acted on** — modules the run reached that the plan never named (and planned ones it never touched) are named in the final report and routed to `/improve-codebase-architecture` or `/domain-model`; the run itself changes nothing because of them
-- **A black box doesn't stop the run** — a mission marked `⚠️ UQ-n` builds the placeholder recorded in `unresolved-questions.md` and keeps going; the run never answers a parked question, and every open one it built on is listed in the announcement and the final report
-
-## Examples
-```
-/start-task single-source-schema-types
-# Reads docs/tasks/single-source-schema-types/progress-tracker.md,
-# announces the remaining missions and starts immediately, running each
-# in a subagent with a commit after every green mission.
-
-/start-task
-# Lists docs/tasks/ and asks which task to start.
-```
+## Notes
+- Never runs `prototype-ui`; UI missions build to the tracker's `## UI Spec`
+- A `⚠️ UQ-n` mission builds the recorded placeholder and keeps going; open questions are listed in the final report
+- Executor, not producer — missions come from `/create-task` / `/extend-task`
 
 ## Alternative Usage
-You can also use the traditional AB Method master controller:
 ```
 /ab-master start-task
 ```

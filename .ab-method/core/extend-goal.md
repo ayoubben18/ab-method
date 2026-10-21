@@ -14,6 +14,8 @@ stops. It does NOT execute the goal — `/goal` does that.
 **ALWAYS check `.ab-method/structure/index.yaml` FIRST** to find where
 goal documents live. Paths are user-configurable.
 
+Follow `.ab-method/rules/communication.md` for every message.
+
 ## Process
 
 ### 1. Identify the Goal

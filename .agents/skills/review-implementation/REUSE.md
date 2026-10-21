@@ -16,8 +16,16 @@ A duplication finding is only credible once you've found the thing being duplica
   `CONTEXT.md` (e.g. a second place that decides when an *Order* is *cancellable*). Domain rules must
   live in one place.
 - **Ignored existing patterns** — the diff builds a route / component / query in a way that departs from
-  `frontend-patterns.md` / `backend-patterns.md` when a documented pattern (or a near-identical sibling
-  in the codebase) already fits. Point at the sibling.
+  the documented pattern (`docs/architecture/<layer>/index.md` → the topic file; legacy repos:
+  `frontend-patterns.md` / `backend-patterns.md`) when it, or a near-identical sibling in the codebase,
+  already fits. Point at the sibling.
+- **Ignored placement decisions** — the task's `progress-tracker.md` `## Placement` recorded *reuse X*,
+  *extend Y* or *extract Z*, and the diff did something else: wrote a fresh copy instead of reusing,
+  bolted onto a different module, or added the logic inline instead of extracting it first. Name the
+  placement line it contradicts.
+- **Inline growth where extraction was due** — no placement line covers it, but the diff adds a second
+  inline copy of logic that already exists elsewhere (`.ab-method/rules/code.md` § Placement). Propose the
+  extraction and the callers it should serve.
 - **Internal copy-paste** — the same block repeated across files or missions in the diff, begging to be a
   shared function or a loop.
 - **Reinvented types** — a new interface/DTO that restates an existing type instead of importing or

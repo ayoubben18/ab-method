@@ -200,10 +200,16 @@ async function install() {
         '- `ab-extend-task` — append missions to a task',
         '- `ab-test-mission` — backfill tests for code written without them',
         '- `ab-update-architecture` — refresh architecture docs',
+        '- `ab-cleanup` — compact docs to budget, split pattern docs, remove task leftovers (also the 4.0 migration)',
+        '- `prototype-ui` — explore new UI as disposable HTML variants with a picker, before building',
         '',
-        'Principles: always grill before defining work (`grill-with-docs`); every',
-        'mission runs through `tdd` (red → green); `progress-tracker.md` is',
-        'the single source of truth per task.',
+        'Principles: always grill before defining work (`grill-with-docs`); the plan',
+        'records where each capability lives (reuse / extend / extract) and a test',
+        'plan; only `verify: test` missions run through `tdd`, `verify: build`',
+        'missions add no test; `progress-tracker.md` is the single source of truth',
+        'per task. Follow `.ab-method/rules/` (communication, code, docs) in every',
+        'workflow. Domain and architecture docs have word budgets: edit them in',
+        'place and run `node .ab-method/scripts/check-docs.js` after any doc write.',
         '',
         'Critics bracket every implementation, and all of them stay silent unless',
         'there is a real problem. Before implementing, `critique-plan` stress-tests',
@@ -212,7 +218,7 @@ async function install() {
         'implementing, `review-implementation` runs three critics on the diff',
         '(cleaner-architecture, slop-defender, reusability-inspector), then',
         '`sync-architecture` finds what the change introduced that the docs do not',
-        'yet capture. Autonomous runs apply only safe fixes / append-only doc adds',
+        'yet capture. Autonomous runs apply only safe fixes / in-place doc edits',
         'and write the rest to `review.md` next to the tracker.',
         '',
         '`change-map` runs on BOTH sides, as one artifact per task',
@@ -282,6 +288,7 @@ async function install() {
     if (installClaude) {
       log('  • Open Claude Code in this project', COLORS.white);
       log('  • Run /analyze-project to generate UBIQ + CONTEXT + arch docs', COLORS.white);
+      log('  • Upgrading from 3.x? Run /ab-cleanup once to migrate and compact your docs', COLORS.white);
       log('  • Run /domain-model to sharpen the domain language (optional)', COLORS.white);
       log('  • Run /create-task or /create-goal to start work', COLORS.white);
     }
@@ -305,12 +312,18 @@ const command = args[0];
 
 if (!command || command === 'install') {
   install();
+} else if (command === 'check-docs') {
+  // Prefer the project's own copy so a customised index.yaml and script win.
+  const projectScript = path.join(process.cwd(), '.ab-method', 'scripts', 'check-docs.js');
+  const script = fs.existsSync(projectScript) ? projectScript : path.join(__dirname, '.ab-method', 'scripts', 'check-docs.js');
+  process.exit(require(script).run(args.slice(1)));
 } else if (command === '--help' || command === '-h') {
   log('\n📚 AB Method CLI', COLORS.bright + COLORS.cyan);
   log('================\n', COLORS.cyan);
   log('Usage:', COLORS.yellow);
   log('  npx ab-method          Install AB Method in current project');
   log('  npx ab-method install  Install AB Method in current project');
+  log('  npx ab-method check-docs  Check domain + architecture docs against their word budgets');
   log('  npx ab-method --help   Show this help message');
   log('\nThe installer detects:');
   log('  • .claude/ → installs commands + skills for Claude Code');

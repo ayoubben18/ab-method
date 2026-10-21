@@ -1,141 +1,98 @@
 # Extend Task Workflow
 
 ## Purpose
-Add new missions to an existing task — when requirements change, scope grows, or follow-up work surfaces during development.
+Add missions to an existing task — when requirements change, scope grows, follow-up work surfaces, or a parked question finally gets answered.
 
 ## Critical Step
-**ALWAYS check `.ab-method/structure/index.yaml` FIRST** to find task locations.
+**ALWAYS check `.ab-method/structure/index.yaml` FIRST** to find task and architecture doc locations.
+
+Follow `.ab-method/rules/communication.md` for every message and `.ab-method/rules/code.md` for placement decisions.
 
 ## Process
 
 ### 1. Identify the Task
-Ask: "Which task should we extend?"
+Ask which task to extend.
 
 ### 2. Read the Progress Tracker
-Show current state:
-```
-Extending: <Task Name>
-Status: <Current>
+Show the current missions (with `verify:` tags; untagged = `verify: test`) and status. Note `## Placement`, `## Test Plan` and `## UI Spec` if present.
 
-Missions:
-[x] Mission 1 — Completed
-[x] Mission 2 — Completed
-[ ] Mission 3 — Pending
-```
+### 2.5 Resolving an Unresolved Question — swapping the black box
 
-### 2.5 Resolving an Unresolved Question — the swap-the-black-box case
-
-If the task has an `unresolved-questions.md` with `OPEN` entries, show them alongside the missions:
+If `unresolved-questions.md` has `OPEN` entries, show them with their shipped placeholders:
 
 ```
-Open questions (docs/tasks/<task>/unresolved-questions.md):
+Open questions:
   UQ-1 Which currencies at launch?  → shipped placeholder: USD only, src/billing/currency.ts:8
 ```
 
-**This is the main reason a task gets extended** — the answer finally arrived and the placeholder has to
-become real. When the user is here to resolve one:
+This is the main reason tasks get extended. When the user is resolving one:
 
-1. **Grill the answer, don't just take it.** Invoke `grill-with-docs` on that question — an answer that
-   was too hard to give at creation time usually brings its own branches.
-2. **Size the swap honestly** using the entry's *If the answer differs* line:
-   - **Constant swap** — the recorded seam takes the real value, its placeholder test becomes the real
-     test, the `TODO(UQ-n)` comment goes. One new mission, sometimes none if it's a one-liner you do
-     right here.
-   - **Real work** — the answer invalidates the shape, not just the value. Draft proper missions for it
-     like any other extension; `grep -rn 'TODO(UQ-n)'` gives you the blast radius.
-3. **Close the entry**: mark it `RESOLVED <date>` with the answer and where it was applied. The entry
-   stays in the file — the record of what was guessed and what it became is the point. Drop the
-   `⚠️ UQ-n` markers from the affected mission lines and the tracker's Unresolved Questions section
-   (remove the section when the last one closes).
-4. **Consider an ADR.** A question hard enough to park, once answered, often clears the ADR bar (hard to
-   reverse, surprising without context, a real trade-off). `grill-with-docs` offers it — take the offer
-   when all three hold.
+1. **Grill the answer** with `grill-with-docs` — late answers bring their own branches.
+2. **Size the swap** using the entry's *If the answer differs* line:
+   - **Constant swap** — the seam takes the real value, its placeholder test becomes the real test, the `TODO(UQ-n)` goes. One mission, or none if it's a one-liner done here.
+   - **Real work** — the answer changes the shape. Draft proper missions; `grep -rn 'TODO(UQ-n)'` gives the blast radius.
+3. **Close the entry**: `RESOLVED <date>`, the answer, and where it was applied. Keep the entry; drop the `⚠️ UQ-n` markers and its line in the tracker's Unresolved Questions section (remove the section when empty).
+4. **Consider an ADR** when the answer is hard to reverse, surprising, and a real trade-off — `grill-with-docs` offers it.
 
-Leaving a question open is a fine outcome too: extending a task for *other* reasons doesn't oblige the
-user to resolve anything. Never resolve one on their behalf.
+Extending for other reasons never obliges the user to resolve anything. Never resolve one on their behalf.
 
 ### 3. Gather New Mission Requirements
-- If the user's description is clear → add the missions as one-line entries
-- If vague → invoke the `grill-with-docs` skill before drafting them
+Clear description → draft the missions. Vague → `grill-with-docs` first (it reads the domain docs and the code, so missions land in canonical terms).
 
-`grill-with-docs` reads `UBIQUITOUS_LANGUAGE.md` + `CONTEXT.md` and explores the codebase, so the new missions land in canonical terms.
+### 3.5 Plan the New Missions — placement, tests, UI
+
+Apply the same planning steps as `/create-task`, scoped to the new work:
+
+- **Placement** — for each new capability, decide reuse / extend / extract (`.ab-method/rules/code.md`) and add a line to `## Placement`. An extraction becomes a refactor mission placed **before** the missions that build on it, tagged `verify: build`.
+- **Test Plan** — append any new use case worth protecting to `## Test Plan` (`UCn` numbering continues). Everything else is `verify: build`.
+- **Prototype gate** — if the new missions add **new UI** (a new page, component or flow — not a tweak to existing UI, not a design the user supplied as Figma, not backend-only), run the `prototype-ui` skill before finalising the missions, exactly as `create-task.md`'s prototype gate does. The pick updates `## UI Spec`.
 
 ### 4. Append Missions to the Progress Tracker
-Continue numbering sequentially:
+Continue numbering; every new mission carries a `verify:` tag:
 ```markdown
 ## Missions
-- [x] Mission 1: ... — Completed
-- [x] Mission 2: ... — Completed
-- [ ] Mission 3: ... — Pending
-- [ ] Mission 4: [Layer] — [one-line description]   ← NEW
-- [ ] Mission 5: [Layer] — [one-line description]   ← NEW
+- [x] Mission 1: ... — verify: test (UC1)
+- [ ] Mission 2: ... — verify: build
+- [ ] Mission 3: Extract refund calc into billing module — verify: build   ← NEW
+- [ ] Mission 4: Enforce refund window — verify: test (UC3)                ← NEW
 ```
 
-**No mission docs.** Same rule as `/create-task`: missions live as one-line entries in the progress tracker. The `tdd` skill drives implementation when each mission is run.
+No mission docs — missions are one-line entries in the tracker.
 
 #### Optional: parallel-group tags on new missions (`[pp-x]`)
 
-If two or more of the **new** missions are independent of each other (disjoint files, no shared types, neither consumes the other's output), they are candidates for a parallel group — same notation and semantics as `create-task.md` § 7. New missions may also join an existing **pending** group when they're independent of every sibling in it.
-
-**Never tag on your own — always ask the user first**; they might not want parallel execution. If they decline, the new missions stay sequential. Continue group numbering from the highest existing tag (existing `[pp-2]` → next group is `[pp-3]`). Never retag completed missions or groups already underway.
+Independent new missions (disjoint files, no shared types, no consumed output) can form a group, same notation as `create-task.md` § 7; they may also join a **pending** group they're independent of. **Never tag without asking the user.** Continue numbering from the highest tag; never retag completed or running groups.
 
 ### 5. Update Task Status
-If the task was `Completed`, move it back to `Validated` (or `In dev` if work has already started on the new missions).
+`Completed` → back to `Validated` (or `In dev` if work on the new missions started).
 
 #### If the task belongs to a roadmap — reopen it there too
-Check `docs/roadmaps/*/roadmap.md` (the `relationships` map in `.ab-method/structure/index.yaml` documents the link). If this task's slug appears in a roadmap:
+If the slug appears in `docs/roadmaps/*/roadmap.md` (see `relationships` in the index): flip its entry `status: done → pending` and uncheck its line (leave `plan: ✅`); a `Completed` roadmap goes back to `In dev`. Downstream tasks are not auto-reopened — extend them too if the change affects them.
 
-- Flip its roadmap entry's `status:` from `done` back to `pending` (it has unfinished work again) and uncheck its roadmap line. Leave `plan: ✅` as is — the task is still planned, just extended.
-- If the roadmap's overall **Status** was `Completed`, move it back to `In dev` (or `Ready`).
+### 5.5 Pre-implementation Critique — `critique-plan` on the NEW missions
 
-This is what lets a later `/start-roadmap` re-run notice the new work. Extending a task that others depend on does **not** auto-reopen those downstream tasks — their own missions are still done. If the tweak actually changes what a downstream task needs, extend that task too; `/start-roadmap` will then run both in dependency order.
+Invoke `critique-plan` scoped to the new missions (existing ones as context). It pushes back only on genuine domain conflicts and is silent otherwise. Resolve any pushback (amend, or dismiss with a load-bearing reason that may become an ADR) before Step 6.
 
-### 5.5 Pre-implementation Critique — invoke the `critique-plan` skill on the NEW missions
+### 5.6 Extend the Planned Change Map — `change-map` (planned pass)
 
-Before confirming, run the newly drafted missions past the domain model — same discipline as
-`/create-task` § 7.5. **Invoke the `critique-plan` skill** scoped to the *new* missions (with the
-existing ones as context): a read-only domain critic pushes back only on genuine conflicts (terminology
-drift, wrong context, an ADR contradiction, a reinvented concept). Advisory and silent when the
-additions are sound. Resolve any real pushback (amend a mission, or dismiss with a load-bearing reason
-that may become an ADR) and update the tracker before Step 6.
-
-### 5.6 Extend the Planned Change Map — invoke the `change-map` skill (planned pass)
-
-New missions mean new blast radius. **Invoke the `change-map` skill** in its *planned* pass, scoped to the
-**new** missions, and append the result to `docs/tasks/<task>/change-map.md` as a dated extension block:
+Invoke `change-map`'s planned pass for the new missions and append a dated block:
 
 ```markdown
-## Planned (extension 1) — YYYY-MM-DD, missions 4–5
+## Planned (extension 1) — YYYY-MM-DD, missions 3–4
 ```
 
-**Never edit the original `## Planned` section**, and never fold the new rows into it. Each block records
-what was believed at the moment those missions were drafted; merging them would silently rewrite a
-prediction the task has already been measured against. The actual pass computes drift against the union of
-the blocks.
-
-Two cases worth calling out when you draw it:
-
-- **The extension lands entirely inside modules the original map already covers** — good sign, and worth
-  saying: the task grew in depth, not in reach.
-- **The extension reaches a module the original never named** — the task's scope genuinely widened. Ask
-  whether this is still one task or two; a `handoff` is often the honest answer.
-
-Skip this step only when the task has no `change-map.md` at all (it predates the map). Never back-fill one
-from what the completed missions already did.
+**Never edit the original `## Planned` or merge into it** — each block is the prediction made at that moment; drift is computed against their union. If the extension reaches a module the original never named, ask whether this is still one task (a `handoff` is often the honest answer). Skip the step when the task has no `change-map.md`; never back-fill one.
 
 ### 6. Confirm with User
-"Added [N] missions. Ready to start Mission X?"
+"Added [N] missions. Start Mission X?"
 
-When the user confirms, choose how to run the new missions:
-- **Standalone task** → hand off to `/resume-task` (or continue inline); each new mission runs through the `tdd` skill.
-- **Roadmap task** → the user can run the new missions right here via `/resume-task`, **or** re-run `/start-roadmap <name>` to execute every extended task across the roadmap in dependency order (the common case after a big roadmap implementation, when several tasks got tweaks).
+- **Standalone task** → `/resume-task` (or continue inline): `verify: test` missions run through `tdd`, `verify: build` missions add no test.
+- **Roadmap task** → `/resume-task` here, or re-run `/start-roadmap <name>` to execute every extended task in dependency order.
 
 ## Remember
-- Add to `progress-tracker.md`, never create separate mission files
-- New missions get their own dated `## Planned (extension N)` block in `change-map.md` — the original block is never edited or merged into
-- Sequential numbering, no gaps
-- Use `grill-with-docs` whenever the new mission descriptions are vague
-- `/extend-task` is where a parked `UQ-n` gets answered: grill the answer, swap the `TODO(UQ-n)` seam (or plan missions if it's more than a swap), mark the entry `RESOLVED` — never resolve one the user didn't answer
-- The `tdd` skill runs on every mission, including extensions
-- `[pp-x]` tags on new missions only with the user's explicit yes — sequential is the default
-- If the task is in a roadmap, reopen its `roadmap.md` entry (`status: done → pending`) so a `/start-roadmap` re-run picks up the new missions in dependency order
+- Missions go in `progress-tracker.md`, numbered sequentially, each with a `verify:` tag
+- New placement decisions, Test Plan entries and (for new UI) the prototype gate apply to extensions too
+- Extension change maps are dated blocks; the original `## Planned` is never edited
+- `/extend-task` is where a parked `UQ-n` gets answered — never resolve one the user didn't answer
+- `[pp-x]` only with the user's explicit yes
+- Roadmap tasks: reopen the `roadmap.md` entry so `/start-roadmap` picks up the new work

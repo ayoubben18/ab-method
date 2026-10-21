@@ -1,6 +1,25 @@
 # AB Method Structure Index
 # Where AB Method workflows read from and write to.
 
+# Rules every workflow and skill follows. Read the ones that apply before acting.
+rules:
+  - .ab-method/rules/communication.md   # how to talk to the user: answer first, no recaps
+  - .ab-method/rules/code.md            # placement (reuse / extend / extract), write less, why-only comments
+  - .ab-method/rules/docs.md            # what docs may hold, edit in place, the check-docs gate
+
+# Word budgets for the domain + architecture docs. First matching glob wins.
+# Enforced by `node .ab-method/scripts/check-docs.js` (or `npx ab-method check-docs`).
+doc_budgets:
+  max_line_words: 60          # a longer line is a paragraph that should be split or cut (ADRs exempt)
+  files:
+    "UBIQUITOUS_LANGUAGE.md": 3000
+    "**/CONTEXT.md": 2000
+    "CONTEXT-MAP.md": 800
+    "docs/architecture/tech-stack.md": 1500
+    "docs/architecture/*/index.md": 300
+    "docs/architecture/**/*.md": 600
+    "docs/adr/*.md": 1000
+
 project_structure:
   # Root-level domain documentation (per domain-model + ubiquitous-language skills)
   root:
@@ -15,8 +34,13 @@ project_structure:
     architecture:
       files:
         - tech-stack.md          # stack + entry points + external services + constraints + testing
-        - frontend-patterns.md
-        - backend-patterns.md
+      folders:
+        # Patterns are split by topic so a mission loads only what it touches:
+        # read index.md (one line per topic), then only the topic files you need.
+        # Legacy single files (frontend-patterns.md / backend-patterns.md) are
+        # migrated by /ab-cleanup.
+        - frontend/              # index.md + one file per topic (forms.md, data-fetching.md, ...)
+        - backend/               # index.md + one file per topic (api.md, services.md, auth.md, ...)
 
     adr:
       # Created lazily by /domain-model when the first ADR is needed.
@@ -26,7 +50,10 @@ project_structure:
     tasks:
       # Example task structure — progress-tracker.md is the SINGLE source of
       # truth per task. Missions are one-line entries inside it; no separate
-      # mission files. Each mission runs through the `tdd` skill.
+      # mission files. Each mission carries `verify: test` (runs through the
+      # `tdd` skill, for a use case in the tracker's `## Test Plan`) or
+      # `verify: build` (typecheck / lint / build + existing tests, no new test).
+      # Untagged missions (pre-4.0 trackers) are treated as `verify: test`.
       # Missions may carry an optional [pp-x] tag (user opt-in only): same tag
       # = a group of independent missions that run concurrently in subagents;
       # untagged missions are sequential barriers.
@@ -59,6 +86,10 @@ project_structure:
                                   # /domain-model, and is never acted on here.
         folders:
           - sub-agents-outputs/   # only created when a subagent runs
+          - prototype/            # DISPOSABLE. prototype-ui's self-contained HTML picker for a task
+                                  # adding new UI. Losing variants are cut when the user picks; the
+                                  # winner stays as the visual reference for the missions and the
+                                  # folder is deleted when the task completes. Gitignored.
 
     goals:
       # Example goal structure — produced by /create-goal. goal.md is the
@@ -115,23 +146,34 @@ workflow_outputs:
     - UBIQUITOUS_LANGUAGE.md
     - CONTEXT.md
     - docs/architecture/tech-stack.md
-    - docs/architecture/frontend-patterns.md
-    - docs/architecture/backend-patterns.md
-  analyze-frontend: docs/architecture/frontend-patterns.md
-  analyze-backend: docs/architecture/backend-patterns.md
+    - docs/architecture/frontend/
+    - docs/architecture/backend/
+  analyze-frontend: docs/architecture/frontend/   # index.md + topic files, within budget
+  analyze-backend: docs/architecture/backend/     # index.md + topic files, within budget
   domain-model:
     - CONTEXT.md          # refined inline during the grilling session
     - docs/adr/           # ADRs created lazily
   ubiquitous-language: UBIQUITOUS_LANGUAGE.md   # flat glossary; the format analyze-project follows
   update-architecture:   # heavy human-invoked refresh after impactful changes; the manual
     - docs/architecture/tech-stack.md        # counterpart of sync-architecture's routing table
-    - docs/architecture/frontend-patterns.md # (2a Entry Points / 2b patterns / 2c stack+deps /
-    - docs/architecture/backend-patterns.md  # 2d domain / 2e ADRs), then runs
+    - docs/architecture/frontend/            # (2a Entry Points / 2b patterns / 2c stack+deps /
+    - docs/architecture/backend/             # 2d domain / 2e ADRs), edits in place, then runs
     - UBIQUITOUS_LANGUAGE.md                 # improve-codebase-architecture scoped to the change
     - CONTEXT.md
     - docs/adr/
   test-mission: docs/tasks/[task-name]/progress-tracker.md   # backfills tests for code written
                         # without them; appends its mission + summary to the tracker like any other
+  prototype-ui: docs/tasks/[task-name]/prototype/   # disposable self-contained HTML picker; never touches
+                        # the codebase. Writes the picked variant into the tracker's `## UI Spec`. Run by
+                        # create-task / extend-task when a task adds NEW UI, or standalone ($TMPDIR outside a task)
+  ab-cleanup:   # one-shot cleanup of a repo already using AB Method (and the 3.x → 4.0 migration).
+    - .ab-method/structure/index.yaml        # migrated to 4.0 keys, custom paths preserved
+    - docs/architecture/                     # pattern files split by topic, every doc compacted to budget
+    - UBIQUITOUS_LANGUAGE.md
+    - CONTEXT.md                             # (and per-context CONTEXT.md files)
+    - docs/tasks/                            # disposable leftovers of completed tasks removed, with approval
+    - docs/handoffs/                         # handoffs already turned into tasks removed
+                        # Runs on its own branch, commits per phase, never pushes
   mastermind: []   # router only — explains the method and delegates to a workflow; writes nothing
   create-task:   # runs critique-plan (pre-impl, advisory) then change-map's PLANNED pass before validating
     - docs/tasks/[task-name]/progress-tracker.md   # missions; then review-implementation + sync-architecture
@@ -142,7 +184,7 @@ workflow_outputs:
   critique-plan: []   # pre-implementation critic; read-only, surfaces domain-model pushbacks only (may prompt an ADR under docs/adr/ on a load-bearing dismissal). Invoked by create-task / create-roadmap, or standalone
   review-implementation: docs/tasks/[task-name]/review.md   # post-implementation review; three critics on the task diff. Writes review.md on autonomous runs; interactive runs present findings instead
   change-map: docs/tasks/[task-name]/change-map.md   # the task's blast radius, drawn twice. PLANNED pass
-                        # (create-task § 7.6, extend-task) predicts the modules the missions will add /
+                        # (create-task § 8, extend-task) predicts the modules the missions will add /
                         # change / touch, from the plan only — never from code. ACTUAL pass (after
                         # review-implementation AND sync-architecture, so their commits are in range)
                         # derives the same map from `git diff <task commit range>`, then computes DRIFT.
@@ -150,9 +192,9 @@ workflow_outputs:
                         # code or docs — it describes shape, it does not judge it
   sync-architecture:   # post-implementation documentation-sync detector; read-only. ONE subagent finds what
     - docs/architecture/tech-stack.md        # the task diff introduced that the docs don't capture (endpoints,
-    - docs/architecture/frontend-patterns.md # patterns, deps, terms, ADR candidates) and routes each to its doc
-    - docs/architecture/backend-patterns.md  # via /update-architecture's table. Autonomous: applies append-only
-    - UBIQUITOUS_LANGUAGE.md                 # safe-adds (commit `docs(<task>): sync architecture docs`), defers
+    - docs/architecture/frontend/            # patterns, deps, terms, ADR candidates) and routes each to its doc
+    - docs/architecture/backend/             # via /update-architecture's table. Autonomous: applies in-place
+    - UBIQUITOUS_LANGUAGE.md                 # safe-edits that pass check-docs (commit `docs(<task>): sync architecture docs`), defers
     - CONTEXT.md                             # prose deprecation / domain reshapes / ADRs to /domain-model +
                                              # /update-architecture. Interactive: presents deltas. Runs after
                                              # review-implementation in create-task / start-task / start-roadmap
@@ -196,7 +238,7 @@ workflow_outputs:
                           # landed at; the run never resolves an open question — it reports them instead
     - docs/tasks/[task-name]/review.md   # post-impl review-implementation pass after the last mission: safe fixes applied, open findings recorded
     - docs/tasks/[task-name]/change-map.md   # post-impl change-map ACTUAL pass (Step 5d, after the reviewers): appends `## Actual` + `## Drift`, committed as docs(<task>): change map
-    - docs/architecture/*   # post-impl sync-architecture pass (Step 5c): append-only doc safe-adds committed as docs(<task>): sync architecture docs
+    - docs/architecture/*   # post-impl sync-architecture pass (Step 5c): in-place doc safe-edits, gated by check-docs, committed as docs(<task>): sync architecture docs
   start-roadmap:
     - docs/roadmaps/[roadmap-name]/roadmap.md   # statuses updated as tasks run; verifies plans exist before executing
     - docs/tasks/[task-name]/progress-tracker.md   # each task executes like start-task (subagent per mission, commit per green mission)
@@ -255,10 +297,11 @@ relationships:
     # sync-architecture is the automated detection half of /update-architecture.
     # It runs post-implementation (right after review-implementation) in create-task /
     # start-task / start-roadmap, so architecture docs stay live without anyone
-    # remembering to run /update-architecture by hand. It only APPENDS (safe-adds);
-    # anything that rewrites prose, reshapes the domain, or is ADR-worthy is deferred.
+    # remembering to run /update-architecture by hand. It edits IN PLACE (merge or
+    # replace the closest entry, never append) and must leave check-docs green;
+    # anything that reshapes the domain, is ADR-worthy, or can't fit the budget is deferred.
     runs_after: "review-implementation, on the same task diff (post-impl phase)"
-    applies: "append-only safe-adds to docs/architecture/* + UBIQUITOUS_LANGUAGE.md/CONTEXT.md (autonomous) or presents them (interactive)"
+    applies: "in-place safe-edits to docs/architecture/* + UBIQUITOUS_LANGUAGE.md/CONTEXT.md that pass check-docs (autonomous) or presents them (interactive)"
     defers_to: "/update-architecture (prose deprecation + improve-codebase-architecture deepening loop) and /domain-model (ADRs, new bounded contexts)"
     reuses: "/update-architecture routing table (2a endpoints, 2b patterns, 2c stack/deps, 2d domain, 2e ADR)"
   change_map_brackets_the_task:
@@ -268,7 +311,7 @@ relationships:
     # `## Actual` is derived from the real commit range once the reviewers are done.
     # The gap between them (DRIFT) is what the feature is for — it is the only
     # measurement in the method of whether a plan understood its own blast radius.
-    planned_pass: "create-task § 7.6 (after critique-plan, before the user validates) and extend-task (a dated extension block)"
+    planned_pass: "create-task § 8 (after critique-plan, before the user validates) and extend-task (a dated extension block)"
     actual_pass: "after review-implementation AND sync-architecture — their commits belong to the diff it maps — and before the task is set Completed"
     scope: "the task's commit range, never the working tree; rows are modules named by CONTEXT.md / docs/architecture, not directories"
     immutable: "`## Planned` is never edited to match reality, and is never back-filled from a diff — a prediction reverse-engineered from the answer measures nothing"

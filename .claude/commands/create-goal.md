@@ -13,14 +13,14 @@ Loads and executes the create-goal workflow from `.ab-method/core/create-goal.md
 
 This workflow will:
 1. **Always invoke `grill-with-docs`** to interview the user and pin down the objective, a *verifiable* measurable end state, the feedback loops that steer the loop, and constraints (no skip)
-2. Read UBIQ + CONTEXT + tech-stack + patterns + ADRs to ground the goal in canonical terms
+2. Read UBIQ + CONTEXT + tech-stack + the patterns index (and only the relevant topic files) + ADRs to ground the goal in canonical terms
 3. Write `docs/goals/<goal-name>/goal.md` — the prompt you paste into `/goal`
 4. Write `docs/goals/<goal-name>/progress-tracker.md` — an empty notes log the loop fills as it runs
 5. Stop. `/create-goal` produces the files; the `/goal` loop does the work
 
 ## `/create-goal` vs `/create-task`
 - **`/create-goal`** — one continuous objective with a verifiable stop condition, handed to an autonomous loop you walk away from
-- **`/create-task`** — broken into missions you review and run through `tdd` yourself, one at a time
+- **`/create-task`** — broken into missions you review yourself, one at a time
 
 ## Workflow Details
 - **Always grill** — `grill-with-docs` runs on every invocation

@@ -62,7 +62,8 @@ Write a `UBIQUITOUS_LANGUAGE.md` file with this structure:
 - **Be opinionated.** When multiple words exist for the same concept, pick the best one and list the others as aliases to avoid.
 - **Flag conflicts explicitly.** If a term is used ambiguously in the conversation, call it out in the "Flagged ambiguities" section with a clear recommendation.
 - **Only include terms relevant for domain experts.** Skip the names of modules or classes unless they have meaning in the domain language.
-- **Keep definitions tight.** One sentence max. Define what it IS, not what it does.
+- **Keep definitions tight.** One sentence max. Define what it IS, not what it does — no rationale, implementation paths or history.
+- **Stay within budget.** `UBIQUITOUS_LANGUAGE.md` has a word budget in `.ab-method/structure/index.yaml` (`doc_budgets`, 3000 by default). After writing, run `node .ab-method/scripts/check-docs.js` (plugin installs: `npx ab-method check-docs`) and compact until it passes. Rules: `.ab-method/rules/docs.md`.
 - **Show relationships.** Use bold term names and express cardinality where obvious.
 - **Only include domain terms.** Skip generic programming concepts (array, function, endpoint) unless they have domain-specific meaning.
 - **Group terms into multiple tables** when natural clusters emerge (e.g. by subdomain, lifecycle, or actor). Each group gets its own heading and table. If all terms belong to a single cohesive domain, one table is fine — don't force groupings.
@@ -87,7 +88,8 @@ Write a `UBIQUITOUS_LANGUAGE.md` file with this structure:
 When invoked again in the same conversation:
 
 1. Read the existing `UBIQUITOUS_LANGUAGE.md`
-2. Incorporate any new terms from subsequent discussion
-3. Update definitions if understanding has evolved
+2. Incorporate new terms into the existing tables — edit in place, never append a duplicate or a "new terms" section
+3. Rewrite definitions whose meaning evolved; delete terms that no longer exist (no deprecated markers)
 4. Re-flag any new ambiguities
 5. Rewrite the example dialogue to incorporate new terms
+6. Run the `check-docs` gate

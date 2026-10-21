@@ -12,7 +12,9 @@ Create the `docs/adr/` directory lazily — only when the first ADR is needed.
 {1-3 sentences: what's the context, what did we decide, and why.}
 ```
 
-That's it. An ADR can be a single paragraph. The value is in recording *that* a decision was made and *why* — not in filling out sections.
+That's it. An ADR can be a single paragraph. The value is in recording *that* a decision was made and *why* — not in filling out sections. Keep it under the ADR budget in `.ab-method/structure/index.yaml` (1000 words by default); a longer one is usually two decisions or carries implementation detail that belongs in code.
+
+Docs that depend on the decision link it in one line (`see ADR-0007`) instead of restating the rationale.
 
 ## Optional sections
 

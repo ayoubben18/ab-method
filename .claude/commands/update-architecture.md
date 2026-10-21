@@ -15,7 +15,7 @@ This workflow will:
 1. Identify what shipped (from the latest `progress-tracker.md` summaries, `git diff`, or user description)
 2. Refresh the architecture docs that the change touches:
    - **APIs/endpoints** in `tech-stack.md` (Entry Points) — checked every run, even if the user didn't mention APIs
-   - Patterns in `frontend-patterns.md` / `backend-patterns.md`
+   - Patterns in the topic files under `docs/architecture/frontend/` / `backend/`
    - Stack / external services / constraints / testing in `tech-stack.md`
    - Domain terms in `UBIQUITOUS_LANGUAGE.md` / `CONTEXT.md`
 3. **Invoke the `improve-codebase-architecture` skill** scoped to the changed files — surfaces deepening opportunities the change just created or revealed, drops into a grilling loop on the candidate the user picks
@@ -24,7 +24,7 @@ This workflow will:
 ## Workflow Details
 - **Always checks APIs** — Entry Points drift is the most common stale-doc issue
 - **Always runs `improve-codebase-architecture`** scoped to the change — docs catch the *what*; the skill catches *the architectural debt the change just introduced*
-- **Incremental** — adds new content; deprecates with `[DEPRECATED <date>]` instead of deleting
+- **Edits in place** — merges into or replaces the closest entry and deletes what is no longer true (`.ab-method/rules/docs.md`); finishes only when `check-docs` passes
 
 ## Examples
 ```

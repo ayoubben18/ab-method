@@ -1,87 +1,56 @@
 # Analyze Frontend Workflow
 
 ## Purpose
-Document client-side architecture: components, state, routing, styling, API integration. Build tooling, testing, and external services are out of scope here — they live in `docs/architecture/tech-stack.md`.
+Document client-side architecture as small topic files: components, state, routing, styling, API integration. Build tooling, testing and external services live in `docs/architecture/tech-stack.md` — link, don't repeat.
 
 ## Configuration
-**ALWAYS check `.ab-method/structure/index.yaml` first** for the output path.
+**ALWAYS check `.ab-method/structure/index.yaml` first** for the output folder and `doc_budgets`. Follow `.ab-method/rules/communication.md` with the user and `.ab-method/rules/docs.md` for every file written.
 
 ## Process
 
 ### 1. Discovery
-- Detect framework (React, Vue, Angular, Svelte, etc.)
-- Find main entry point (index.tsx, main.ts, App.tsx, etc.)
+- Framework (React, Vue, Angular, Svelte, …) and main entry point.
+- Legacy `docs/architecture/frontend-patterns.md` present → read it as input; carry over only what is still true in the code, then delete it. Mention `/ab-cleanup` for the rest of the repo.
 
-### 2. Component Architecture
-- Component hierarchy and organization
-- Reusable vs page components
-- Composition patterns (functional, hooks, HOCs, slots)
+### 2. Analyze each topic
+- **components** — hierarchy, reusable vs page components, composition.
+- **state** — solution, store shape, data flow, local vs global.
+- **routing** — library, route map (high level), auth-gated routes.
+- **styling** — methodology, theme/tokens, responsive approach.
+- **data-fetching** — client setup, request/response, errors, caching layer.
 
-### 3. State Management
-- Solution (Redux, Zustand, MobX, Context, signals, etc.)
-- Store shape and data flow
-- Local vs global state
-
-### 4. Routing
-- Routing library and config
-- Route map (high-level, not exhaustive)
-- Protected/auth-gated routes
-
-### 5. Styling
-- Methodology (CSS Modules, Tailwind, styled-components, etc.)
-- Theme/token system
-- Responsive approach
-
-### 6. API Integration
-- Client setup (fetch wrapper, axios, tRPC, GraphQL client, etc.)
-- Request/response patterns
-- Error handling and retries
-- Caching/data-fetching layer (React Query, SWR, RTK Query, etc.)
+Add a topic only when the codebase has a real pattern for it (forms, tables, i18n, …); skip topics with nothing to say.
 
 ## Output
 
-### Location
-Path defined in `.ab-method/structure/index.yaml` → `workflow_outputs.analyze-frontend`.
+Folder from `.ab-method/structure/index.yaml` → `workflow_outputs.analyze-frontend` (default `docs/architecture/frontend/`):
 
-### `frontend-patterns.md` Structure
-```markdown
-# Frontend Patterns
-
-## Framework
-- Framework + version
-- Entry point
-
-## Components
-- Organization
-- Naming + composition conventions
-
-## State
-- Solution and store shape
-- Data flow
-
-## Routing
-- Library
-- Route map
-- Auth-gated routes
-
-## Styling
-- Methodology
-- Theme/tokens
-- Responsive approach
-
-## API Layer
-- Client and patterns
-- Error handling
-- Caching/data-fetching
-
-## Cross-references
-- Build tooling, testing, external services → docs/architecture/tech-stack.md
+```
+docs/architecture/frontend/
+  index.md          # one line per topic: `- [state](state.md) — Zustand stores per feature, server state in React Query`
+  components.md
+  state.md
+  routing.md
+  styling.md
+  data-fetching.md
 ```
 
+Each topic file:
+
+```markdown
+# <Topic>
+
+- **Rule** — one line. Example: `path/to/exemplar.tsx`.
+- **Rule** — one line. Example: `path/to/other.tsx`.
+```
+
+Rules plus one exemplar each; no instance lists, no history, nothing the code says plainly. Stay within budget (index 300 words, topic 600 by default).
+
+### Gate
+```bash
+node .ab-method/scripts/check-docs.js   # plugin installs: npx ab-method check-docs
+```
+Compact any failing file before reporting.
+
 ## Key Files
-- package.json
-- src/index.* / main entry
-- src/App.* / root component
-- Router config
-- Store/state config
-- API client
+package.json · main entry · root component · router config · store config · API client

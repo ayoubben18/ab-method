@@ -41,7 +41,8 @@ Not "a directory". The map partitions the codebase the way **this project** part
 1. **`CONTEXT.md` / `CONTEXT-MAP.md`** — the bounded contexts, named in the project's own ubiquitous
    language. Best source by far: the map then speaks the domain, and a row nobody predicted reads as *a
    context boundary being crossed*, not as "another folder changed".
-2. **`docs/architecture/*`** — documented entry points, layers, and pattern groupings.
+2. **`docs/architecture/`** — `tech-stack.md` entry points, and each layer's `index.md` for its pattern
+   topics (open a topic file only when a mission touches it).
 3. **The source tree** — top-level source directories, one level deeper where a directory is large.
 
 A module is a module in the [../codebase-design/SKILL.md](../codebase-design/SKILL.md) sense — an
@@ -51,7 +52,7 @@ the session that drew it.
 
 ## Pass 1 — the planned map
 
-**When**: `/create-task` § 7.6 (after `critique-plan`, before the user validates the plan) and
+**When**: `/create-task` § 8 (after `critique-plan`, before the user validates the plan) and
 `/extend-task` (appended for the new missions). It is drawn from the plan, never from code you wrote.
 
 **Inputs**: the drafted missions, the grill's constraints and existing-code anchors, the architecture +
@@ -72,13 +73,13 @@ second read on the missions: a module you can't attribute to a mission, or a mis
 place anywhere, is a planning gap `critique-plan` didn't catch. Say so out loud and fix the missions
 before the user validates them. That is most of this pass's value; the picture is the by-product.
 
-The planned map is shown to the user in `/create-task` § 8 **alongside** the mission list — they are
+The planned map is shown to the user in `/create-task` § 9 **alongside** the mission list — they are
 validating the blast radius, not just the sentences.
 
 ## Pass 2 — the actual map
 
 **When**: after `review-implementation` and `sync-architecture` have run, before the task's status is set
-to `Completed`. Not earlier: the reviewers apply safe fixes and commit append-only doc additions, so a map
+to `Completed`. Not earlier: the reviewers apply safe fixes and commit in-place doc edits, so a map
 drawn before them describes a diff that no longer exists.
 
 Derive it from the task's **commit range**, never the working tree:
