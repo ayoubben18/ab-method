@@ -11,6 +11,10 @@ Every test must protect a real use case, fail for the right reason before the ch
 
 See [tests.md](tests.md) for worked examples of each step and [mocking.md](mocking.md) for where mocks belong.
 
+## 0. Is this use case in the Test Plan?
+
+Inside an AB Method task, the tracker's `## Test Plan` is the complete list of tests the task will write. If the task has a plan and this use case isn't on it, don't write a test: verify through typecheck/build and the existing tests, and say so in the summary. If a missing use case clearly deserves a test, say so instead of adding it silently — it goes on the plan first. Standalone use (no task, or a tracker with no Test Plan) is unaffected.
+
 ## 1. Define the use case before writing the test
 
 State the starting condition, the action, and the observable result. Ground it in a requirement, actual usage, or a reproduced bug — never in what the code happens to do. The use case is not complete until you can say concretely what breaks for the user if this behavior regresses.
@@ -47,7 +51,7 @@ Rewrite weak assertions and remove tests with no distinct protection. For substa
 
 ## 7. Keep execution deterministic and verification bounded
 
-Control external data and time when needed, wait for observable outcomes instead of sleeping, and account for platform differences. Run the focused tests and the relevant integration checks.
+Control external data and time when needed, wait for observable outcomes instead of sleeping, and account for platform differences. Run only the focused tests for what you changed, plus the relevant integration checks; the full suite runs once, at the end of the task, not after every change.
 
 Finish with three things stated: the behavior now protected, the evidence of red and green (the failing output, then the passing run), and any verification limits — what you could not run or could not observe.
 

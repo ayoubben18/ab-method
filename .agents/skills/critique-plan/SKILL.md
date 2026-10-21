@@ -29,7 +29,8 @@ whatever the user pastes in (standalone).
 
 Read only what exists; skip missing files silently (don't flag them or offer to create them):
 `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md` (or `CONTEXT-MAP.md` + each `src/<context>/CONTEXT.md`),
-`docs/adr/`, and `docs/architecture/*`.
+`docs/adr/`, `docs/architecture/tech-stack.md`, and each layer's `docs/architecture/<layer>/index.md`
+(open a topic file only when the plan touches it).
 
 ### 2. Spin up ONE read-only domain critic (subagent)
 

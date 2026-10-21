@@ -38,6 +38,8 @@ where roadmaps and tasks are stored and how they reference each other
 (the `relationships` section). Paths are user-configurable; never
 hardcode them.
 
+Follow `.ab-method/rules/communication.md` for every message.
+
 ## Process
 
 ### 1. Grill the Idea — ONCE — to draw the task graph
@@ -201,7 +203,7 @@ actually resolve one:
 |---|---|---|
 | `grilling` | A `grill-with-docs` session on that one question. **The default.** | Yes — the decision is theirs |
 | `research` | Reading docs, a third-party API, the codebase. Hand it to a subagent. | No — run it and report |
-| `prototype` | Build something cheap and concrete to react to — a stub, a sketch, a throwaway script. Link it from the decision. | Yes — they react to it |
+| `prototype` | Build something cheap and concrete to react to — a stub, a throwaway script, or for a UI question the `prototype-ui` skill (disposable HTML variants with a picker, never in the codebase). Link it from the decision. | Yes — they react to it |
 | `task` | Manual work that must happen before the decision is *possible*: signing up for the service so its API can be judged, provisioning access, moving data so its shape is visible. | Either — do it if you can, otherwise hand over a precise checklist |
 
 **Resolve at most one `grilling` or `prototype` decision per session**

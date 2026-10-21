@@ -31,7 +31,7 @@ The analyze-frontend workflow examines:
 /analyze-frontend
 # Analyzes frontend architecture and component patterns
 # Documents UI frameworks, state management, and styling approaches
-# Creates frontend-specific technical documentation
+# Writes docs/architecture/frontend/ — index.md + one small file per topic, within budget
 ```
 
 ## Alternative Usage

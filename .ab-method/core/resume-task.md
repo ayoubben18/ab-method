@@ -1,133 +1,96 @@
 # Resume Task Workflow
 
 ## Purpose
-Continue work on an existing task. The progress tracker is the source of truth — no mission docs to read.
+Continue an existing task one mission at a time. The progress tracker is the source of truth — there are no mission docs.
 
 ## Critical Step
-**ALWAYS check `.ab-method/structure/index.yaml` FIRST** to find where task documents are stored.
+**ALWAYS check `.ab-method/structure/index.yaml` FIRST** to find where task documents and architecture docs live.
+
+Follow `.ab-method/rules/communication.md` for every message and `.ab-method/rules/code.md` for every line of code.
 
 ## Process
 
 ### 1. Identify the Task
-Ask: "Which task should we resume?" If unsure, list folders under `docs/tasks/`.
+Ask which task to resume; list `docs/tasks/` if unsure.
 
 ### 2. Read the Progress Tracker
-Open `docs/tasks/<task>/progress-tracker.md`. From it, identify:
-- Task status (Brainstormed / Validated / In dev / Testing / Completed)
-- Which missions are completed (with their technical summaries)
-- Which mission is next (or in progress)
-- Any `[pp-x]` parallel-group tags on pending missions (same tag = user-approved concurrent batch; untagged missions are sequential barriers)
-- Any `⚠️ UQ-n` markers on pending missions — those missions build on a black box; read `unresolved-questions.md` in the same folder for the question and its agreed placeholder
-- Any constraints/notes from the original grill-with-docs session
-- The `## Planned` section of `change-map.md` if the task has one — where the plan expects the remaining
-  missions to land. Read it for orientation; never edit it
+From `docs/tasks/<task>/progress-tracker.md`, identify:
+- Status, completed missions (with summaries), and the next mission
+- `[pp-x]` tags (same tag = user-approved concurrent batch; untagged = sequential barrier)
+- `verify:` tags — `verify: test (UCn)` or `verify: build`; untagged missions (pre-4.0 trackers) are `verify: test`
+- `⚠️ UQ-n` markers — read `unresolved-questions.md` for the question and agreed placeholder
+- `## Placement`, `## Test Plan`, `## UI Spec` (if present), and Constraints / Notes
+- `## Planned` in `change-map.md`, if present — for orientation; never edit it
 
 ### 3. Display Resume Context
 ```
-Resuming: <Task Name>
-Status: <In dev>
+Resuming: <Task Name> (In dev)
 
-Missions:
-[x] Mission 1: [Name] — Completed
-[x] Mission 2: [Name] — Completed
-[ ] Mission 3: [Name] — next up
-[ ] Mission 4: [Name] — pending
+[x] Mission 1: [Name]
+[ ] Mission 2: [Name] — verify: build — next up
+[ ] Mission 3: [Name] — verify: test (UC1)
 
-Ready to continue with Mission 3?
+Continue with Mission 2?
 ```
 
-If the next mission is part of a `[pp-x]` group, surface the whole group and offer the parallel run:
-```
-[ ] Mission 3: [Name] [pp-1] — next up
-[ ] Mission 4: [Name] [pp-1] — same group
-
-Missions 3–4 are grouped [pp-1] — run them in parallel in subagents, or one at a time?
-```
-If some missions in a group are already completed, only the remaining ones form the batch. The tag records *permission*, not *obligation* — the user may still choose sequential.
+If the next mission is in a `[pp-x]` group, show the remaining group members and ask: run them in parallel in subagents, or one at a time? The tag records permission, not obligation.
 
 #### Open unresolved questions — ask once, then move on
 
-If `unresolved-questions.md` exists with `OPEN` entries that any *remaining* mission is marked
-`⚠️ UQ-n` for, surface them before starting — a resumed session is the natural moment for an answer
-that arrived since the grill:
+If `unresolved-questions.md` has `OPEN` entries feeding a remaining `⚠️ UQ-n` mission, surface them once:
 
 ```
-2 open questions feed the remaining missions
-(docs/tasks/<task>/unresolved-questions.md):
-  UQ-1 Which currencies at launch?           → placeholder: USD only     (Mission 4)
+2 open questions feed the remaining missions:
+  UQ-1 Which currencies at launch?           → placeholder: USD only      (Mission 4)
   UQ-2 Refund window fixed or per-merchant?  → placeholder: fixed 30 days (Mission 6)
-
-Answer either one now and I'll build the real thing — otherwise we ship the placeholders.
+Answer either now and I'll build the real thing — otherwise we ship the placeholders.
 ```
 
-Ask **once**. If the user answers, mark that entry `RESOLVED <date>` with the answer, drop the
-`⚠️ UQ-n` marker from the affected mission lines **and its line from the tracker's Unresolved
-Questions section** (remove the section when the last one closes), then implement the real behaviour
-(if the answer grows the scope beyond a seam swap, say so and point at `/extend-task`). If they don't, proceed on
-the placeholders without re-asking each mission — nagging is worse than the black box. Questions
-whose missions are already completed stay in the file; mention them only in the closing summary.
+If answered: mark the entry `RESOLVED <date>` with the answer, drop the `⚠️ UQ-n` markers and its line in the tracker's Unresolved Questions section (remove the section when empty), and build the real behaviour (if it grows beyond a seam swap, point at `/extend-task`). If not, proceed on the placeholders without re-asking.
 
-### 4. Load the `tdd` Skill — STEP ZERO, before anything else for the mission
+### 4. Load the `tdd` Skill — `verify: test` missions only
 
-Invoke the `tdd` skill via the Skill tool: `Skill("tdd")`.
+For a `verify: test` mission, invoke `Skill("tdd")` **first** — before reading mission context, grilling, or touching the code. The playbook drives the use case, boundary, red → green and value challenge; writing a test first is not the same thing.
 
-Do this **first**, every resumed mission, no exceptions — before reading mission context, before grilling, before any Read / Edit / Write / Bash for the mission's work. The skill loads `SKILL.md` (use case, coverage check, test boundary, meaningful red → green → refactor, independent assertions, test-value challenge, bounded verification) plus its companions (`tests.md`, `mocking.md`), which drive every subsequent decision. Writing the test first is not enough; the discipline lives in that playbook. If you catch yourself about to touch the codebase without having called `Skill("tdd")` for this mission, stop and call it.
+A `verify: build` mission skips this: it adds no test.
 
-### 5. Load Context for the Next Mission
+### 5. Load Context for the Mission
 Read (paths from `.ab-method/structure/index.yaml`):
-- `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`
-- `docs/architecture/tech-stack.md` (incl. Testing section)
-- `docs/architecture/frontend-patterns.md` and/or `backend-patterns.md` — only the ones the mission touches
-- `docs/adr/`
-- Mission summaries already in the progress tracker
+- `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, `docs/adr/`
+- `docs/architecture/tech-stack.md` (Testing section, typecheck/lint/build commands)
+- Patterns: `docs/architecture/<layer>/index.md`, then only the topic files the mission touches. Legacy repo (only `frontend-patterns.md` / `backend-patterns.md`): read those and suggest `/ab-cleanup` once
+- The mission's `## Placement` lines, its Test Plan entry, and `## UI Spec` + `docs/tasks/<task>/prototype/` for UI missions
+- Prior mission summaries
 
-### 6. Run the Mission Through `tdd` (red → green)
-- If the mission's one-line description is vague → invoke `grill-with-docs` first
-- If the mission carries `⚠️ UQ-n` → implement the **recorded placeholder** behind one named seam marked `TODO(UQ-n)`, with a test naming the UQ, per `create-task.md` § 9.2b. Never invent the answer mid-mission; never fabricate data to route around it
-- Run red → green under the already-loaded `tdd` skill — consult it, don't improvise. Meaningful red first, smallest fix to green, then refactor what you touched; task-wide cleanup belongs to `review-implementation` once the task's missions are green
-- Optionally deploy a subagent if the mission warrants it (large surface, specialized domain). Pick by need, not by mission type. A subagent does not exempt you from Step 4 — load `tdd` in the parent context first.
+### 6. Run the Mission
+- Vague one-line description → `grill-with-docs` first
+- `⚠️ UQ-n` → build the **recorded placeholder** behind one named seam marked `TODO(UQ-n)`, with a test naming the UQ (`create-task.md` § 10). Never invent the answer or fabricate data around it
+- **`verify: test (UCn)`** → red → green under the loaded `tdd` skill for that use case: meaningful red, smallest fix, refactor what you touched
+- **`verify: build`** → implement, then run typecheck/lint/build and the focused existing tests for the area. No new test. An extraction mission must leave existing tests green
+- Apply `.ab-method/rules/code.md` while writing; task-wide cleanup is `review-implementation`'s job
+- Optionally use a subagent for a large or specialized mission; for `verify: test`, load `tdd` in the parent first
 
-**If the mission is tagged `[pp-x]` and the user confirmed the parallel run:** follow **Parallel group execution** in `.ab-method/core/create-task.md` (§ 9) — one subagent per remaining mission in the group, spawned in a single message, each running tdd on disjoint files and writing its detailed output to `sub-agents-outputs/`; then run the test suite once at the parent level to verify the merge.
+**`[pp-x]` group the user approved:** follow **Parallel group execution** in `create-task.md` § 10 — one subagent per remaining mission, single message, disjoint files, detail to `sub-agents-outputs/`; then run focused checks once at the parent level to verify the merge.
 
 ### 7. On Completion
-Append a tight technical summary to the progress tracker (same format as `create-task.md` § 9.6). Skip empty bullets. Then prompt:
-"Mission N completed. Ready to start Mission N+1?"
+Append the mission summary to the tracker (format: `create-task.md` § 10; skip empty bullets), then ask: "Mission N done. Start Mission N+1?" For a group, one summary per mission and one prompt per group.
 
-For a parallel group: append one summary block per mission, mark the whole group complete, and prompt once per group — "Missions N–M (`[pp-x]`) completed in parallel. Ready to continue with Mission M+1?"
+When all missions are done: run the **full test suite once**, then Steps 8–9, then delete `docs/tasks/<task>/prototype/` if it exists, and only then set status to `Completed`.
 
-When all missions are done, run the **post-implementation review** and then the **actual change map**, and only then set task status to `Completed`.
+### 8. Post-Implementation Review — `review-implementation` (interactive)
 
-### 8. Post-Implementation Review — invoke the `review-implementation` skill
+Invoke the `review-implementation` skill on the task's diff in **interactive mode**: it presents findings by lens (`safe-fix` / `needs-judgment`) and you apply what the user approves, keeping tests green. Then optionally `sync-architecture` (interactive) for doc deltas, applied in place under `.ab-method/rules/docs.md` with `check-docs` green.
 
-Once the last mission is complete, **invoke the `review-implementation` skill** on the task's diff (the
-cohesive change across all its missions). Three read-only critics — `cleaner-architecture`,
-`slop-defender`, `reusability-inspector` — push back only on real issues; a clean diff yields nothing.
+### 9. Actual Change Map + Drift — `change-map`
 
-`/resume-task` keeps you in the loop, so run it in **interactive mode**: it presents findings grouped by
-lens (each marked `safe-fix` / `needs-judgment`) and you apply what you approve, keeping tests green.
-(The autonomous `/start-task` variant instead auto-applies safe fixes and writes a `review.md`.) The
-skill owns the review logic; don't duplicate it here.
-
-### 9. Actual Change Map + Drift — invoke the `change-map` skill
-
-After the review (and `sync-architecture`, if you ran it) — their fixes are part of the diff — **invoke the
-`change-map` skill** in its *actual* pass. It derives the task's real blast radius from its commit range
-and appends `## Actual` and `## Drift` to `docs/tasks/<task>/change-map.md`, leaving the `## Planned`
-section from task creation untouched.
-
-`/resume-task` keeps you in the loop, so walk the drift with the user before closing the task: modules the
-task reached that the plan never named, modules the plan named that it never touched (re-read that
-mission's summary — a claimed-but-untouched module means the mission may not have done what it says), and
-verdicts heavier than predicted. The skill **reports only** — route what it finds to
-`/improve-codebase-architecture` or `/domain-model` rather than fixing it here. A task with no `## Planned`
-section records `no planned map — nothing to compare`; never back-fill one from the diff.
+After the review and any sync (their fixes are part of the diff), invoke `change-map`'s *actual* pass. It appends `## Actual` and `## Drift` to `change-map.md` without touching `## Planned`. Walk the drift with the user: unplanned modules, planned-but-untouched modules (re-read that mission's summary), heavier verdicts. Route findings to `/improve-codebase-architecture` or `/domain-model`; never back-fill a missing `## Planned`.
 
 Then set status to `Completed`.
 
 ## Remember
-- The progress tracker carries everything you need; there are no mission docs by design
-- `change-map.md`'s `## Planned` section is read-only from here on — the actual pass appends to it, never rewrites it
-- Tests + technical summaries are the persistent context across sessions
-- Always `Skill("tdd")` first, before any other mission work — never skip the load, even when you "know" how to TDD
-- `[pp-x]` tags exist only because the user opted in when the missions were defined — still confirm before launching a group in parallel, and never invent new tags during resume without asking
-- `⚠️ UQ-n` means a black box: ask once at resume whether the answer arrived, then build the recorded placeholder and stop asking. Open questions never block completion — they ship, recorded, in `unresolved-questions.md`
+- The tracker carries everything; there are no mission docs
+- `Skill("tdd")` first for every `verify: test` mission; `verify: build` missions add no test
+- Focused checks per mission, full suite once at the end
+- `## Planned` in `change-map.md` is read-only
+- Never invent `[pp-x]` tags; confirm before a parallel run
+- `⚠️ UQ-n`: ask once, then build the recorded placeholder; open questions never block completion

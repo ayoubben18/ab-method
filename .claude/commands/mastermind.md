@@ -37,4 +37,5 @@ It will:
 - Multi-task orchestration (idea → dependency-ordered roadmap → execution)
   lives in the `/create-roadmap` → `/start-roadmap` pair. Mastermind routes
   to them; it doesn't hold that logic itself.
+- Also routes to the `prototype-ui` skill (explore UI directions as disposable HTML), `/ab-cleanup` (clean or migrate a repo already using AB Method), and `check-docs` (doc budget report).
 - For the plain workflow menu, use `/ab-master`.

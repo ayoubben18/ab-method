@@ -29,6 +29,8 @@ recommend `/create-task` instead.
 **ALWAYS check `.ab-method/structure/index.yaml` FIRST** to find where
 goal documents should be created. Paths are user-configurable.
 
+Follow `.ab-method/rules/communication.md` for every message.
+
 ## Process
 
 ### 1. Define the Goal — ALWAYS invoke the `grill-with-docs` skill
@@ -100,8 +102,10 @@ Before writing the goal file, ground it in the codebase:
 1. **Check `.ab-method/structure/index.yaml`** for doc locations.
 2. **Read architecture + domain docs** — `UBIQUITOUS_LANGUAGE.md`,
    `CONTEXT.md` (or `CONTEXT-MAP.md` + per-context files),
-   `docs/architecture/tech-stack.md`, `frontend-patterns.md`,
-   `backend-patterns.md`, `docs/adr/`.
+   `docs/architecture/tech-stack.md`, `docs/adr/`, and for patterns
+   `docs/architecture/<layer>/index.md` plus only the relevant topic
+   files (legacy repos: `frontend-patterns.md` / `backend-patterns.md`;
+   suggest `/ab-cleanup` once).
 3. **Analyze relevant code areas** — similar implementations, file
    organization, reusable services/types, the test command and
    framework (from `tech-stack.md` Testing section — the loop needs
@@ -143,7 +147,8 @@ Run these after every meaningful change to steer yourself — not just at
 the end. Each is a check, what a pass/fail signals, and what to do on
 failure.
 - [Command or check] — [what pass/fail means] — [action on failure]
-- e.g. `npm test` — unit + integration green — fix before continuing
+- e.g. `npm test -- src/billing` — focused tests for what you touched green — fix before continuing
+  (the full suite belongs to the end state, not every iteration)
 - e.g. `npm run typecheck` — no type errors — fix immediately
 - e.g. visual check of /dashboard vs the design — layout matches — adjust styles
 A red feedback loop takes priority: stop adding scope and fix it first.
@@ -171,8 +176,10 @@ Read these before starting, and again whenever unsure. Paths come from
 `.ab-method/structure/index.yaml`:
 - `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md` — use canonical domain terms
 - `docs/architecture/tech-stack.md` — stack, entry points, test command
-- `docs/architecture/frontend-patterns.md` and/or `backend-patterns.md`
-  — only the layer this goal touches
+- `docs/architecture/<layer>/index.md`, then only the topic files this
+  goal touches
+- `.ab-method/rules/code.md` — placement (reuse / extend / extract
+  before adding inline), write less, comments only for the why
 - `docs/adr/` — prior decisions; do not contradict without flagging
 [Plus any existing-code anchors: "mirror src/auth/UserForm.tsx".]
 

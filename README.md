@@ -113,7 +113,7 @@ If the runtime can't be determined it falls back to flat, which runs correctly o
 | `/mastermind`         | Intelligent entry point — routes your intent to the right workflow, helps decide goal vs task vs roadmap, explains the method |
 | `/create-roadmap`     | Turn a bigger idea into a dependency-ordered DAG of tasks; plan each via `/create-task` |
 | `/start-roadmap`      | Execute a planned roadmap in dependency order; independent tasks optionally parallel  |
-| `/create-task`        | Define a task; always grills, runs every mission through `tdd`. Roadmap-aware        |
+| `/create-task`        | Define a task; always grills, decides placement and a test plan, prototypes new UI. Roadmap-aware |
 | `/create-task-from-handoff` | Resume a handoff spun off mid-grill into a task; continues the grill, then runs `create-task` |
 | `/create-goal`        | Produce a ready-to-run prompt for an autonomous `/goal` loop            |
 | `/extend-goal`        | Extend an existing goal, building on what the `/goal` run implemented   |
@@ -125,20 +125,25 @@ If the runtime can't be determined it falls back to flat, which runs correctly o
 | `/analyze-frontend`   | Frontend patterns only                                                  |
 | `/analyze-backend`    | Backend patterns only                                                   |
 | `/update-architecture`| Refresh architecture and domain docs after impactful changes            |
+| `/ab-cleanup`         | Clean up a repo already using AB Method: compact docs to budget, split pattern docs, remove task leftovers. Also the 3.x → 4.0 migration |
 | `/ab-master [name]`   | Master controller — lists workflows, or runs the named one              |
 
 ## Core principles
 
 1. Always grill — `/create-task` and `/create-goal` invoke `grill-with-docs` on every run, no skip.
-2. Always TDD — every mission runs through the `tdd` skill: use case first, meaningful red, smallest fix to green, then refactor; each test must protect a distinct failure mode. Task-wide cleanup is left to `review-implementation`, once the task's missions are green.
-3. No mission docs — missions are one-line entries in `progress-tracker.md`; tight summaries on completion.
-4. One task at a time — focus, conserve context.
-5. Backend-first for full-stack tasks — types feed the frontend.
-6. Never lose a tangent — when a grill surfaces a side-topic that deserves its own task, the `handoff` skill captures it under `docs/handoffs/` instead of derailing the current grill; `/create-task-from-handoff` resumes it later.
-7. Parallel only by consent — independent missions can be tagged `[pp-1]`, `[pp-2]`, ... and run concurrently in subagents; untagged missions are sequential barriers. The workflow always asks before tagging — sequential is the default.
-8. Map the blast radius twice — every task predicts which modules it will land in *before* implementation, and derives the same map from the real diff *after*. The drift between them is the method's only measurement of whether a plan understood its own reach (below).
-9. Critique before, review after — `critique-plan` stress-tests the drafted plan against the domain model before coding, and `review-implementation` runs three critics on the diff after. Both push back **only on real issues** — a sound plan or a clean diff produces nothing. No suggestion-for-its-own-sake.
-10. Park, never guess — the rare question you genuinely can't answer yet becomes a recorded black box, not a silent invented decision (below).
+2. Test what matters — each task has a `## Test Plan`: the full list of use cases worth a test. Missions marked `verify: test` run through the `tdd` skill (use case first, meaningful red, smallest fix to green); `verify: build` missions (styling, wiring, config, refactors) add no test and are checked by typecheck, build and the existing suite. Focused tests per mission, the full suite once at the end.
+3. Placement before code — for every capability, the plan records reuse, extend or extract (`## Placement`). Logic that would become a second copy is extracted first, in its own refactor mission: make the change easy, then make the easy change.
+4. Prototype new UI first — a task that adds a new page, component or flow runs `prototype-ui`: several genuinely different variants as one disposable HTML file with a picker, never in the codebase. The pick becomes the tracker's `## UI Spec`; the file is deleted when the task completes.
+5. Small docs, by rule — domain and architecture docs have word budgets (`doc_budgets` in `index.yaml`), hold the current state only (no task history, no `[DEPRECATED]`), and are edited in place. `npx ab-method check-docs` enforces it, and every doc-writing workflow runs it.
+6. Short communication, lean code — `.ab-method/rules/communication.md` and `code.md` apply to every workflow: answer first, no recaps; deletion test, no speculative generality, comments only for the why.
+7. No mission docs — missions are one-line entries in `progress-tracker.md`; tight summaries on completion.
+8. One task at a time — focus, conserve context.
+9. Backend-first for full-stack tasks — types feed the frontend.
+10. Never lose a tangent — when a grill surfaces a side-topic that deserves its own task, the `handoff` skill captures it under `docs/handoffs/` instead of derailing the current grill; `/create-task-from-handoff` resumes it later.
+11. Parallel only by consent — independent missions can be tagged `[pp-1]`, `[pp-2]`, ... and run concurrently in subagents; untagged missions are sequential barriers. The workflow always asks before tagging — sequential is the default.
+12. Map the blast radius twice — every task predicts which modules it will land in *before* implementation, and derives the same map from the real diff *after*. The drift between them is the method's only measurement of whether a plan understood its own reach (below).
+13. Critique before, review after — `critique-plan` stress-tests the drafted plan against the domain model before coding, and `review-implementation` runs three critics on the diff after. Both push back **only on real issues** — a sound plan or a clean diff produces nothing. No suggestion-for-its-own-sake.
+14. Park, never guess — the rare question you genuinely can't answer yet becomes a recorded black box, not a silent invented decision (below).
 
 `grill-with-docs` reads `UBIQUITOUS_LANGUAGE.md` and `CONTEXT.md`, challenges terminology against them, and updates `CONTEXT.md` and `docs/adr/` inline as decisions crystallise.
 
@@ -166,7 +171,7 @@ Critic layers bracket every implementation, all anchored in the domain model and
 - **`critique-plan` (pre-implementation, advisory).** Before missions are validated (in `/create-task`) or the task graph is handed off (in `/create-roadmap`), a read-only domain critic challenges the plan against `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, and `docs/adr/`. It pushes back on genuine conflicts — terminology drift, wrong bounded context, an ADR contradiction, a reinvented concept, a bad seam in the DAG — and stays silent otherwise. You resolve each pushback (amend the plan, or dismiss with a load-bearing reason that may become an ADR).
 - **`reconcile-roadmap` (pre-execution, roadmap-level, advisory).** Once a roadmap's tasks are all planned, this read-only critic reads *every* planned task's `progress-tracker.md` **together** and checks the finished plans cohere as a system — catching discrepancies only visible *between* plans that `critique-plan` structurally can't see (it judges one plan at a time). It fires on a consumer with no producer, a coverage gap, duplicated work, a reversed/missing edge, cross-task terminology drift, conflicting assumptions, a black box one task ships that another builds real logic on, or a map gone stale against its plans (fog a task already covers, an out-of-scope item a task implements, a `plan: ✅` task planned around a still-open decision). Standalone (`/reconcile-roadmap <name>`), run before `/start-roadmap`; silent when the plans line up.
 - **`review-implementation` (post-implementation).** After a task's missions are done, three read-only critics run in parallel on the task's diff: **cleaner-architecture** (shallow modules the change introduced, via the deletion test), **slop-defender** (AI code-slop — speculative generality, pass-through wrappers, dead code, comments that restate code), and **reusability-inspector** (logic that duplicates an existing util/service/type). Each returns nothing when the diff is clean. In autonomous runs (`/start-task`, `/start-roadmap`) the orchestrator auto-applies only **safe** fixes (mechanical, test-covered, no behavior change — each gated on green tests) and writes **everything** to `docs/tasks/<task>/review.md` next to the tracker: safe fixes marked applied, riskier findings left open for you to read afk. Interactive runs present the findings for you to pick instead.
-- **`sync-architecture` (post-implementation, docs).** Right after the review, a single read-only detector runs on the same diff — asking not "is this good code?" but "does this diff introduce anything the docs don't yet know about?" It finds new endpoints, patterns, dependencies, domain terms, and ADR-worthy decisions the change added, and routes each to the exact doc it belongs in (reusing `/update-architecture`'s routing). Autonomous runs apply only **append-only** safe additions (a new Entry Points line, a new dependency, a new pattern section — committed as `docs(<task>): sync architecture docs`) and defer anything that rewrites prose, reshapes the domain, or is ADR-worthy to `/update-architecture` / `/domain-model`. This is the automated detection half of `/update-architecture`, so the architecture docs stay live instead of drifting until someone refreshes them by hand. Silent when the task introduced nothing doc-worthy.
+- **`sync-architecture` (post-implementation, docs).** Right after the review, a single read-only detector runs on the same diff — asking not "is this good code?" but "does this diff introduce anything the docs don't yet know about?" It finds new endpoints, patterns, dependencies, domain terms, and ADR-worthy decisions the change added, and routes each to the exact doc it belongs in (reusing `/update-architecture`'s routing). Autonomous runs apply only **in-place safe edits** (merged into the closest existing entry, never appended, and only if `check-docs` stays green — committed as `docs(<task>): sync architecture docs`) and defer anything that reshapes the domain, is ADR-worthy, or can't fit the budget to `/update-architecture` / `/domain-model`. This is the automated detection half of `/update-architecture`, so the architecture docs stay live instead of drifting until someone refreshes them by hand. Silent when the task introduced nothing doc-worthy.
 
 - **`change-map` (pre *and* post-implementation).** The only skill that runs on both sides of the work, because it is one artifact asked twice (below).
 
@@ -219,10 +224,10 @@ Two rules keep it honest. **Graduation is a planning act**: `/create-roadmap` an
 
 ## Workflow phases
 
-1. Baseline — `/analyze-project` produces `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, and three lean architecture docs.
+1. Baseline — `/analyze-project` produces `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, `tech-stack.md` and topic-split pattern docs, all within budget.
 2. Sharpen — the `domain-model` skill grills the domain language and captures ADRs.
 3. Build — `/create-task` or `/create-goal` grills, `critique-plan` stress-tests the plan against the domain model, then either TDD-loops missions or hands off a goal prompt, and `review-implementation` critiques the resulting diff, `sync-architecture` catches what the docs missed, and `change-map` measures where the change actually landed against where the plan said it would. For multi-task efforts, `/create-roadmap` draws the task graph and `/start-roadmap` runs it in dependency order.
-4. Maintain — `/update-architecture` keeps the baseline fresh.
+4. Maintain — `/update-architecture` keeps the baseline fresh; `/ab-cleanup` brings an older or bloated repo back within budget.
 
 ## File layout
 
@@ -230,7 +235,9 @@ Two rules keep it honest. **Graduation is a planning act**: `/create-roadmap` an
 .claude/commands/        Slash commands (one per workflow)
 .ab-method/
   core/                  Workflow definitions
-  structure/index.yaml   Configurable paths and outputs
+  rules/                 communication.md, code.md, docs.md — apply to every workflow
+  scripts/check-docs.js  The doc budget gate (also `npx ab-method check-docs`)
+  structure/index.yaml   Configurable paths, outputs and doc budgets
                          (plugin installs: bundled; add this file to override)
 
 UBIQUITOUS_LANGUAGE.md   Domain glossary
@@ -238,15 +245,26 @@ CONTEXT.md               Bounded-context overview
                          (or CONTEXT-MAP.md + per-context files)
 
 docs/
-  architecture/          tech-stack.md, frontend-patterns.md, backend-patterns.md
+  architecture/          tech-stack.md
+    frontend/, backend/  index.md (one line per topic) + one small file per topic
   adr/                   Decision records, created lazily by /domain-model
   tasks/<task-name>/     progress-tracker.md (single source of truth)
                          review.md (post-implementation review; autonomous runs)
                          change-map.md (planned vs actual blast radius + drift)
                          unresolved-questions.md (black boxes; rare, absent by default)
+                         prototype/ (disposable UI picker; gitignored, deleted on completion)
   goals/<goal-name>/     goal.md + progress-tracker.md
   handoffs/<slug>.md     Tangents spun off mid-grill, awaiting their own task
 ```
+
+## Upgrading to 4.0
+
+4.0 changes how tasks are planned and how docs are written. Existing trackers keep working: a mission with no `verify:` tag is treated as `verify: test`, the old behaviour. After updating, run `/ab-cleanup` once. It works on its own branch and commits each phase separately:
+
+1. Migrates `.ab-method/structure/index.yaml`, keeping your custom paths.
+2. Splits `frontend-patterns.md` / `backend-patterns.md` into topic folders.
+3. Compacts every doc over budget, and lists every rule it drops for your review.
+4. With your approval, removes the disposable leftovers of completed tasks.
 
 ## Configuration
 

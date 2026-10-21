@@ -28,8 +28,10 @@ bundled file lives in.
 ### 1. Gather diff + context
 
 The changed files and their `git diff`, plus (read only what exists): `UBIQUITOUS_LANGUAGE.md` /
-`CONTEXT.md` (canonical terms, spotting reinvented concepts), `docs/architecture/*` (the documented way
-things are built here), `docs/adr/` (don't propose what an ADR settled), and the task's
+`CONTEXT.md` (canonical terms, spotting reinvented concepts), the pattern docs for the layers the diff
+touches (`docs/architecture/<layer>/index.md`, then only the relevant topic files), `docs/adr/` (don't
+propose what an ADR settled), `.ab-method/rules/code.md` (the rules the code was written under), the
+task's `progress-tracker.md` sections `## Placement` and `## Test Plan`, and its
 `unresolved-questions.md` if it has one.
 
 **Black boxes are deliberate — seed every critic with the file.** A `TODO(UQ-n)` seam whose entry is

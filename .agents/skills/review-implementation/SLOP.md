@@ -22,13 +22,16 @@ carries no weight, comments that restate the obvious. You are read-only: return 
 - **Defensive checks for impossible states** — null guards on values the type system already guarantees,
   try/catch that swallows and rethrows, validation of inputs a caller has already validated.
 - **Comments that restate the code** — `// increment i` above `i++`, docstrings that echo the signature,
-  section-divider banners. Keep comments that explain *why*; cut the ones that narrate *what*.
+  section-divider banners. Per `.ab-method/rules/code.md` the default is no comment: keep only the
+  non-obvious *why* (a constraint, a workaround, a gotcha); cut everything that narrates *what*.
 - **Needless configuration** — flags, env vars, or config keys with a single value that never varies;
   "customizable" knobs nothing turns.
 - **Over-verbose naming / ceremony** — `AbstractBaseUserServiceFactoryImpl`, wrapper types that alias a
   primitive for no invariant, getters/setters over plain fields with no logic.
-- **Redundant tests** — tests asserting the language/framework works, or several tests covering the exact
-  same path with no distinct behavior; and their inverse — a big new surface with **no** test at all.
+- **Redundant tests** — tests asserting the language/framework works, several tests covering the exact
+  same path with no distinct behavior, or tests the diff added for a use case **not on the task's
+  `## Test Plan`** (the plan is the complete list — an extra test needs a reason the plan missed). Their
+  inverse is also a finding: a Test Plan use case with **no** test in the diff.
 - **Copy-pasted boilerplate** the diff duplicated instead of looping/reusing (hand hard duplication to
   `reusability-inspector`; flag the *ceremony* kind here).
 

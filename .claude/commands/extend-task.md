@@ -1,7 +1,7 @@
 # Extend Task
 
 ## Description
-Add new missions to an existing task after initial missions have been completed. Useful when requirements change or new features need to be added to an ongoing task.
+Add missions to an existing task — when requirements change, scope grows, or a parked question finally gets answered.
 
 ## Usage
 ```
@@ -9,39 +9,19 @@ Add new missions to an existing task after initial missions have been completed.
 ```
 
 ## Behavior
-Loads and executes the extend-task workflow from `.ab-method/core/extend-task.md`
+Loads and executes the extend-task workflow from `.ab-method/core/extend-task.md`:
+1. Pick the task and show its missions
+2. Surface open `⚠️ UQ-n` questions — **this is where a parked question gets answered**: grill the answer, swap the `TODO(UQ-n)` seam (or plan missions if it's more than a swap), mark the entry `RESOLVED`
+3. Gather the new work (grills if vague), then plan it like `/create-task`: placement (reuse / extend / extract, extractions first), new `## Test Plan` entries, and the `prototype-ui` gate if it adds new UI
+4. Append one-line missions with `verify:` tags to `progress-tracker.md`
+5. `critique-plan` on the new missions, then a dated `## Planned (extension N)` change-map block (the original is never edited)
+6. Reopen the task — and its `roadmap.md` entry if it belongs to a roadmap — so `/start-roadmap` re-runs the new work in order
 
-This workflow will:
-1. Select a task to extend
-2. Review current mission progress
-2b. Surface any open unresolved questions (`⚠️ UQ-n`) — **this is where a parked question gets answered**: the workflow grills the answer, swaps the `TODO(UQ-n)` placeholder (or plans real missions if it's more than a seam swap), and marks the entry `RESOLVED`
-3. Gather requirements for new missions (grills if vague)
-4. Append the new missions as one-line entries in `progress-tracker.md` (no mission docs)
-5. **Run `critique-plan` on the new missions** — the pre-implementation domain critic pushes back only on genuine conflicts before you confirm
-5b. **Extend the planned change map** — `change-map` appends a dated `## Planned (extension N)` block for the new missions' blast radius; the original planned map is never edited or merged into
-6. Reopen the task if it was `Completed` — and, if it belongs to a roadmap, reopen its `roadmap.md` entry too (`status: done → pending`) so a `/start-roadmap` re-run picks up the new work in dependency order
-
-## Workflow Details
-The extend-task workflow provides:
-- **Task Selection** - Choose which task to extend
-- **Progress Review** - See what missions are already completed
-- **Mission Planning** - Define new missions to add
-- **Context Preservation** - Maintain technical context from existing missions
-- **Progress Tracking** - Update `progress-tracker.md` with new missions (one-line entries, no separate mission docs)
-- **Roadmap-aware** - If the task is part of a roadmap, reopening it updates `roadmap.md` so `/start-roadmap` re-runs the extended work in dependency order
-- **Optional Parallel Groups** - Independent new missions can be tagged `[pp-x]` (or join a pending group) for concurrent subagent execution — only with the user's explicit yes
-
-## Examples
-```
-/extend-task
-# Selects a task and adds new missions
-# Creates detailed mission documents
-# Updates progress tracker with additional missions
-```
+## Notes
+- `[pp-x]` tags on new missions only with your explicit yes
+- No mission docs — missions live in the tracker
 
 ## Alternative Usage
-You can also use the traditional AB Method master controller:
 ```
 /ab-master extend-task
 ```
-

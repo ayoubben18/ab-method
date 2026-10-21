@@ -40,7 +40,9 @@ _Avoid_: Client, buyer, account
 
 - **Be opinionated.** When multiple words exist for the same concept, pick the best one and list the others as aliases to avoid.
 - **Flag conflicts explicitly.** If a term is used ambiguously, call it out in "Flagged ambiguities" with a clear resolution.
-- **Keep definitions tight.** One sentence max. Define what it IS, not what it does.
+- **Keep definitions tight.** At most two sentences plus the `_Avoid_` line. Define what it IS, not what it does — no rationale (that's an ADR), no implementation paths, no history.
+- **Edit in place.** Rewrite a term whose meaning shifted; delete one that no longer exists. Never append a second entry or mark one deprecated.
+- **Stay within budget.** The word budget for `CONTEXT.md` lives in `.ab-method/structure/index.yaml` (`doc_budgets`); after writing, run `node .ab-method/scripts/check-docs.js` (plugin installs: `npx ab-method check-docs`) and compact until it passes. Rules: `.ab-method/rules/docs.md`.
 - **Show relationships.** Use bold term names and express cardinality where obvious.
 - **Only include terms specific to this project's context.** General programming concepts (timeouts, error types, utility patterns) don't belong even if the project uses them extensively. Before adding a term, ask: is this a concept unique to this context, or a general programming concept? Only the former belongs.
 - **Group terms under subheadings** when natural clusters emerge. If all terms belong to a single cohesive area, a flat list is fine.

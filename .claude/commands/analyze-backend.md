@@ -31,7 +31,7 @@ The analyze-backend workflow examines:
 /analyze-backend
 # Analyzes backend API architecture and service patterns
 # Documents database models, authentication, and integrations
-# Creates backend-specific technical documentation
+# Writes docs/architecture/backend/ — index.md + one small file per topic, within budget
 ```
 
 ## Alternative Usage

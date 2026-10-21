@@ -1,136 +1,112 @@
 ---
 name: sync-architecture
-description: Post-implementation documentation-sync detector. Spins up ONE read-only subagent on a completed task's diff to find everything the change introduced that the architecture docs don't yet know about — new endpoints, patterns, dependencies, domain terms, ADR-worthy decisions — routed to the exact doc each belongs in. Autonomous runs apply only append-only safe additions and defer domain/ADR reshapes; interactive runs present the proposed doc deltas to pick. Use after a task's missions are done (from create-task / start-task / start-roadmap) or standalone on a diff.
+description: Post-implementation documentation-sync detector. Spins up ONE read-only subagent on a completed task's diff to find everything the change introduced that the architecture docs don't yet know about — new endpoints, patterns, dependencies, domain terms, ADR-worthy decisions — routed to the exact doc each belongs in. Autonomous runs apply only in-place safe edits that pass the check-docs budget gate and defer domain/ADR reshapes; interactive runs present the proposed doc deltas to pick. Use after a task's missions are done (from create-task / start-task / start-roadmap) or standalone on a diff.
 ---
 
 # Sync Architecture (post-implementation)
 
-Keep `docs/architecture/*` and the domain docs **live** by detecting, from a completed task's diff, what
-the change introduced that the docs haven't caught up with — then proposing the exact doc deltas. It runs
-in the same post-implementation phase as [../review-implementation/SKILL.md](../review-implementation/SKILL.md),
-but asks a **different question**:
+Detect, from a completed task's diff, what the change introduced that the architecture and domain docs
+don't know yet — then fold it **into** the docs in place. It runs beside
+[../review-implementation/SKILL.md](../review-implementation/SKILL.md) but asks a different question:
+that skill asks *"is this diff good code?"*, this one asks *"are the docs now wrong or incomplete?"*
 
-> `review-implementation` asks *"is this diff good code?"* — this skill asks *"does this diff introduce
-> anything the docs don't yet know about?"* The first is code debt; this is **documentation drift**.
+It is the automated detection half of `/update-architecture` and reuses its routing table. Talk to the
+user per `.ab-method/rules/communication.md`; every doc write follows `.ab-method/rules/docs.md`.
 
-It is the **automated detection half** of the manual `/update-architecture` workflow. Where
-`/update-architecture` is a heavy, human-invoked pass (and also runs the `improve-codebase-architecture`
-deepening loop), this skill is a lightweight detector that runs automatically after each task so the docs
-stop silently drifting. It **reuses `/update-architecture`'s routing table** — it does not invent its own.
+> **Silence is the default output.** A bug fix, styling, or CRUD that follows existing patterns produces
+> no deltas. A finding survives only if a doc is genuinely now wrong or incomplete. Never invent churn.
 
-> **Silence is the default output.** A task that introduced nothing doc-worthy (a bug fix, styling, a
-> trivial CRUD following existing patterns) produces no deltas — that is the normal case. A finding
-> survives only if the docs are genuinely now wrong or incomplete. Never invent doc churn to look thorough.
-
-**ALWAYS check `.ab-method/structure/index.yaml` FIRST** for where the architecture and domain docs live —
-paths are user-configurable. Sweep **only what this task changed** — the cohesive diff across its missions
-(`git diff` for the commit range) plus its `progress-tracker.md` mission summaries. This is not a
-whole-repo doc audit.
-
-Look for it under the project root (the current working directory) first — a project's own copy is how it
-customises its paths, so it always wins. Only if the project has none (AB Method installed as a plugin rather than
-with `npx ab-method`), read the bundled default: `../../../.ab-method/structure/index.yaml` relative to this
-`SKILL.md`. Either way, every path the index names is relative to the **project root**, never to the folder the
-bundled file lives in.
+**ALWAYS check `.ab-method/structure/index.yaml` FIRST** for where the docs live — paths are
+user-configurable. Use the project root's copy; only if the project has none (plugin install), read the
+bundled default at `../../../.ab-method/structure/index.yaml` relative to this `SKILL.md`. Every path it
+names is relative to the **project root**. Sweep **only this task's diff** (its commit range) plus its
+`progress-tracker.md` mission summaries — never a whole-repo audit.
 
 ## Process
 
 ### 1. Gather diff + context
 
-- The changed files and their `git diff` for the task's commit range.
-- The task's `progress-tracker.md` **Mission Summaries** — the per-mission **Files / Built / Integrates
-  with** bullets already enumerate most of what's new.
-- The **current** architecture + domain docs, so the detector proposes only what's genuinely *missing*
-  (skip files that don't exist): `docs/architecture/tech-stack.md`, `frontend-patterns.md`,
-  `backend-patterns.md`, `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, `docs/adr/`.
+- The task's `git diff` for its commit range and its **Mission Summaries** (Files / Built / Integrates with).
+- The current docs, so only what's missing is proposed (skip absent files): `tech-stack.md`, the
+  `index.md` of `docs/architecture/frontend/` and `backend/` (then only the topic files the diff touches),
+  `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, `docs/adr/`.
+- Legacy single-file `frontend-patterns.md` / `backend-patterns.md` instead of the split folders: route to
+  them as they are, and note once in the report that `/ab-cleanup` migrates them.
 
 ### 2. Spin up ONE read-only detector subagent
 
-Spawn a single subagent — `architecture-sync` — with the diff, the mission summaries, the current
-docs, and the task's `unresolved-questions.md` if it has one. It is **read-only**: it returns a routed findings list (often empty) and edits nothing. Isolating it
-keeps the doc analysis out of the orchestrator's context. On **Codex** (`spawn_agent` is one level deep)
-spawn it at the orchestrator's own level; on **Claude** it may nest. One detector is enough — the whole
-point is a single sweep of the change.
+Spawn a single subagent, `architecture-sync`, with the diff, the mission summaries, the current docs, and
+the task's `unresolved-questions.md` if present. It returns a routed findings list (often empty) and edits
+nothing. On **Codex** spawn it at the orchestrator's level; on **Claude** it may nest.
 
-Its brief — **detect only what the docs don't already capture**, routed with `/update-architecture`'s
-table:
+Its brief — detect only what the docs don't already capture, routed with `/update-architecture`'s table:
 
 | Finding | Routes to (update-architecture step) |
 |---|---|
-| New / renamed / moved endpoint, CLI command, cron, webhook, queue consumer | `tech-stack.md` **Entry Points** (2a) — and `backend-patterns.md` § API if a *convention* shifted |
-| New component / service / state / auth **pattern**, or a pattern swapped | `frontend-patterns.md` / `backend-patterns.md` (2b) |
-| New dependency, third-party API/queue, new limit/budget, test-framework shift | `tech-stack.md` Stack / External Services / Constraints / Testing (2c) |
-| New domain term used in code, or a term whose meaning shifted | `UBIQUITOUS_LANGUAGE.md` (+ `CONTEXT.md` if meaning shifted) (2d) |
-| A hard-to-reverse, surprising, trade-off-carrying **decision** | ADR candidate (2e) — **never written inline; defer to `/domain-model`** |
+| New / renamed / moved endpoint, CLI command, cron, webhook, queue consumer | `tech-stack.md` **Entry Points** (2a) — plus the backend `api` topic if a *convention* shifted |
+| New or swapped component / service / state / auth **pattern** | the closest topic file under `docs/architecture/<layer>/` (2b) |
+| New dependency, third-party API/queue, new limit, test-framework shift | `tech-stack.md` Stack / External Services / Constraints / Testing (2c) |
+| New domain term, or a term whose meaning shifted | `UBIQUITOUS_LANGUAGE.md` (+ `CONTEXT.md` if meaning shifted) (2d) |
+| A hard-to-reverse, surprising, trade-off-carrying **decision** | ADR candidate (2e) — never written inline; defer to `/domain-model` |
 
-For each finding return: **What** (the concrete thing the diff introduced, citing the file/mission),
-**Doc** (the exact target file + section), **Proposed delta** (the append-only line or short section to
-add), **Class** (see Step 3).
+For each finding return: **What** (the thing introduced, citing file/mission), **Doc** (target file +
+section or topic), **Proposed delta** (the in-place edit: which entry it merges into or replaces, and the
+new wording), **Class** (Step 3).
 
-> Example: *"New endpoint `POST /charges` (src/api/charges.ts, mission 2) — not in tech-stack.md Entry
-> Points. Proposed delta: add `POST /charges — create a charge (auth: bearer)` under Entry Points.
-> Class: safe-add."*
+> Example: *"New endpoint `POST /charges` (src/api/charges.ts, mission 2) — missing from tech-stack.md
+> Entry Points. Delta: add `POST /charges — create a charge (bearer auth)` to the Entry Points list.
+> Class: safe-edit."*
 
-**Never document a black box as established practice.** If the diff contains `TODO(UQ-n)` seams recorded
-in the task's `unresolved-questions.md`, the placeholder behind them is provisional by construction — do
-not write it into `tech-stack.md` as a constraint, into a patterns doc as "the way we do this", or into
-`UBIQUITOUS_LANGUAGE.md` as a term. A parked question is also **never** an ADR candidate: an ADR records a
-decision that was made, and this one wasn't. The real thing the docs may be missing is what the change
-built *around* the black box (the new endpoint, the new dependency, the seam's existence) — route that
-normally, and describe the placeholder only as what it is, e.g. "currency is fixed to USD pending UQ-1".
-When the question is later answered via `/extend-task`, the resulting decision syncs like any other.
+Deltas obey `.ab-method/rules/docs.md`: the rule plus **one** exemplar path, never a list of instances;
+no task names, "added in", or dated blocks; no `[DEPRECATED]` — what stopped being true is deleted; the
+why is an ADR link, not prose. A new topic file only when no existing topic fits, plus its one line in
+that layer's `index.md`.
 
-**Out of scope** — do not raise: code-quality issues (that's `review-implementation`), whole-repo
-deepening opportunities (that's `/improve-codebase-architecture`), or rewrites of existing prose. With
-nothing the docs are missing, return exactly: `Docs in sync — no architecture updates needed.`
+**Never document a black box as established practice.** A placeholder behind a `TODO(UQ-n)` seam recorded
+in `unresolved-questions.md` is provisional: don't write it as a constraint, a pattern, or a term, and a
+parked question is never an ADR candidate. Route what the change built *around* it (the endpoint, the
+dependency, the seam's existence) and describe the placeholder only as what it is ("currency fixed to USD
+pending UQ-1").
+
+**Out of scope:** code quality (`review-implementation`), whole-repo deepening
+(`/improve-codebase-architecture`). With nothing missing, return exactly:
+`Docs in sync — no architecture updates needed.`
 
 ### 3. Classify each finding
 
-- **`safe-add`** — an **append-only** addition that follows `/update-architecture`'s "add, don't rewrite"
-  rule: a new Entry Points line, a new dependency, a new pattern subsection, a new glossary term. Purely
-  additive, no existing prose touched.
-- **`needs-judgment`** — anything that would **change or deprecate existing prose** (a pattern was
-  *swapped*, a term's *meaning shifted*, an endpoint convention *moved*), a new bounded context, or an
-  **ADR candidate**. These reshape the docs and belong to a human — route them to `/domain-model` (domain
-  / ADR) or `/update-architecture` (prose deprecation), don't apply them here.
+- **`safe-edit`** — an in-place edit that makes the doc match the diff with no judgment call: add a line to
+  an existing list, merge into the closest entry, replace an entry the diff made untrue (the old pattern is
+  gone from the code), add a glossary term.
+- **`needs-judgment`** — a term's meaning shifted, a new bounded context, an ADR candidate, or an edit that
+  can't pass the budget gate without deciding what else to cut. Route to `/domain-model` (domain / ADR) or
+  `/update-architecture` (larger reshapes); don't apply here.
 
 ### 4. Act — by mode
 
-**Interactive** (manual create-task tail, or standalone): present the proposed deltas grouped by target
-doc, each marked `safe-add` / `needs-judgment`. Apply the `safe-add`s the user approves; for
-`needs-judgment` findings, point at the right workflow (`/domain-model`, `/update-architecture`) rather
-than editing. Report what landed.
+After applying any edit, run the gate:
 
-**Autonomous** (`start-task` / `start-roadmap` — afk): the **orchestrator** (not the detector) applies:
-1. Apply every **`safe-add`** to its target doc — append-only, preserving format and tone, with a
-   `### Recent Updates (YYYY-MM-DD)` block for a notable shift (per `/update-architecture` Step 3). Docs
-   are prose, not code, so there is no test to re-run — but **never rewrite or delete** existing content;
-   if a finding can't be expressed as a pure addition, it isn't a `safe-add` — leave it open.
-2. Commit the doc additions as one `docs(<task>): sync architecture docs` (repo convention). Nothing to
-   add → no commit.
-3. **Leave every `needs-judgment` finding for the user** — record them in the task's `review.md` (the
-   `review-implementation` skill's file, if it ran) under an **Architecture sync** heading, or in a short
-   note in the run report. Never write an ADR and never deprecate prose autonomously — those need
-   `/domain-model` / `/update-architecture`.
+```bash
+node .ab-method/scripts/check-docs.js   # plugin installs: npx ab-method check-docs
+```
 
-Never prompt in autonomous mode — anything that isn't a pure safe-add stays open for the user.
+**Interactive** (create-task tail, or standalone): present deltas grouped by target doc, each marked
+`safe-edit` / `needs-judgment`. Apply the `safe-edit`s the user approves, run the gate, and compact any
+failing file under `.ab-method/rules/docs.md` before reporting. Point `needs-judgment` findings at the
+right workflow.
 
-## Key Principles
-
-- **Documentation drift, not code quality** — a distinct lens from `review-implementation`; the two run
-  side by side in the post-impl phase.
-- **Detection half of `/update-architecture`** — reuses its routing table (2a–2e) and its "add, don't
-  rewrite" rule; the full manual workflow still owns prose deprecation + the deepening loop.
-- **Silent by default** — most tasks introduce nothing doc-worthy; produce no deltas then.
-- **Autonomous stays conservative** — append-only safe-adds only; domain reshapes and ADRs are always
-  deferred to a human, so the docs never fill with noise.
-- **Scoped to the task's diff** — never a whole-repo doc audit.
+**Autonomous** (`start-task` / `start-roadmap`) — the orchestrator, not the detector, applies:
+1. Apply every `safe-edit` in place, then run the gate.
+2. If a touched file fails and can only pass by cutting content that needs a judgment call, **revert that
+   file's edit** and record the delta as open. Pre-existing failures in files this run didn't touch are
+   noted, not fixed.
+3. Commit what passed as one `docs(<task>): sync architecture docs`. Nothing applied → no commit.
+4. Record every open finding (`needs-judgment` and reverted deltas) in the task's `review.md` under an
+   **Architecture sync** heading, or in the run report if no `review.md` exists. Never write an ADR and
+   never prompt.
 
 ## Remember
 
-- Check `.ab-method/structure/index.yaml` for paths.
-- The task's mission summaries already list Files / Built — start there, confirm against the diff.
-- **Always check Entry Points** for API drift, even when the diff didn't obviously touch routing — the
-  most common stale-doc victim (inherited from `/update-architecture`).
-- Defer anything that rewrites prose, reshapes the domain, or is ADR-worthy to `/domain-model` /
-  `/update-architecture` — this skill only adds.
+- Index first; the mission summaries already list Files / Built — start there, confirm against the diff.
+- **Always check Entry Points** for API drift, even when routing wasn't obviously touched.
+- Edit in place, never append; a doc write isn't done until `check-docs` passes.
+- Silent by default; scoped to the task's diff; domain reshapes and ADRs always go to a human.
