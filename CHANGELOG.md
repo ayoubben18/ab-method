@@ -1,3 +1,9 @@
+## [4.0.1](https://github.com/ayoubben18/ab-method/compare/v4.0.0...v4.0.1) (2026-10-21)
+
+### 🐛 Bug Fixes
+
+* **check-docs:** pass biome lint in consumer repos ([e754b11](https://github.com/ayoubben18/ab-method/commit/e754b11a222d666b65b090be9ab4b7d7d5d99247))
+
 ## [4.0.0](https://github.com/ayoubben18/ab-method/compare/v3.12.0...v4.0.0) (2026-10-21)
 
 ### ⚠ BREAKING CHANGES
