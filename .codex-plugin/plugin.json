@@ -1,6 +1,6 @@
 {
   "name": "ab-method",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Incremental task management for coding agents: grill the problem, plan test-driven missions, bracket every implementation with critics.",
   "author": {
     "name": "Ayoub"

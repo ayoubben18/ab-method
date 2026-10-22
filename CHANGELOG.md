@@ -1,3 +1,9 @@
+## [4.0.2](https://github.com/ayoubben18/ab-method/compare/v4.0.1...v4.0.2) (2026-10-22)
+
+### 📚 Documentation
+
+* trim README, move plugin development notes to CONTRIBUTING.md [skip ci] ([96f6b5b](https://github.com/ayoubben18/ab-method/commit/96f6b5bb607720065b9c97aa8c16738242e6cbc9))
+
 ## [4.0.1](https://github.com/ayoubben18/ab-method/compare/v4.0.0...v4.0.1) (2026-10-21)
 
 ### 🐛 Bug Fixes
