@@ -15,7 +15,7 @@ Do not act on the plan until I confirm we have reached a shared understanding.
 
 A branch is closed when it is answered — or, rarely, when it is **parked** as an unresolved question (see below). Parking is the only sanctioned way to leave a branch open; never leave one silently unresolved.
 
-When a question has options, explain every option so I can choose without looking anything up — see **Presenting choices** below.
+Before the first question on an area I haven't had explained yet, brief me on it — see **Brief before you ask** below. When a question has options, explain every option so I can choose without looking anything up — see **Presenting choices** below.
 
 </what-to-do>
 
@@ -59,12 +59,29 @@ Create files lazily — only when you have something to write. If no `CONTEXT.md
 
 ## During the session
 
+### Brief before you ask
+
+Assume the user did not write the code under discussion — an agent did — so every module is new to them until you have explained it in this session. Before the **first question on a branch** that touches such an area, brief them, then ask. Build the picture in this order:
+
+1. **The pieces** — the 2–4 concepts the decision rests on, each defined in one plain line. Name the domain thing ("a bot joins a workspace with a role"), not the code thing (`grant`, `#mutate`).
+2. **How it works today** — walk one concrete case from the ticket through the system: who does what, what gets checked, what happens. A small table or step diagram beats prose.
+3. **What's wrong** — the symptom the user sees first, then the cause. If it splits into several problems, number them and say which one is the decision and which get fixed whatever they pick.
+4. **What we're deciding** — one sentence. Then the question and its options.
+
+Rules:
+
+- **Every word in the question must already be explained.** A function name, flag, error code or internal term that the briefing did not introduce gets translated or cut. File references (`path:line`) are pointers for later, never the explanation.
+- **Size it to the gap.** A full briefing for a module not yet explained this session; one line when it was. Never re-explain what is already explained.
+- **Lead with one line saying what we're about to decide**, then the briefing, then the question. This is the one place a grill message doesn't open with the question itself.
+
+See Example 3 in [EXAMPLES.md](./EXAMPLES.md).
+
 ### Presenting choices
 
 When a question has options to pick from, do this for **every** option:
 
-1. **Show it in code first** — a short, simplified snippet of what that option looks like in practice. Use the project's real names (files, functions, tables, domain terms) when you know them; otherwise a tiny made-up example. A few lines: just enough to see the difference, not a full implementation.
-2. **Explain it in plain words** — one or two short sentences on what it means for the user: what gets easier, what gets harder, when you'd pick it.
+1. **Say what changes** — one or two plain sentences on what happens differently for the people and the system: who can now do what, what the user sees, what gets easier or harder, when you'd pick it.
+2. **Then show it in code** — a short, simplified snippet that makes the difference visible. Use only names the briefing already introduced; otherwise a tiny made-up example. A few lines, not a full implementation. Skip the snippet when the sentence already makes the difference obvious.
 
 Keep the language simple:
 
