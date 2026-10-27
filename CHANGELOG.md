@@ -1,3 +1,9 @@
+## [4.1.0](https://github.com/ayoubben18/ab-method/compare/v4.0.2...v4.1.0) (2026-10-27)
+
+### ✨ Features
+
+* **grill:** brief the user on an unfamiliar area before asking ([506fca3](https://github.com/ayoubben18/ab-method/commit/506fca3a2655de0c4ff82902d0bb036d1da33710))
+
 ## [4.0.2](https://github.com/ayoubben18/ab-method/compare/v4.0.1...v4.0.2) (2026-10-22)
 
 ### 📚 Documentation
