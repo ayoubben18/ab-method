@@ -57,3 +57,6 @@ For each real finding:
 
 If the diff introduced no shallowness worth deepening, return exactly:
 `cleaner-architecture: no findings.`
+
+Every return, clean or not, ends with one evidence line: `Checked: <the seam docs, ADRs and rules it actually read, and the files it opened>`. Near-misses you
+examined and rejected go under `Checked, dropped:` with the reason.

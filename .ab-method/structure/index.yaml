@@ -4,7 +4,7 @@
 # Rules every workflow and skill follows. Read the ones that apply before acting.
 rules:
   - .ab-method/rules/communication.md   # how to talk to the user: answer first, no recaps
-  - .ab-method/rules/code.md            # placement (reuse / extend / extract), write less, why-only comments
+  - .ab-method/rules/code.md            # strategic programming, seams first, placement (reuse / extend / extract / introduce), write less, comments, obviousness
   - .ab-method/rules/docs.md            # what docs may hold, edit in place, the check-docs gate
 
 # Word budgets for the domain + architecture docs. First matching glob wins.
@@ -18,6 +18,8 @@ doc_budgets:
     "docs/architecture/tech-stack.md": 1500
     "docs/architecture/*/index.md": 300
     "docs/architecture/**/*.md": 600
+    "docs/seams/index.md": 300   # one line per seam
+    "docs/seams/*.md": 400       # one seam per file (codebase-design SEAM-FORMAT.md)
     "docs/adr/*.md": 1000
 
 project_structure:
@@ -42,6 +44,20 @@ project_structure:
         - frontend/              # index.md + one file per topic (forms.md, data-fetching.md, ...)
         - backend/               # index.md + one file per topic (api.md, services.md, auth.md, ...)
 
+    seams:
+      # WHERE the app's seams live and how callers must use them (living docs;
+      # an ADR says WHY and is frozen). index.md + one file per seam, named by
+      # slug. Format: SEAM-FORMAT.md in the codebase-design skill; defaults:
+      # SEAM-CATALOG.md (seven seams from A Philosophy of Software Design).
+      # Status per seam: introducing → migrating → settled. Written by
+      # analyze-project (catalog applied), create-task's seam design gate
+      # (status introducing, before any code), sync-architecture and
+      # update-architecture. Read before placement by every task workflow and
+      # checked by critique-plan and review-pr. Created lazily.
+      files:
+        - index.md               # one line per seam
+        # - data-fetching.md     # one per seam
+
     adr:
       # Created lazily by /domain-model when the first ADR is needed.
       # Sequential numbering: 0001-slug.md, 0002-slug.md, ...
@@ -49,11 +65,15 @@ project_structure:
 
     tasks:
       # Example task structure — progress-tracker.md is the SINGLE source of
-      # truth per task. Missions are one-line entries inside it; no separate
-      # mission files. Each mission carries `verify: test` (runs through the
-      # `tdd` skill, for a use case in the tracker's `## Test Plan`) or
-      # `verify: build` (typecheck / lint / build + existing tests, no new test).
-      # Untagged missions (pre-4.0 trackers) are treated as `verify: test`.
+      # truth per task. Missions live inside it; no separate mission files.
+      # A mission is a composed slice: one headline delivering a capability,
+      # its steps indented under it, split only at real boundaries. Each
+      # carries `verify: build` (typecheck / lint / build + existing tests, no
+      # new test) or `verify: repro` (a bug fix: reproducing test first, via
+      # the `tdd` skill). Tests for everything else are written AFTER the
+      # missions by the protect step (`tdd` skill's PROTECT.md), recorded in the tracker's
+      # `## Protected`. Legacy `verify: test (UCn)` / untagged missions still
+      # run through `tdd` for their `## Test Plan` entry.
       # Missions may carry an optional [pp-x] tag (user opt-in only): same tag
       # = a group of independent missions that run concurrently in subagents;
       # untagged missions are sequential barriers.
@@ -73,7 +93,8 @@ project_structure:
           - review.md             # post-implementation review (review-implementation
                                   # skill); written by autonomous runs (start-task /
                                   # start-roadmap): safe fixes marked applied, the rest
-                                  # left open for the user. Absent until a review runs.
+                                  # left open for the user. `## PR review` holds review-pr's
+                                  # open findings. Absent until a review runs.
           - change-map.md         # the task's blast radius, drawn TWICE (change-map skill,
                                   # format: DIAGRAM-FORMAT.md). `## Planned` is written at
                                   # plan time from the missions — which modules the task
@@ -148,6 +169,7 @@ workflow_outputs:
     - docs/architecture/tech-stack.md
     - docs/architecture/frontend/
     - docs/architecture/backend/
+    - docs/seams/          # seam mapper applies codebase-design's SEAM-CATALOG.md
   analyze-frontend: docs/architecture/frontend/   # index.md + topic files, within budget
   analyze-backend: docs/architecture/backend/     # index.md + topic files, within budget
   domain-model:
@@ -161,8 +183,11 @@ workflow_outputs:
     - UBIQUITOUS_LANGUAGE.md                 # improve-codebase-architecture scoped to the change
     - CONTEXT.md
     - docs/adr/
-  test-mission: docs/tasks/[task-name]/progress-tracker.md   # backfills tests for code written
-                        # without them; appends its mission + summary to the tracker like any other
+    - docs/seams/                            # step 2f: new / changed / removed seams, status moves
+  tdd: docs/tasks/[task-name]/progress-tracker.md   # PROTECT.md is the protect step, run after every task's
+                        # last mission: decides what must not break from the diff + seam docs, writes those
+                        # tests through seam interfaces, proves each red by breaking the behaviour, records
+                        # them in `## Protected`. SKILL.md: test-first for `verify: repro` bug fixes
   prototype-ui: docs/tasks/[task-name]/prototype/   # disposable self-contained HTML picker; never touches
                         # the codebase. Writes the picked variant into the tracker's `## UI Spec`. Run by
                         # create-task / extend-task when a task adds NEW UI, or standalone ($TMPDIR outside a task)
@@ -175,9 +200,12 @@ workflow_outputs:
     - docs/handoffs/                         # handoffs already turned into tasks removed
                         # Runs on its own branch, commits per phase, never pushes
   mastermind: []   # router only — explains the method and delegates to a workflow; writes nothing
-  create-task:   # runs critique-plan (pre-impl, advisory) then change-map's PLANNED pass before validating
-    - docs/tasks/[task-name]/progress-tracker.md   # missions; then review-implementation + sync-architecture
-    - docs/tasks/[task-name]/change-map.md         # + change-map's ACTUAL pass (post-impl, interactive)
+  create-task:   # deepening scan over the blast radius → placement → seam design gate → critique-plan
+                 # (advisory) → change-map PLANNED pass → validate → missions → protect → review-implementation
+                 # + sync-architecture + change-map ACTUAL pass → optional PR (pr + review-pr)
+    - docs/tasks/[task-name]/progress-tracker.md
+    - docs/tasks/[task-name]/change-map.md
+    - docs/seams/[slug].md   # seam design gate: written BEFORE code, status introducing (+ index line)
   grill-with-docs: docs/tasks/[task-name]/unresolved-questions.md   # ONLY when the grill had to park a
                           # question the user genuinely can't answer yet; the file is absent otherwise.
                           # Also updates CONTEXT.md / docs/adr/ inline as decisions crystallise.
@@ -191,6 +219,7 @@ workflow_outputs:
                         # Never rewrites `## Planned`, never back-fills one from the diff, never edits
                         # code or docs — it describes shape, it does not judge it
   sync-architecture:   # post-implementation documentation-sync detector; read-only. ONE subagent finds what
+    - docs/seams/                            # (seam docs: files, interface, status moves — update-architecture 2f)
     - docs/architecture/tech-stack.md        # the task diff introduced that the docs don't capture (endpoints,
     - docs/architecture/frontend/            # patterns, deps, terms, ADR candidates) and routes each to its doc
     - docs/architecture/backend/             # via /update-architecture's table. Autonomous: applies in-place
@@ -199,11 +228,22 @@ workflow_outputs:
                                              # /update-architecture. Interactive: presents deltas. Runs after
                                              # review-implementation in create-task / start-task / start-roadmap
   codebase-design: []   # read-only reference skill; writes nothing. Single source of the architecture
-                        # vocabulary (module / interface / depth / seam / adapter / leverage / locality)
-                        # and its principles. Consumed by improve-codebase-architecture, by
-                        # review-implementation's cleaner-architecture + slop-defender lenses, and by
-                        # tdd when choosing a test boundary — they reference it rather than restating it
-  improve-codebase-architecture: []   # writes NOTHING to the repo: the candidate report is a
+                        # vocabulary (module / interface / depth / seam / adapter / leverage / locality),
+                        # grounded in A Philosophy of Software Design: SEAM-FORMAT.md (the docs/seams/
+                        # format), SEAM-CATALOG.md (seven default seams), RED-FLAGS.md (the book's red flags
+                        # + three complexity symptoms), DEEPENING.md, DESIGN-IT-TWICE.md. Consumed by
+                        # create-task's deepening scan + seam design gate, review-implementation,
+                        # review-pr, improve-codebase-architecture and tdd — they reference it, never restate it
+  pr: []   # format-only skill (adapted from mattpocock/skills): the PR body — Summary (change-map
+           # `## Actual`), Evidence (`## Protected` red/green), Merge Danger (one-/two-way door +
+           # blast radius from ADRs and docs/seams/). Never pushes or opens the PR itself
+  review-pr: docs/tasks/[task-name]/review.md   # final review on the OPEN PR: two read-only reviewers in
+                        # parallel, fresh contexts — seams (docs/seams/ honoured, seam docs match code) and
+                        # rules (rules/code.md + RED-FLAGS.md + repo standards + Fowler smells). Autonomous:
+                        # safe fixes committed `refactor(<task>): PR review fixes` and pushed; open findings
+                        # under `## PR review` in review.md + one PR comment. Interactive: present to pick
+  improve-codebase-architecture: []   # OPTIONAL repo-wide review (task-time deepening is create-task's
+                        # scan). Writes NOTHING to the repo: the candidate report is a
                         # self-contained HTML file in the OS temp dir ($TMPDIR/architecture-review-<ts>.html),
                         # falling back to a markdown list with no network. The grilling loop that follows
                         # may update CONTEXT.md / docs/adr/ via grill-with-docs. Proposes and designs only —
@@ -214,8 +254,9 @@ workflow_outputs:
                           # Standalone (/reconcile-roadmap <name>); complements critique-plan (single
                           # plan, pre-impl) and review-implementation (one diff, post-impl)
   create-task-from-handoff: docs/tasks/[task-name]/progress-tracker.md   # reads docs/handoffs/[slug].md, deletes it once the task exists
-  extend-task:
+  extend-task:   # same planning as create-task (deepening scan, placement, seam design gate), scoped to new work
     - docs/tasks/[task-name]/progress-tracker.md
+    - docs/seams/[slug].md   # only when the seam design gate runs
     - docs/tasks/[task-name]/change-map.md   # change-map PLANNED pass appended for the NEW missions only,
                           # as a dated `## Planned (extension N)` block — the original `## Planned` stays
                           # untouched, so drift is still measured against what was believed at the time
@@ -232,8 +273,10 @@ workflow_outputs:
   extend-goal:
     - docs/goals/[goal-name]/goal.md   # updated in place; progress-tracker.md carries forward
   create-roadmap: docs/roadmaps/[roadmap-name]/roadmap.md   # DAG of tasks; runs critique-plan on the graph (pre-impl, advisory) before emitting per-task create-task prompts in dep order
-  start-task:
-    - docs/tasks/[task-name]/progress-tracker.md   # autonomous run; mission subagents update the tracker, parent commits per mission
+  start-task:   # `/start-task <task> [inline]` — inline runs missions in the parent, no mission subagents
+    - docs/tasks/[task-name]/progress-tracker.md   # autonomous run; mission subagents update the tracker, parent commits per
+                          # mission; then the protect step fills `## Protected`
+    - "pull request"      # draft PR (pr skill body) → review-pr → `gh pr ready`; needs its own branch
     - docs/tasks/[task-name]/unresolved-questions.md   # Marker lines updated with the paths the placeholders
                           # landed at; the run never resolves an open question — it reports them instead
     - docs/tasks/[task-name]/review.md   # post-impl review-implementation pass after the last mission: safe fixes applied, open findings recorded
@@ -245,6 +288,7 @@ workflow_outputs:
     - docs/tasks/[task-name]/review.md   # each task's post-impl review (inherited from start-task rules)
     - docs/tasks/[task-name]/change-map.md   # each task's post-impl change-map ACTUAL pass (inherited from start-task rules)
     - docs/architecture/*   # each task's post-impl sync-architecture pass (inherited from start-task rules)
+    - "pull request"        # ONE for the whole roadmap at the end (pr + review-pr); tasks skip start-task § 6
 
 # How the workflows and their artifacts reference each other. Any workflow
 # reads this file first, so this map is how they "know about each other"
@@ -318,7 +362,21 @@ relationships:
     routes_to: "/improve-codebase-architecture (a module changes keep leaking into = a locality problem), /domain-model (an unplanned row crossing a bounded context), or a re-read of a mission whose claimed module went untouched"
     complements: "review-implementation (is the diff good code?) and sync-architecture (do the docs know about it?) — change-map only describes the change's SHAPE, and never edits code or docs"
 
+  seams_are_read_before_placement:
+    # docs/seams/ is to placement what CONTEXT.md is to naming. Every planning and
+    # executing workflow reads docs/seams/index.md before deciding where code goes;
+    # a capability a seam owns goes through it. The docs evolve with the code.
+    written_by: "analyze-project (catalog), create-task / extend-task seam design gate (introducing), sync-architecture + update-architecture (files, interface, status)"
+    checked_by: "critique-plan (plan bypasses a seam), review-pr seams reviewer (diff bypasses a seam; doc drifted from code)"
+    lifecycle: "introducing (gate, before code) → migrating (old path + grep named) → settled (grep empty)"
+  tasks_end_in_a_reviewed_pr:
+    # Autonomous runs finish with a pull request, not just commits: draft PR with the
+    # pr skill body, review-pr's two fresh-context reviewers (seams, rules), safe fixes
+    # pushed, the rest commented, then ready. Interactive runs ask before opening one.
+    order: "full suite → protect → review-implementation → sync-architecture → change-map actual → draft PR → review-pr → ready"
+
 # Inputs that downstream workflows should read for domain context
 domain_inputs:
   - UBIQUITOUS_LANGUAGE.md
   - CONTEXT.md
+  - docs/seams/index.md

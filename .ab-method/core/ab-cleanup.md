@@ -34,6 +34,7 @@ Bring the project's `.ab-method/structure/index.yaml` up to the bundled 4.0 vers
 - Add the `rules:` and `doc_budgets:` blocks if missing.
 - Replace `frontend-patterns.md` / `backend-patterns.md` under `docs.architecture` with the `frontend/` and `backend/` folders.
 - Add `prototype/` to the task folder entry.
+- Add the `docs/seams/` entry and its two `doc_budgets` lines (`docs/seams/index.md`, `docs/seams/*.md`) if missing.
 - **Preserve every custom path or budget the user set.** The 3.x defaults are `UBIQUITOUS_LANGUAGE.md` / `CONTEXT.md` at the root and everything under `docs/architecture`, `docs/adr`, `docs/tasks`, `docs/goals`, `docs/roadmaps`, `docs/handoffs`; any other path is the user's and stays. Reinstalling with `npx ab-method` overwrites this file, so also check `git log -p -- .ab-method/structure/index.yaml` for customisations the reinstall dropped, and restore them.
 
 If `.ab-method/rules/` or `.ab-method/scripts/check-docs.js` is missing, tell the user to run `npx ab-method` to install 4.0 first, then continue.

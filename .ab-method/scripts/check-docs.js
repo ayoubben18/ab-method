@@ -14,6 +14,8 @@ const DEFAULT_BUDGETS = {
     ['docs/architecture/tech-stack.md', 1500],
     ['docs/architecture/*/index.md', 300],
     ['docs/architecture/**/*.md', 600],
+    ['docs/seams/index.md', 300],
+    ['docs/seams/*.md', 400],
     ['docs/adr/*.md', 1000],
   ],
 };

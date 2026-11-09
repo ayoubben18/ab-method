@@ -1,15 +1,19 @@
 ---
 name: improve-codebase-architecture
-description: Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick. Informed by the domain language in CONTEXT.md and the decisions in docs/adr/. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable.
+description: Optional repo-wide review. Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick and hand it to /create-task. Informed by the domain language in CONTEXT.md, the decisions in docs/adr/ and the seams in docs/seams/. Task-time deepening happens in create-task's planning scan instead; use this when the user wants a deliberate repo-wide review, wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable.
 ---
 
 # Improve Codebase Architecture
 
 Surface architectural friction and propose **deepening opportunities** — refactors that turn shallow modules into deep ones. The aim is testability and AI-navigability.
 
+**Optional.** Every task already deepens the modules it touches: `create-task` § 3 runs a deepening scan over the task's blast radius and plans the refactors as missions placed first. Reach for this skill only for a deliberate review wider than one task — a whole subsystem, the repo, or the drift several tasks have piled up.
+
 This skill is built on a shared design vocabulary and _informed_ by the project's domain model:
 
 - **Architecture vocabulary** — run the `codebase-design` skill for the terms (**module**, **interface**, **depth**, **seam**, **adapter**, **leverage**, **locality**) and the principles (the deletion test, "the interface is the test surface", "one adapter = hypothetical seam, two = real"). Use those terms exactly in every suggestion — don't drift into "component," "service," "API," or "boundary." It is the single source; this skill doesn't restate it.
+- **Red flags** — the `codebase-design` skill's `RED-FLAGS.md`. Every candidate names the symptom it causes (change amplification, cognitive load, unknown unknowns), not a feeling.
+- **Seams** — `docs/seams/` records the app's seams (format: `codebase-design`'s `SEAM-FORMAT.md`). A caller that bypasses one, or a seam still `migrating`, is a candidate; a settled seam is not re-proposed.
 - **Domain language** — `CONTEXT.md` gives names to good seams; ADRs in `docs/adr/` record decisions this skill should not re-litigate. See [CONTEXT-FORMAT.md](../domain-model/CONTEXT-FORMAT.md) and [ADR-FORMAT.md](../domain-model/ADR-FORMAT.md).
 
 ## Process
@@ -26,6 +30,7 @@ Read the existing documentation first:
 
 - `CONTEXT.md` (or `CONTEXT-MAP.md` + each `CONTEXT.md` in a multi-context repo)
 - Relevant ADRs in `docs/adr/` (and any context-scoped `docs/adr/` directories)
+- `docs/seams/index.md`, then the seam docs in the area you're scanning
 
 If any of these files don't exist, proceed silently — don't flag their absence or suggest creating them upfront.
 
@@ -48,7 +53,7 @@ The report uses **Tailwind via CDN** for layout and **Mermaid via CDN** for grap
 For each candidate, render a card with:
 
 - **Files** — which files/modules are involved
-- **Problem** — why the current architecture is causing friction
+- **Problem** — why the current architecture is causing friction: the red flag (`RED-FLAGS.md`) and the symptom it causes
 - **Solution** — plain English description of what would change
 - **Benefits** — in terms of locality and leverage, and how tests would improve
 - **Before / After diagram** — side by side, illustrating the shallowness and the deepening
@@ -78,4 +83,4 @@ Side effects happen inline as decisions crystallize — the grill maintains the 
 - **Want to explore alternative interfaces for the deepened module?** Run the `codebase-design` skill and use its [DESIGN-IT-TWICE.md](../codebase-design/DESIGN-IT-TWICE.md) parallel sub-agent pattern.
 - **Deepening a cluster with awkward dependencies?** [DEEPENING.md](../codebase-design/DEEPENING.md) has the four dependency categories and the seam discipline for each.
 
-This skill **proposes and designs; it does not implement.** Once the shape is agreed, the work becomes a task — `/create-task` grills it into missions and `tdd` builds it. Don't start editing source here.
+This skill **proposes and designs; it does not implement.** Once the shape is agreed, hand it to `/create-task`, seeded with the agreed shape: the module, its interface, what sits behind the seam, and the callers to migrate. A shape that introduces or changes a seam enters create-task's seam design gate with the interface already picked. Don't start editing source here.

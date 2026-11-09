@@ -31,7 +31,7 @@ The changed files and their `git diff`, plus (read only what exists): `UBIQUITOU
 `CONTEXT.md` (canonical terms, spotting reinvented concepts), the pattern docs for the layers the diff
 touches (`docs/architecture/<layer>/index.md`, then only the relevant topic files), `docs/adr/` (don't
 propose what an ADR settled), `.ab-method/rules/code.md` (the rules the code was written under), the
-task's `progress-tracker.md` sections `## Placement` and `## Test Plan`, and its
+task's `progress-tracker.md` sections `## Placement` and `## Protected` (`## Test Plan` in legacy trackers), and its
 `unresolved-questions.md` if it has one.
 
 **Black boxes are deliberate — seed every critic with the file.** A `TODO(UQ-n)` seam whose entry is
@@ -74,8 +74,10 @@ design change bigger than this task (note it open, don't act). Classify each sur
 
 **Autonomous** (`start-task` / `start-roadmap` — afk): the **orchestrator** (never the parallel critics)
 applies fixes, so there are no concurrent writes:
-1. For each `safe-fix`: apply it, **re-run the test suite** (command from `tech-stack.md`). Green → keep.
+1. For each `safe-fix`: apply it, **re-run the focused tests** for what it touched. Green → keep.
    Red → **revert it**, downgrade to `needs-judgment` with a note (`attempted, reverted — broke <test>`).
+   If any fix was kept, run the full suite (command from `tech-stack.md`) once at the end; red → revert
+   the fixes one by one until green, downgrading each reverted one.
 2. Commit kept fixes as one `refactor(<task>): post-review cleanup` (repo convention). Nothing kept → no commit.
 3. **Write `docs/tasks/<task>/review.md`** (below) — every finding, applied or open. Never prompt;
    anything uncertain stays open rather than being changed.
@@ -101,7 +103,14 @@ user knows the review ran.
 
 ## Clean lenses
 - slop-defender: no further findings
+
+## Checked, dropped
+- [cleaner-architecture] `RefundRow` looks shallow, but it is the table's row adapter — two adapters exist
 ```
+
+`## Checked, dropped` (optional) lists near-misses a critic examined and rejected, with the reason, so
+later reviews (`review-pr`) don't re-raise them. Each lens's evidence line (`Checked: ...`) goes under its
+heading or after its clean line.
 
 If all three lenses are clean and nothing was applied, the whole body is one line:
 `All three lenses clean — no findings.`

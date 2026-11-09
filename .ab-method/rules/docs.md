@@ -1,6 +1,6 @@
 # Docs
 
-Rules for every write to the domain and architecture docs (`CONTEXT.md`, `UBIQUITOUS_LANGUAGE.md`, `docs/architecture/**`, `docs/adr/**`). They keep docs small enough to read in full.
+Rules for every write to the domain and architecture docs (`CONTEXT.md`, `UBIQUITOUS_LANGUAGE.md`, `docs/architecture/**`, `docs/seams/**`, `docs/adr/**`). They keep docs small enough to read in full.
 
 ## What a doc may hold
 
@@ -15,7 +15,7 @@ Rules for every write to the domain and architecture docs (`CONTEXT.md`, `UBIQUI
 
 - **Edit in place, never append.** Find the closest existing entry and merge into it or replace it. A new section is the last resort.
 - **Net zero near budget.** When a file is within 10% of its budget, every addition removes at least as many words.
-- **Split by topic.** Patterns live as `docs/architecture/<layer>/index.md` (one line per topic) plus one small file per topic. Read the index, then only the topics you need.
+- **Split by topic.** Patterns live as `docs/architecture/<layer>/index.md` (one line per topic) plus one small file per topic. Read the index, then only the topics you need. Seams follow the same shape: `docs/seams/index.md` plus one file per seam (format: `SEAM-FORMAT.md` in the `codebase-design` skill).
 
 ## The gate
 

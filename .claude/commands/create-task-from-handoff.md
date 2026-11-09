@@ -17,7 +17,7 @@ This workflow will:
 1. Locate the handoff (by slug, or by listing `docs/handoffs/`)
 2. Absorb its context — treat everything it already settled as given
 3. **Continue the grill via `grill-with-docs`**, driving only the branches the handoff left open
-4. Hand off to the standard create-task flow (project analysis → placement → prototype gate for new UI → Test Plan → missions)
+4. Hand off to the standard create-task flow (project context → deepening scan → placement → seam design gate → prototype gate for new UI → missions)
 5. Retire the handoff once the task document exists
 
 ## Workflow Details

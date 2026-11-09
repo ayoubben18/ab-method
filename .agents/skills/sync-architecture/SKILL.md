@@ -1,6 +1,6 @@
 ---
 name: sync-architecture
-description: Post-implementation documentation-sync detector. Spins up ONE read-only subagent on a completed task's diff to find everything the change introduced that the architecture docs don't yet know about — new endpoints, patterns, dependencies, domain terms, ADR-worthy decisions — routed to the exact doc each belongs in. Autonomous runs apply only in-place safe edits that pass the check-docs budget gate and defer domain/ADR reshapes; interactive runs present the proposed doc deltas to pick. Use after a task's missions are done (from create-task / start-task / start-roadmap) or standalone on a diff.
+description: Post-implementation documentation-sync detector. Spins up ONE read-only subagent on a completed task's diff to find everything the change introduced that the architecture docs don't yet know about — new endpoints, patterns, seams, dependencies, domain terms, ADR-worthy decisions — routed to the exact doc each belongs in. Autonomous runs apply only in-place safe edits that pass the check-docs budget gate and defer domain/ADR reshapes; interactive runs present the proposed doc deltas to pick. Use after a task's missions are done (from create-task / start-task / start-roadmap) or standalone on a diff.
 ---
 
 # Sync Architecture (post-implementation)
@@ -29,7 +29,8 @@ names is relative to the **project root**. Sweep **only this task's diff** (its 
 - The task's `git diff` for its commit range and its **Mission Summaries** (Files / Built / Integrates with).
 - The current docs, so only what's missing is proposed (skip absent files): `tech-stack.md`, the
   `index.md` of `docs/architecture/frontend/` and `backend/` (then only the topic files the diff touches),
-  `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, `docs/adr/`.
+  `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md`, `docs/adr/`, and `docs/seams/index.md` (then only the seam docs the
+  diff touches).
 - Legacy single-file `frontend-patterns.md` / `backend-patterns.md` instead of the split folders: route to
   them as they are, and note once in the report that `/ab-cleanup` migrates them.
 
@@ -48,6 +49,9 @@ Its brief — detect only what the docs don't already capture, routed with `/upd
 | New dependency, third-party API/queue, new limit, test-framework shift | `tech-stack.md` Stack / External Services / Constraints / Testing (2c) |
 | New domain term, or a term whose meaning shifted | `UBIQUITOUS_LANGUAGE.md` (+ `CONTEXT.md` if meaning shifted) (2d) |
 | A hard-to-reverse, surprising, trade-off-carrying **decision** | ADR candidate (2e) — never written inline; defer to `/domain-model` |
+| A seam doc's **files, interface or adapters** changed | that `docs/seams/<slug>.md` (2f) |
+| A seam's **status** moved (format: `codebase-design`'s `SEAM-FORMAT.md`) | that seam doc's **Status** line (2f): set from the seam's **Check** per the lifecycle there (`introducing` → `migrating` once most callers go through it → `settled` once Check is empty) |
+| A **new module that clears the seam bar** | a new `docs/seams/<slug>.md` + its `index.md` line (2f) |
 
 For each finding return: **What** (the thing introduced, citing file/mission), **Doc** (target file +
 section or topic), **Proposed delta** (the in-place edit: which entry it merges into or replaces, and the
@@ -76,9 +80,11 @@ pending UQ-1").
 
 - **`safe-edit`** — an in-place edit that makes the doc match the diff with no judgment call: add a line to
   an existing list, merge into the closest entry, replace an entry the diff made untrue (the old pattern is
-  gone from the code), add a glossary term.
-- **`needs-judgment`** — a term's meaning shifted, a new bounded context, an ADR candidate, or an edit that
-  can't pass the budget gate without deciding what else to cut. Route to `/domain-model` (domain / ADR) or
+  gone from the code), add a glossary term, update a seam doc's files / interface / adapters, or move a
+  seam's status when its **Check** proves it (run it; cite its result).
+- **`needs-judgment`** — a term's meaning shifted, a new bounded context, an ADR candidate, a **new seam** whose
+  name, interface or bar needs deciding, or an edit that can't pass the budget gate without deciding what else
+  to cut. Route to `/domain-model` (domain / ADR) or
   `/update-architecture` (larger reshapes); don't apply here.
 
 ### 4. Act — by mode
@@ -108,5 +114,6 @@ right workflow.
 
 - Index first; the mission summaries already list Files / Built — start there, confirm against the diff.
 - **Always check Entry Points** for API drift, even when routing wasn't obviously touched.
+- **Always check seam docs** the diff touched: files, interface, status.
 - Edit in place, never append; a doc write isn't done until `check-docs` passes.
 - Silent by default; scoped to the task's diff; domain reshapes and ADRs always go to a human.

@@ -1,6 +1,6 @@
 ---
 name: ab-start-task
-description: Run an existing task autonomously to completion — each remaining mission in a subagent with tdd, tracker updated per mission, a commit after every green mission. Use when the user wants to hand off a well-defined task and review commits instead of missions.
+description: Run an existing task autonomously to a reviewed pull request — each remaining mission in a subagent (or in the conversation with the `inline` argument), a commit after every green mission, then the protect step, reviews, a draft PR and a final review against the seams and coding rules. Use when the user wants to hand off a well-defined task and review a PR instead of missions. Pass `inline` to run the missions without subagents.
 ---
 
 This skill runs the AB Method **start-task** workflow.

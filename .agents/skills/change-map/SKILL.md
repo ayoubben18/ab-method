@@ -95,7 +95,10 @@ first; a map of uncommitted work is not reproducible.
 
 Verdicts here are **derived, not judged** (thresholds in [DIAGRAM-FORMAT.md](DIAGRAM-FORMAT.md)). The
 `+` / `−` lines are exported symbols that exist at head but not base, or the reverse — re-exports and
-`export default` are skipped, because a barrel forwarding a symbol is not new logic. A `−` line is often
+`export default` are skipped, because a barrel forwarding a symbol is not new logic. Count named export
+lists (`export { a, b }`) as exports, and when a module's interface is the object an exported factory
+returns (`createX()` / `x(ctx)` returning methods), its members are the interface: list those that appeared
+or went away (`+ scoped(bu).notesFor`). A `−` line is often
 the most informative thing on the page: it is where the task *removed* a concept.
 
 Generated and vendored files (lockfiles, migration snapshots, generated route trees, i18n catalogs, build
@@ -107,7 +110,7 @@ moved; only the sentence says what it now does.
 
 ## Pass 3 — drift
 
-Three findings, in a table (format in [DIAGRAM-FORMAT.md](DIAGRAM-FORMAT.md)):
+Four findings, in a table (format in [DIAGRAM-FORMAT.md](DIAGRAM-FORMAT.md)):
 
 - **Unplanned** — in Actual, absent from Planned. The blast radius was wider than the plan said. State
   *why* in one clause, citing the mission that reached it. This is the most valuable row on the page.
@@ -116,6 +119,9 @@ Three findings, in a table (format in [DIAGRAM-FORMAT.md](DIAGRAM-FORMAT.md)):
   mission's summary in the tracker and say so before the task is closed).
 - **Escalated** — the same module, at a heavier verdict than planned (`[touched]` → `[rewritten]`,
   `[extended]` → `[NEW]` siblings). The plan under-read the work.
+- **Lighter** — the same module, at a lighter verdict than planned, including `[reduced]` where the plan
+  said `[rewritten]` or `[extended]`. Usually fine (logic moved behind a seam shrinks its old home); worth
+  one clause saying where the logic went.
 
 A task that landed where its plan said gets exactly one line — `No drift — the change landed where the
 plan said it would.` — and that is the good, common outcome for a well-grilled task. Never manufacture
@@ -125,7 +131,7 @@ drift to look thorough.
 
 | Drift pattern | What it means | Route to |
 |---|---|---|
-| The same unplanned module keeps appearing across tasks | Changes keep leaking there — a locality problem | `/improve-codebase-architecture` (`codebase-design`: leverage, locality) |
+| The same unplanned module keeps appearing across tasks | Changes keep leaking there — a locality problem | The next task's deepening scan (`create-task` § 3a), or `/improve-codebase-architecture` for a repo-wide look |
 | An unplanned row crosses a bounded context | The boundary in `CONTEXT.md` may be drawn in the wrong place | `/domain-model` |
 | A predicted-untouched row whose mission claimed it | The mission may not have done what its summary says | Re-read that mission before setting the task `Completed` |
 | Wide drift on almost every task | Missions are being drafted without reading the code | `/create-task` § 2 — the project-analysis step is being skipped |
@@ -172,7 +178,7 @@ shape. Keep it that way: judgment living in two places drifts, and a map that ar
 - **The planned map is immutable once written** — it records a belief, and being wrong is its whole value.
 - **Never back-fill a prediction from the answer** — a task with no planned map has no drift, and that's fine.
 - **Speak the project's language** — rows come from `CONTEXT.md` and the architecture docs, never a taxonomy you made up.
-- **Report, never fix** — drift routes to `/improve-codebase-architecture`, `/domain-model`, or a re-read of a mission.
+- **Report, never fix** — drift routes to the next task's deepening scan, `/domain-model`, or a re-read of a mission.
 
 ## Remember
 

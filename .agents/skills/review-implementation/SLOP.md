@@ -23,15 +23,17 @@ carries no weight, comments that restate the obvious. You are read-only: return 
   try/catch that swallows and rethrows, validation of inputs a caller has already validated.
 - **Comments that restate the code** — `// increment i` above `i++`, docstrings that echo the signature,
   section-divider banners. Per `.ab-method/rules/code.md` the default is no comment: keep only the
-  non-obvious *why* (a constraint, a workaround, a gotcha); cut everything that narrates *what*.
+  non-obvious *why* (a constraint, a workaround, a gotcha); cut everything that narrates *what*. An
+  interface comment on a seam or deep module (invariants, error modes, units) is not slop.
 - **Needless configuration** — flags, env vars, or config keys with a single value that never varies;
   "customizable" knobs nothing turns.
 - **Over-verbose naming / ceremony** — `AbstractBaseUserServiceFactoryImpl`, wrapper types that alias a
   primitive for no invariant, getters/setters over plain fields with no logic.
 - **Redundant tests** — tests asserting the language/framework works, several tests covering the exact
-  same path with no distinct behavior, or tests the diff added for a use case **not on the task's
-  `## Test Plan`** (the plan is the complete list — an extra test needs a reason the plan missed). Their
-  inverse is also a finding: a Test Plan use case with **no** test in the diff.
+  same path with no distinct behavior, or tests the diff added outside the task's **`## Protected`** list
+  (written by the protect step) or a `verify: repro` mission — those are the complete list, so an extra test
+  needs a reason they missed. The inverse is also a finding: a `## Protected` entry with **no** test in the
+  diff. Legacy trackers: read `## Test Plan` the same way.
 - **Copy-pasted boilerplate** the diff duplicated instead of looping/reusing (hand hard duplication to
   `reusability-inspector`; flag the *ceremony* kind here).
 
@@ -61,3 +63,6 @@ For each real finding:
   leans on, or anything you're unsure the tests cover, is `needs-judgment`.
 
 If the diff added no slop, return exactly: `slop-defender: no findings.`
+
+Every return, clean or not, ends with one evidence line: `Checked: <the seam docs, ADRs and rules it actually read, and the files it opened>`. Near-misses you
+examined and rejected go under `Checked, dropped:` with the reason.

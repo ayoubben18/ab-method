@@ -105,7 +105,8 @@ Before writing the goal file, ground it in the codebase:
    `docs/architecture/tech-stack.md`, `docs/adr/`, and for patterns
    `docs/architecture/<layer>/index.md` plus only the relevant topic
    files (legacy repos: `frontend-patterns.md` / `backend-patterns.md`;
-   suggest `/ab-cleanup` once).
+   suggest `/ab-cleanup` once), and `docs/seams/index.md` plus the
+   seams the goal crosses.
 3. **Analyze relevant code areas** — similar implementations, file
    organization, reusable services/types, the test command and
    framework (from `tech-stack.md` Testing section — the loop needs
@@ -178,8 +179,11 @@ Read these before starting, and again whenever unsure. Paths come from
 - `docs/architecture/tech-stack.md` — stack, entry points, test command
 - `docs/architecture/<layer>/index.md`, then only the topic files this
   goal touches
-- `.ab-method/rules/code.md` — placement (reuse / extend / extract
-  before adding inline), write less, comments only for the why
+- `docs/seams/index.md`, then the seams this goal crosses — go
+  through them, never around them
+- `.ab-method/rules/code.md` — placement (reuse / extend / extract /
+  introduce before adding inline), write less, interface comments on
+  seams, otherwise comments only for the why
 - `docs/adr/` — prior decisions; do not contradict without flagging
 [Plus any existing-code anchors: "mirror src/auth/UserForm.tsx".]
 

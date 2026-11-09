@@ -1,7 +1,7 @@
 # Update Architecture Workflow
 
 ## Purpose
-After impactful changes have shipped, bring the architecture/domain docs back in line with the code **and** surface deepening opportunities by running `improve-codebase-architecture` scoped to what was just implemented.
+After impactful changes have shipped, bring the architecture, seam and domain docs back in line with the code. Deepening is not done here: it happens in the next task's planning scan (`create-task` § 3).
 
 ## Critical Step
 **ALWAYS check `.ab-method/structure/index.yaml` FIRST** for doc paths and `doc_budgets`. Follow `.ab-method/rules/communication.md` with the user; every doc edit follows `.ab-method/rules/docs.md`.
@@ -14,7 +14,7 @@ Pull the change set from one or more of:
 - `git diff` / `git log` since the last refresh
 - The user's description, if neither is enough
 
-List: **files touched · APIs/endpoints added or changed · new dependencies · new patterns · domain terms used.**
+List: **files touched · APIs/endpoints added or changed · new dependencies · new patterns · seams added or changed · domain terms used.**
 
 ### 2. Update Docs (priority order — only touch what changed)
 
@@ -39,6 +39,14 @@ Patterns live split by topic: `docs/architecture/<layer>/index.md` (one line per
 #### 2e. Hard-to-reverse decisions → `docs/adr/`
 Only when the change carries a real trade-off, was surprising, and is hard to reverse (the bar in the `domain-model` skill's `ADR-FORMAT.md`). Suggest `/domain-model` to capture it; docs then link the ADR in one line.
 
+#### 2f. Seams → `docs/seams/`
+Format, bar and status lifecycle: the `codebase-design` skill's `SEAM-FORMAT.md`.
+- New module that clears the bar → its `<slug>.md` plus one line in `index.md`.
+- Changed interface, files or adapters → edit that seam doc in place.
+- Status: set from the seam's **Check** using the lifecycle in `SEAM-FORMAT.md` (never moved without running it). A legitimate bypass goes under **Exceptions**.
+- Seam removed → delete its doc and its index line.
+- A pattern topic that restates a seam → replace the text with a one-line link to the seam doc.
+
 ### 3. Edit Strategy — `.ab-method/rules/docs.md`
 - **Edit in place, never append.** Merge into or replace the closest entry.
 - **Delete what is no longer true.** No `[DEPRECATED]` markers, no dated "Recent Updates" blocks — git keeps history.
@@ -51,24 +59,20 @@ node .ab-method/scripts/check-docs.js   # plugin installs: npx ab-method check-d
 ```
 The doc update is not done until this passes. Compact failing files you touched; report pre-existing failures elsewhere and point at `/ab-cleanup`.
 
-### 5. Invoke `improve-codebase-architecture` — scoped to what was implemented
+### 5. Deepening
 
-Frame it tightly so it doesn't sweep the whole repo:
-
-> "Run `improve-codebase-architecture` against the files touched in this change: [list from Step 1]. Scope the exploration to those modules and their immediate seams. Surface deepening opportunities — places that just became shallow, friction the new code introduced, or where the new domain language exposes a previously-misshapen module."
-
-The skill reads `CONTEXT.md` and `docs/adr/`, walks the changed modules with the deletion test, presents numbered candidates, and grills whichever the user picks — updating `CONTEXT.md` inline or offering an ADR when warranted. This is the point of the workflow: docs catch the *what*; the skill catches *the architectural debt the change just created or revealed*.
+Not run here. The next task touching these modules deepens them in its planning scan (`create-task` § 3). For a deliberate repo-wide review, `/improve-codebase-architecture` stays available.
 
 ### 6. Report
 Short, per `.ab-method/rules/communication.md`:
 - One bullet per file updated (what changed, word count vs budget)
 - API/endpoint changes reflected, or "no API changes"
+- Seam docs added, changed or moved in status
 - Domain terms added or sharpened
-- Deepening candidates surfaced and which the user is exploring
 - Any ADR captured
 
 ## Remember
 - Index first; edit in place; `check-docs` must pass.
 - **Always check Entry Points**, even if the user didn't mention APIs.
-- **Always run `improve-codebase-architecture`** scoped to the change.
+- **Seam docs follow the code**: new seam → doc, status moves with its Check.
 - Defer hard-to-reverse / domain-reshape decisions to `/domain-model`.

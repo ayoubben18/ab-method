@@ -34,7 +34,8 @@ named mission on the planned pass. Never hand-write a verdict, a symbol, an arro
 |---|---|---|
 | `[NEW]` | the module doesn't exist yet; a mission creates it | the module's directory did not exist at base |
 | `[GONE]` | a mission deletes it | the directory is gone at head |
-| `[rewritten]` | a mission replaces how it works, not what it offers | modifications only, deletions ≥ 40% of additions |
+| `[rewritten]` | a mission replaces how it works, not what it offers | modifications only, deletions ≥ 40% of additions, and additions ≥ deletions |
+| `[reduced]` | a mission removes logic from it (folded into a seam, deleted as dead) | modifications only, deletions > additions |
 | `[extended]` | a mission adds a file or a capability to it | existed at base, ≥ 1 new file |
 | `[touched]` | a mission makes a small additive edit | small additive edits only |
 
@@ -135,6 +136,7 @@ also touched: platform/db · 2 migration snapshots
 | web/checkout | `[extended]` | `[extended]` | as planned |
 | platform/audit | — | `[touched]` | **unplanned** — M2 made every charge state change write an audit row; the grill never raised auditing |
 | billing/invoice | — | (caller only) | **unplanned seam** — invoicing now reads charges through `billing/charge` instead of the table |
+| web/orders | `[rewritten]` | `[reduced]` | lighter — its total calc moved behind `billing/charge` |
 
 **Read**: the task landed where it was planned, and reached one module past it. Auditing wasn't in the
 grill; it is a real requirement discovered mid-mission, worth a line in `CONTEXT.md`. The `billing/invoice`

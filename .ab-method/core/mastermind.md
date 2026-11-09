@@ -60,16 +60,18 @@ Common routes:
 | Resume a task already in progress | `resume-task` |
 | Add more work to an existing task | `extend-task` |
 | Extend a goal after its loop ran | `extend-goal` |
-| Run an existing task autonomously to completion | `start-task` |
+| Run an existing task autonomously to completion, ending in a reviewed PR | `start-task` (`start-task <task> inline` runs the missions in the conversation, no mission subagents) |
 | Run a whole roadmap of tasks in dependency order | `start-roadmap` |
 | Continue a tangent that got parked mid-grill | `create-task-from-handoff` |
 | Answer a question that was parked as a black box (`UQ-n`) | `extend-task` (or `extend-goal`) |
 | Stress-test a plan against the domain model (standalone) | `critique-plan` skill |
 | Review a completed diff for architecture / slop / reuse (standalone) | `review-implementation` skill |
+| Review an open PR against the seams and the coding rules | `review-pr` skill |
+| Write a PR body (Summary, Evidence, Merge Danger) | `pr` skill |
 | Map where a task landed vs where it was planned to land (standalone) | `change-map` skill |
 | Understand the codebase (arch / domain) | `analyze-project` / `analyze-frontend` / `analyze-backend` |
 | Refresh architecture docs after big changes | `update-architecture` |
-| Backfill tests for code written without them | `test-mission` |
+| Deliberate repo-wide architecture review | `improve-codebase-architecture` skill (optional; tasks deepen what they touch) |
 | Explore UI directions before building (disposable HTML variants + picker, never in the codebase) | `prototype-ui` skill |
 | Clean up / migrate a repo already using AB Method (bloated docs, task leftovers, 3.x → 4.0) | `ab-cleanup` |
 | Check whether the docs are within their word budgets | `node .ab-method/scripts/check-docs.js` (or `npx ab-method check-docs`) |
@@ -80,7 +82,7 @@ The most common fork. Decide it with the user, don't guess blindly:
 
 - **`create-task`** — you want to **stay in the loop**: review each
   mission yourself. Bounded, focused scope broken into missions, with
-  tests only where its Test Plan says they earn their keep. Pick this when the work is a single feature
+  tests written after coding, only through the seams that must not break. Pick this when the work is a single feature
   or fix you want to shepherd.
 - **`create-goal`** — one continuous objective with a verifiable stop
   condition that you want to **hand off and walk away** from (migrations,
@@ -100,14 +102,19 @@ autonomous objective → `create-goal`; several ordered tasks →
 If the user asks how the AB Method works, give a concise end-to-end tour
 grounded in the actual files, not from memory:
 
-1. **Baseline** — `analyze-project` → UBIQ + CONTEXT + architecture docs.
+1. **Baseline** — `analyze-project` → UBIQ + CONTEXT + architecture docs + `docs/seams/`.
 2. **Sharpen** — `domain-model` grills the language, captures ADRs.
-3. **Build** — `create-task` grills, decides placement (reuse / extend /
-   extract), prototypes new UI as disposable HTML, plans the few tests
-   worth having, then runs missions — `verify: test` ones through `tdd`.
+3. **Build** — `create-task` grills, scans the task's blast radius for
+   modules to deepen, decides placement (reuse / extend / extract /
+   introduce), designs any new seam before code (seam design gate),
+   prototypes new UI as disposable HTML, then runs composed missions —
+   bug fixes test-first (`verify: repro`), the rest `verify: build`.
+   After coding, the protect step tests what must not break, through the
+   seams. `start-task` runs it unattended and ends with a draft PR (`pr`
+   skill), reviewed by `review-pr` against the seams and the coding rules.
    Or `create-goal` for autonomous runs.
-4. **Maintain** — `sync-architecture` edits docs in place after each
-   task, gated by `check-docs` budgets; `update-architecture` for bigger
+4. **Maintain** — `sync-architecture` edits docs and seam docs in place
+   after each task, gated by `check-docs` budgets; `update-architecture` for bigger
    refreshes; `ab-cleanup` to compact a repo whose docs already grew.
 
 Keep it short. Point them at `/ab-master` for the full workflow menu.
@@ -118,11 +125,12 @@ Keep it short. Point them at `/ab-master` for the full workflow menu.
 - **Park, never guess** — the rare question the user genuinely can't answer
   yet becomes a recorded black box (`unresolved-questions.md` + a
   `TODO(UQ-n)` seam), not a silent invented decision.
-- **Place before you code** — reuse, extend, or extract first; never a
-  second inline copy (`.ab-method/rules/code.md`).
-- **Tests where they earn their keep** — the task's Test Plan lists them;
-  `verify: test` missions run through `tdd`, `verify: build` missions add
-  none.
+- **Place before you code** — reuse, extend, extract or introduce first;
+  never a second inline copy; go through documented seams, never around
+  them (`.ab-method/rules/code.md`).
+- **Tests where they earn their keep** — written after coding by the
+  protect step, through the seams; bug fixes stay test-first
+  (`verify: repro`).
 - **Docs stay small** — edited in place, within budget
   (`.ab-method/rules/docs.md`).
 - **`progress-tracker.md` is the single source of truth** per task.

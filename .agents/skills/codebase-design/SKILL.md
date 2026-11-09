@@ -1,13 +1,23 @@
 ---
 name: codebase-design
-description: Shared vocabulary and principles for designing deep modules — small interfaces, clean seams, testable through the interface. Use when designing or improving a module's interface, deciding where a seam goes, hunting deepening opportunities, making code more testable, or when another skill needs the deep-module vocabulary.
+description: Shared vocabulary and principles for designing deep modules — small interfaces, clean seams, testable through the interface — grounded in Ousterhout's A Philosophy of Software Design. Holds the seam doc format, the default seam catalog and the book's red flags. Use when designing or improving a module's interface, deciding where a seam goes, writing a seam doc, hunting deepening opportunities, or when another skill needs the deep-module vocabulary.
 ---
 
 # Codebase Design
 
 Design **deep modules**: a lot of behaviour behind a small interface, placed at a clean seam, testable through that interface. The aim is leverage for callers, locality for maintainers, and testability for everyone.
 
-This skill is the **single source** of the architecture vocabulary used across AB Method — by `improve-codebase-architecture` when proposing deepenings, by `review-implementation`'s `cleaner-architecture` lens when judging a diff, and by `tdd` when agreeing seams. Consumers reference it; they don't restate it.
+This skill is the **single source** of the architecture vocabulary used across AB Method — by the in-plan deepening scan and seam design gate in `create-task` / `extend-task`, by `review-implementation`'s `cleaner-architecture` lens and `review-pr`'s reviewers when judging a diff, by `improve-codebase-architecture` for repo-wide reviews, and by `tdd` when choosing a test boundary. Consumers reference it; they don't restate it.
+
+It follows John Ousterhout's *A Philosophy of Software Design*: complexity is the enemy, deep modules are the main defence, and good design is a continuous investment rather than a phase (**strategic programming**: working code isn't enough; each change leaves the design a little better).
+
+| File | Holds |
+|---|---|
+| [SEAM-FORMAT.md](SEAM-FORMAT.md) | the `docs/seams/` doc: template, the bar, the status lifecycle |
+| [SEAM-CATALOG.md](SEAM-CATALOG.md) | the seven default seams most apps have, each from the book |
+| [RED-FLAGS.md](RED-FLAGS.md) | the book's red flags and the three symptoms every finding names |
+| [DEEPENING.md](DEEPENING.md) | deepening a cluster given its dependencies |
+| [DESIGN-IT-TWICE.md](DESIGN-IT-TWICE.md) | designing an interface several radically different ways |
 
 ## Terms
 
@@ -126,7 +136,9 @@ This is the design-side counterpart of the `tdd` skill's seam discipline: `tdd` 
 ## Going deeper
 
 - **Deepening a cluster given its dependencies** — see [DEEPENING.md](DEEPENING.md): the four dependency categories, seam discipline, and replace-don't-layer testing.
-- **Exploring alternative interfaces** — see [DESIGN-IT-TWICE.md](DESIGN-IT-TWICE.md): spin up parallel sub-agents to design the interface several radically different ways, then compare on depth, locality, and seam placement.
+- **Exploring alternative interfaces** — see [DESIGN-IT-TWICE.md](DESIGN-IT-TWICE.md): spin up parallel sub-agents to design the interface several radically different ways, then compare on depth, locality, and seam placement. The seam design gate in `create-task` runs it.
+- **Recording a seam** — see [SEAM-FORMAT.md](SEAM-FORMAT.md); the defaults are in [SEAM-CATALOG.md](SEAM-CATALOG.md).
+- **Judging code** — see [RED-FLAGS.md](RED-FLAGS.md); name the symptom (change amplification, cognitive load, unknown unknowns) for every finding.
 
 ## Where the domain model fits
 

@@ -1,6 +1,6 @@
 ---
 name: critique-plan
-description: Pre-implementation critic. Spins up a read-only domain critic that challenges a drafted plan — a task's missions or a roadmap's task graph — against the ubiquitous language, CONTEXT.md, and ADRs, and pushes back ONLY on genuine conflicts. Silent when the plan is sound. Use before implementing (from create-task / create-roadmap) or standalone to stress-test a plan against the project's domain model.
+description: Pre-implementation critic. Spins up a read-only domain critic that challenges a drafted plan — a task's missions or a roadmap's task graph — against the ubiquitous language, CONTEXT.md, ADRs and the documented seams, and pushes back ONLY on genuine conflicts. Silent when the plan is sound. Use before implementing (from create-task / create-roadmap) or standalone to stress-test a plan against the project's domain model.
 ---
 
 # Critique Plan (pre-implementation)
@@ -29,8 +29,9 @@ whatever the user pastes in (standalone).
 
 Read only what exists; skip missing files silently (don't flag them or offer to create them):
 `UBIQUITOUS_LANGUAGE.md`, `CONTEXT.md` (or `CONTEXT-MAP.md` + each `src/<context>/CONTEXT.md`),
-`docs/adr/`, `docs/architecture/tech-stack.md`, and each layer's `docs/architecture/<layer>/index.md`
-(open a topic file only when the plan touches it).
+`docs/adr/`, `docs/architecture/tech-stack.md`, each layer's `docs/architecture/<layer>/index.md`
+(open a topic file only when the plan touches it), and `docs/seams/index.md` (open a seam doc only when the
+plan touches that seam).
 
 ### 2. Spin up ONE read-only domain critic (subagent)
 
@@ -48,9 +49,13 @@ out of the planning context. Its brief:
 - **Bad graph seam** (roadmap) — a `depends-on` edge crosses a seam the wrong way, two "independent"
   tasks share a domain concept, or a task is mis-scoped (an epic, or a single mission dressed as a task).
 - **Reinvents a named concept** — introduces a new abstraction for something the domain model names.
+- **Bypasses a documented seam** — a mission does work a seam in `docs/seams/` owns without going through
+  it (direct `fetch` beside the data-fetching seam), or changes a seam's interface without an `introduce`
+  placement or a pass through the seam design gate (`create-task` § 3). Cite the seam doc and its
+  **Callers never** line.
 
 For each, return **What** (the mission/task/decision), **Conflicts with** (the exact term / `CONTEXT.md`
-section / `ADR-NNNN`), **Why it matters** (concrete cost, not taste), **Suggested resolution**.
+section / `ADR-NNNN` / `docs/seams/<slug>.md`), **Why it matters** (concrete cost, not taste), **Suggested resolution**.
 
 > Example pushback: *"Mission 3 calls it `archiveOrder`, but the glossary defines archiving as retention
 > only — this mission also stops billing, which is **Cancellation**. Rename to `cancelOrder` so the code
@@ -69,6 +74,8 @@ recorded anywhere.
 also…" ideas — anything not anchored in the domain model. Those belong to the post-implementation
 [review-implementation](../review-implementation/SKILL.md) skill. With nothing anchored, the critic
 returns exactly: `No objections — the plan is consistent with the domain model.`
+
+Every return, clean or not, ends with one evidence line: `Checked: <the seam docs, ADRs and rules it actually read, and the files it opened>`. A clean result with no evidence line is a pass that didn't happen: re-run the critic.
 
 ### 3. Surface pushbacks — advisory, never blocking
 

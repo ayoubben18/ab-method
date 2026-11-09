@@ -1,6 +1,6 @@
 ---
 name: ab-start-roadmap
-description: Execute a roadmap autonomously to completion — the layer above start-task. Use when a roadmap's tasks are planned and you want them run in dependency order, with independent tasks optionally in parallel. Verifies the dependency tree is planned before running; stops if a needed task has no plan. Executor only.
+description: Execute a roadmap autonomously to completion — the layer above start-task. Use when a roadmap's tasks are planned and you want them run in dependency order, with independent tasks optionally in parallel (or `inline`, without mission subagents), ending in one reviewed pull request. Verifies the dependency tree is planned before running; stops if a needed task has no plan. Executor only.
 ---
 
 This skill runs the AB Method **start-roadmap** workflow.

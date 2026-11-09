@@ -65,3 +65,6 @@ For each real finding:
   interface, is `needs-judgment`.
 
 If the diff reinvented nothing, return exactly: `reusability-inspector: no findings.`
+
+Every return, clean or not, ends with one evidence line: `Checked: <the seam docs, ADRs and rules it actually read, and the files it opened>`. Near-misses you
+examined and rejected go under `Checked, dropped:` with the reason.

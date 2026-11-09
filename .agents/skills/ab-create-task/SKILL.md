@@ -1,6 +1,6 @@
 ---
 name: ab-create-task
-description: Create a focused task and break it into test-driven missions. Use when the user wants to start a new feature, fix a bug, or begin implementation work.
+description: Create a holistic task — deepen the code it touches, design new seams, and break it into composed missions. Use when the user wants to start a new feature, fix a bug, or begin implementation work.
 ---
 
 This skill runs the AB Method **create-task** workflow.

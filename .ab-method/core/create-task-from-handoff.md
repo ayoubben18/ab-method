@@ -28,7 +28,7 @@ Invoke `grill-with-docs` **seeded with the handoff**: treat its settled decision
 
 ### 4. Hand off to the create-task flow
 
-Follow `.ab-method/core/create-task.md` from **"2. Analyze Project Context"** onward, with no divergence — project analysis, placement decisions, the prototype gate for new UI, the Test Plan, `verify:` tags on missions, `critique-plan`, the planned change map, confirmation, then the mission loop and the post-implementation passes.
+Follow `.ab-method/core/create-task.md` from **"2. Project context"** onward, with no divergence — project analysis, the deepening scan and placement decisions, the seam design gate, the prototype gate for new UI, composed missions with `verify:` tags, `critique-plan`, the planned change map, confirmation, then the mission loop, the protect step and the post-implementation passes.
 
 ### 5. Retire the handoff
 

@@ -14,7 +14,7 @@ Follow `.ab-method/rules/communication.md` for every message and `.ab-method/rul
 Ask which task to extend.
 
 ### 2. Read the Progress Tracker
-Show the current missions (with `verify:` tags; untagged = `verify: test`) and status. Note `## Placement`, `## Test Plan` and `## UI Spec` if present.
+Show the current missions (with `verify:` tags; untagged = legacy `verify: test`) and status. Note `## Placement`, `## Protected`, a legacy `## Test Plan`, and `## UI Spec` if present.
 
 ### 2.5 Resolving an Unresolved Question — swapping the black box
 
@@ -29,7 +29,7 @@ This is the main reason tasks get extended. When the user is resolving one:
 
 1. **Grill the answer** with `grill-with-docs` — late answers bring their own branches.
 2. **Size the swap** using the entry's *If the answer differs* line:
-   - **Constant swap** — the seam takes the real value, its placeholder test becomes the real test, the `TODO(UQ-n)` goes. One mission, or none if it's a one-liner done here.
+   - **Constant swap** — the seam takes the real value, any test that pinned the placeholder is updated to the real answer, the `TODO(UQ-n)` goes. One mission, or none if it's a one-liner done here.
    - **Real work** — the answer changes the shape. Draft proper missions; `grep -rn 'TODO(UQ-n)'` gives the blast radius.
 3. **Close the entry**: `RESOLVED <date>`, the answer, and where it was applied. Keep the entry; drop the `⚠️ UQ-n` markers and its line in the tracker's Unresolved Questions section (remove the section when empty).
 4. **Consider an ADR** when the answer is hard to reverse, surprising, and a real trade-off — `grill-with-docs` offers it.
@@ -39,25 +39,29 @@ Extending for other reasons never obliges the user to resolve anything. Never re
 ### 3. Gather New Mission Requirements
 Clear description → draft the missions. Vague → `grill-with-docs` first (it reads the domain docs and the code, so missions land in canonical terms).
 
-### 3.5 Plan the New Missions — placement, tests, UI
+### 3.5 Plan the New Missions — deepening, placement, seams, UI
 
-Apply the same planning steps as `/create-task`, scoped to the new work:
+Apply the same planning steps as `/create-task` § 3–5, scoped to the new work. Read `docs/seams/index.md` and the seams the new work touches first.
 
-- **Placement** — for each new capability, decide reuse / extend / extract (`.ab-method/rules/code.md`) and add a line to `## Placement`. An extraction becomes a refactor mission placed **before** the missions that build on it, tagged `verify: build`.
-- **Test Plan** — append any new use case worth protecting to `## Test Plan` (`UCn` numbering continues). Everything else is `verify: build`.
+- **Deepening scan** — over the new work's blast radius (the modules it touches, their callers, the seams they cross), with the `codebase-design` red flags. Each finding becomes a refactor mission placed **before** the missions that build on it, `verify: build`.
+- **Placement** — for each new capability, decide reuse / extend / extract / introduce (`.ab-method/rules/code.md`) and add a line to `## Placement`. Extractions are refactor missions placed first, like deepenings.
+- **Seam design gate** — an **introduce**, or a change to a documented seam's interface, runs `create-task.md` § 3c before the missions are written.
+- **Tests** — no test plan. New missions are `verify: build`; a bug fix is `verify: repro`. The protect step picks the tests once the new code exists.
+- **Composed missions** — one headline per capability with its steps indented under it, split only at real boundaries (`create-task.md` § 6).
 - **Prototype gate** — if the new missions add **new UI** (a new page, component or flow — not a tweak to existing UI, not a design the user supplied as Figma, not backend-only), run the `prototype-ui` skill before finalising the missions, exactly as `create-task.md`'s prototype gate does. The pick updates `## UI Spec`.
 
 ### 4. Append Missions to the Progress Tracker
 Continue numbering; every new mission carries a `verify:` tag:
 ```markdown
 ## Missions
-- [x] Mission 1: ... — verify: test (UC1)
-- [ ] Mission 2: ... — verify: build
-- [ ] Mission 3: Extract refund calc into billing module — verify: build   ← NEW
-- [ ] Mission 4: Enforce refund window — verify: test (UC3)                ← NEW
+- [x] Mission 1: ... — verify: build
+- [ ] Mission 2: Billing — deepen refund calc behind the billing seam — verify: build   ← NEW
+  - extract the refund calc from checkout + admin
+  - fold `OrderTotals` into it
+- [ ] Mission 3: Refunds double-charge on retry — verify: repro                         ← NEW
 ```
 
-No mission docs — missions are one-line entries in the tracker.
+No mission docs — missions live in the tracker. A completed task that gains new missions reruns the protect step for the new code when they finish.
 
 #### Optional: parallel-group tags on new missions (`[pp-x]`)
 
@@ -86,12 +90,12 @@ Invoke `change-map`'s planned pass for the new missions and append a dated block
 ### 6. Confirm with User
 "Added [N] missions. Start Mission X?"
 
-- **Standalone task** → `/resume-task` (or continue inline): `verify: test` missions run through `tdd`, `verify: build` missions add no test.
+- **Standalone task** → `/resume-task` (or continue inline): `verify: repro` missions run through `tdd`, `verify: build` missions add no test, and the protect step runs once the new missions are done.
 - **Roadmap task** → `/resume-task` here, or re-run `/start-roadmap <name>` to execute every extended task in dependency order.
 
 ## Remember
 - Missions go in `progress-tracker.md`, numbered sequentially, each with a `verify:` tag
-- New placement decisions, Test Plan entries and (for new UI) the prototype gate apply to extensions too
+- The deepening scan, placement (incl. introduce and the seam design gate), composed missions and (for new UI) the prototype gate apply to extensions too
 - Extension change maps are dated blocks; the original `## Planned` is never edited
 - `/extend-task` is where a parked `UQ-n` gets answered — never resolve one the user didn't answer
 - `[pp-x]` only with the user's explicit yes
