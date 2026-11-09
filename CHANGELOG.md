@@ -1,3 +1,18 @@
+## [5.0.0](https://github.com/ayoubben18/ab-method/compare/v4.1.0...v5.0.0) (2026-11-09)
+
+### ⚠ BREAKING CHANGES
+
+* /start-task now pushes its branch and opens a pull request.
+New plans have no `## Test Plan` and no `verify: test` missions; tests come
+from the protect step after coding. /test-mission and ab-test-mission are
+removed. Legacy trackers still run.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+### ✨ Features
+
+* seams, holistic tasks and reviewed PRs (v5) ([d9593ab](https://github.com/ayoubben18/ab-method/commit/d9593aba2f8cfed7aadcd5975780b56400509b13))
+
 ## [4.1.0](https://github.com/ayoubben18/ab-method/compare/v4.0.2...v4.1.0) (2026-10-27)
 
 ### ✨ Features
