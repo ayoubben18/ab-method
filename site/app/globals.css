@@ -317,7 +317,7 @@ main > .hero {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   border-bottom: 1.5px solid var(--ink);
 }
 
@@ -774,6 +774,28 @@ button.primary:disabled {
   color: var(--muted);
 }
 
+.mission-steps {
+  flex-basis: 100%;
+  margin: 0.15rem 0 0.35rem 1.65rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.missions .mission-steps li {
+  display: list-item;
+}
+
+.mission-steps li::before {
+  content: "– ";
+}
+
+.doc .code-block {
+  margin: 0.4rem 0 0.8rem;
+  font-size: 0.8rem;
+}
+
 .mission-title[data-flagged] {
   text-decoration: underline wavy var(--red);
   text-underline-offset: 0.3em;
@@ -803,7 +825,8 @@ button.primary:disabled {
   margin: 0.15rem 0 0;
 }
 
-.glossary [data-added] {
+.glossary [data-added],
+.fields [data-added] {
   margin-left: -0.9rem;
   padding: 0.5rem 0.9rem;
   border-left: 3px solid var(--green);
@@ -983,7 +1006,7 @@ button.primary:disabled {
   }
 
   .steps {
-    grid-template-columns: repeat(7, minmax(3.25rem, 1fr));
+    grid-template-columns: repeat(8, minmax(3.25rem, 1fr));
     overflow-x: auto;
   }
 

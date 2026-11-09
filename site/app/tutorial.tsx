@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const STEPS = ["Ask", "Grill", "Plan", "Critique", "Build", "Review", "Map"] as const;
+const STEPS = ["Ask", "Grill", "Plan", "Critique", "Build", "Protect", "Review", "Ship"] as const;
 
 type Q1 = "reuse" | "new" | null;
 type Q2 = "auto" | "park" | null;
@@ -11,32 +11,75 @@ type FileName =
   | "progress-tracker.md"
   | "CONTEXT.md"
   | "unresolved-questions.md"
+  | "seams/billing.md"
   | "change-map.md"
-  | "review.md";
+  | "review.md"
+  | "pr-body.md";
 
 type Mission = {
   title: string;
-  verify: "test" | "build";
+  steps: { text: string; flagged?: boolean; uq?: boolean }[];
   output: string;
-  uq?: boolean;
 };
+
+type Protected = {
+  useCase: string;
+  boundary: string;
+  red: string;
+  green: string;
+};
+
+type Run = { index: number; phase: "red" | "green" } | null;
 
 function missions(critique: Critique, q2: Q2): Mission[] {
   return [
-    { title: "Extract addCalendarMonths from trial.ts", verify: "build", output: "typecheck clean, 212 existing tests pass" },
-    { title: "Pause a subscription for up to three months", verify: "test", output: "rejects a pause longer than three months" },
     {
-      title: critique === "amend" ? "Skip and log charges while paused" : "Freeze charges while paused",
-      verify: "test",
-      output: critique === "amend" ? "skips and logs the charge inside a pause" : "freezes the charge inside a pause",
+      title: "Billing: deepen the date math behind the billing module",
+      steps: [
+        { text: "extract addCalendarMonths from trial.ts and renewal.ts" },
+        { text: "point both callers at it" },
+      ],
+      output: "typecheck clean, 212 existing tests pass",
     },
     {
-      title: "Resume billing when the pause ends",
-      verify: "test",
-      output: q2 === "park" ? "resumes through the UQ-1 placeholder policy" : "resumes billing on the day the pause ends",
-      uq: q2 === "park",
+      title: "Pause a subscription, end to end",
+      steps: [
+        { text: "pause rules: up to three months" },
+        {
+          text: critique === "amend" ? "skip and log charges while paused, in BillingSchedule" : "freeze charges while paused",
+          flagged: true,
+        },
+        {
+          text: q2 === "park" ? "resume billing through the UQ-1 placeholder" : "resume billing the day the pause ends",
+          uq: q2 === "park",
+        },
+        { text: "pause button on the billing page (prototype B)" },
+      ],
+      output: "typecheck, lint and build clean, 212 existing tests pass",
     },
-    { title: "Pause button on the billing page", verify: "build", output: "you picked prototype B of 3; typecheck and build pass" },
+  ];
+}
+
+function protectedTests(critique: Critique, q2: Q2): Protected[] {
+  return [
+    {
+      useCase: "A pause longer than three months is rejected",
+      boundary: "Subscription",
+      red: "broke the limit: accepted a four-month pause",
+      green: "restored: rejected with PauseTooLong",
+    },
+    {
+      useCase: critique === "amend" ? "A charge inside a pause is skipped and logged" : "A charge inside a pause is frozen",
+      boundary: "billing seam",
+      red: "removed the pause check: the charge ran",
+      green: critique === "amend" ? "restored: skipped, one ledger entry" : "restored: frozen",
+    },
+    {
+      useCase: q2 === "park" ? "Billing resumes through the UQ-1 placeholder" : "Billing resumes the day a pause ends",
+      boundary: "billing seam",
+      red: "shifted the end date: charged a day late",
+      green: "restored: charged on the end date",
+    },
   ];
 }
 
@@ -49,20 +92,26 @@ export function Tutorial() {
   const [q2, setQ2] = useState<Q2>(null);
   const [critique, setCritique] = useState<Critique>(null);
   const [done, setDone] = useState(0);
-  const [running, setRunning] = useState<{ index: number; phase: "red" | "green" } | null>(null);
+  const [running, setRunning] = useState<Run>(null);
+  const [protectStarted, setProtectStarted] = useState(false);
+  const [protectDone, setProtectDone] = useState(0);
+  const [protectRunning, setProtectRunning] = useState<Run>(null);
   const [reviewRun, setReviewRun] = useState(false);
+  const [prReviewed, setPrReviewed] = useState(false);
   const [activeFile, setActiveFile] = useState<FileName>("progress-tracker.md");
   const timers = useRef<number[]>([]);
 
   const list = useMemo(() => missions(critique, q2), [critique, q2]);
+  const tests = useMemo(() => protectedTests(critique, q2), [critique, q2]);
 
   const files = useMemo(() => {
     const f: FileName[] = [];
     if (sent) f.push("progress-tracker.md");
     if (q1 === "new") f.push("CONTEXT.md");
     if (q2 === "park") f.push("unresolved-questions.md");
-    if (step >= 2) f.push("change-map.md");
+    if (step >= 2) f.push("seams/billing.md", "change-map.md");
     if (reviewRun) f.push("review.md");
+    if (step >= 7) f.push("pr-body.md");
     return f;
   }, [sent, q1, q2, step, reviewRun]);
 
@@ -73,39 +122,60 @@ export function Tutorial() {
   }, [lastFile]);
 
   useEffect(() => {
-    const primary: Partial<Record<number, FileName>> = { 2: "progress-tracker.md", 3: "progress-tracker.md", 4: "progress-tracker.md", 6: "change-map.md" };
+    const primary: Partial<Record<number, FileName>> = {
+      2: "progress-tracker.md",
+      3: "progress-tracker.md",
+      4: "progress-tracker.md",
+      5: "progress-tracker.md",
+      7: "pr-body.md",
+    };
     const f = primary[step];
     if (f) setActiveFile(f);
   }, [step]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
-  const canAdvance = [sent, q1 === "new" && q2 !== null, true, critique !== null, done === list.length, reviewRun, false][step];
+  const canAdvance = [
+    sent,
+    q1 === "new" && q2 !== null,
+    true,
+    critique !== null,
+    done === list.length,
+    protectDone === tests.length,
+    reviewRun,
+    false,
+  ][step];
 
   function go(to: number) {
     setStep(to);
     setReached((r) => Math.max(r, to));
   }
 
-  function runMissions(count: number) {
+  // Plays a sequence: each item optionally shows red first, then settles green.
+  function play(
+    from: number,
+    count: number,
+    withRed: boolean,
+    setRun: (r: Run) => void,
+    setCount: (n: number) => void,
+  ) {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const redFor = reduced ? 0 : 650;
+    const redFor = reduced ? 0 : 700;
     const gap = reduced ? 0 : 450;
     let t = 0;
     for (let k = 0; k < count; k++) {
-      const index = done + k;
-      const isTest = list[index].verify === "test";
-      timers.current.push(window.setTimeout(() => setRunning({ index, phase: isTest ? "red" : "green" }), t));
-      if (isTest) t += redFor;
+      const index = from + k;
+      timers.current.push(window.setTimeout(() => setRun({ index, phase: withRed ? "red" : "green" }), t));
+      if (withRed) t += redFor;
       timers.current.push(
         window.setTimeout(() => {
-          setRunning({ index, phase: "green" });
-          setDone(index + 1);
+          setRun({ index, phase: "green" });
+          setCount(index + 1);
         }, t),
       );
       t += gap;
     }
-    timers.current.push(window.setTimeout(() => setRunning(null), t));
+    timers.current.push(window.setTimeout(() => setRun(null), t));
   }
 
   function reset() {
@@ -119,7 +189,11 @@ export function Tutorial() {
     setCritique(null);
     setDone(0);
     setRunning(null);
+    setProtectStarted(false);
+    setProtectDone(0);
+    setProtectRunning(null);
     setReviewRun(false);
+    setPrReviewed(false);
   }
 
   return (
@@ -159,8 +233,8 @@ export function Tutorial() {
                 </div>
               ) : (
                 <Turn who="agent">
-                  Before asking anything, I read the domain glossary, <code>CONTEXT.md</code> and the billing docs, so
-                  my questions use your project&apos;s words. I&apos;ve started a tracker for the task.
+                  Before asking anything, I read the domain glossary, <code>CONTEXT.md</code>, the seam docs and the
+                  billing code, so my questions use your project&apos;s words. I&apos;ve started a tracker for the task.
                 </Turn>
               )}
             </>
@@ -236,9 +310,9 @@ export function Tutorial() {
                           "Recorded in the tracker. That's everything I needed; on to the plan."
                         ) : (
                           <>
-                            Then I won&apos;t guess. I&apos;ve parked it as <strong>UQ-1</strong>: mission 4 ships a
-                            placeholder behind one function, marked <code>TODO(UQ-1)</code>, so the build doesn&apos;t
-                            wait for finance.
+                            Then I won&apos;t guess. I&apos;ve parked it as <strong>UQ-1</strong>: the resume step
+                            ships a placeholder behind one function, marked <code>TODO(UQ-1)</code>, so the build
+                            doesn&apos;t wait for finance.
                           </>
                         )}
                       </Turn>
@@ -251,29 +325,34 @@ export function Tutorial() {
 
           {step === 2 && (
             <>
-              <Turn who="agent">
-                Here&apos;s the plan, written to the tracker. Three things decide its shape:
-              </Turn>
+              <Turn who="agent">Here&apos;s the plan, written to the tracker. Four things decide its shape:</Turn>
               <dl className="explain">
                 <div>
-                  <dt>Placement</dt>
+                  <dt>Seams</dt>
                   <dd>
-                    Date math already lives in <code>trial.ts</code>. Writing it again would make a second copy, so
-                    mission 1 extracts it before anything uses it.
+                    <code>docs/seams/billing.md</code> says every charge goes through <code>BillingSchedule</code>. The
+                    pause hooks in there, never around it.
                   </dd>
                 </div>
                 <div>
-                  <dt>Verification</dt>
+                  <dt>Deepening</dt>
                   <dd>
-                    Missions that change behavior get a test written first. Moving code and adding a button get
-                    typecheck, build and the existing suite instead.
+                    Date math is copied into <code>trial.ts</code> and <code>renewal.ts</code>. The pause would make a
+                    third copy, so mission 1 pulls it into the billing module before anything builds on it.
                   </dd>
                 </div>
                 <div>
-                  <dt>New UI</dt>
+                  <dt>Missions</dt>
                   <dd>
-                    The pause button is new, so before mission 5 you&apos;ll pick from three throwaway prototypes in the
-                    browser.
+                    Two, not five: the refactor first, then the whole capability end to end. A mission is split only
+                    where one part must land before the next.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Tests</dt>
+                  <dd>
+                    None planned yet. Once the code exists, the protect step picks what must not break. The pause button
+                    is new UI, so you&apos;ll pick from three throwaway prototypes first.
                   </dd>
                 </div>
               </dl>
@@ -287,11 +366,11 @@ export function Tutorial() {
           {step === 3 && (
             <>
               <Turn who="agent" source="critique-plan">
-                A separate critic read the plan against your domain docs. It stays silent when a plan is sound. This one
-                found one real conflict:
+                A separate critic read the plan against your domain docs and seams. It stays silent when a plan is sound.
+                This one found one real conflict:
               </Turn>
               <Turn who="agent" tone={critique === "amend" ? "resolved" : "pushback"} source="critique-plan">
-                Mission 3 says <strong>freeze</strong> charges. ADR-0007 says charges are never frozen: one that
+                Mission 2 says <strong>freeze</strong> charges. ADR-0007 says charges are never frozen: one that
                 shouldn&apos;t run is skipped and logged, so the ledger has no gaps.
               </Turn>
               {critique === null ? (
@@ -306,7 +385,7 @@ export function Tutorial() {
               ) : (
                 <Turn who="agent">
                   {critique === "amend"
-                    ? "Mission 3 renamed and its test updated. The plan now agrees with ADR-0007."
+                    ? "Mission 2's step rewritten. The plan now agrees with ADR-0007. Plan committed; building starts from here."
                     : "Dismissed. Your reason contradicts an existing decision, so I drafted ADR-0012 to supersede ADR-0007 rather than leaving the two to disagree."}
                 </Turn>
               )}
@@ -316,25 +395,65 @@ export function Tutorial() {
           {step === 4 && (
             <>
               <Turn who="agent">
-                Each mission runs in order. A tested mission must fail before its code exists, then pass once it does.
-                The tracker ticks as each one goes green.
+                Each mission builds to the plan, then runs typecheck, lint, build and the existing tests. One commit per
+                mission. No new tests yet: the design comes first.
               </Turn>
               <ul className="run-list">
                 {list.map((m, i) => {
-                  const state =
-                    running?.index === i ? running.phase : i < done ? "green" : "todo";
+                  const state = running?.index === i ? running.phase : i < done ? "green" : "todo";
                   return (
                     <li key={m.title} data-state={state}>
                       <span className="run-mark" aria-hidden="true" />
                       <span className="run-title">
                         {i + 1}. {m.title}
-                        {m.uq && <span className="uq">UQ-1</span>}
+                      </span>
+                      {state !== "todo" && <code className="run-output">✓ {m.output}</code>}
+                      <span className="sr-only">{state === "green" ? "passing" : "not run"}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+              {done < list.length ? (
+                <div className="choices row">
+                  <button
+                    type="button"
+                    className="primary"
+                    disabled={running !== null}
+                    onClick={() => play(done, 1, false, setRunning, setDone)}
+                  >
+                    Run mission {done + 1}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={running !== null}
+                    onClick={() => play(done, list.length - done, false, setRunning, setDone)}
+                  >
+                    Run the rest
+                  </button>
+                </div>
+              ) : (
+                <Turn who="agent">Both missions are green, each in its own commit. The full suite passes: 212 tests.</Turn>
+              )}
+            </>
+          )}
+
+          {step === 5 && (
+            <>
+              <Turn who="agent">
+                Now the code exists, so I can see what must not break. I test it through the billing seam and the
+                Subscription module, nothing internal:
+              </Turn>
+              <ul className="run-list">
+                {tests.map((t, i) => {
+                  const state = protectRunning?.index === i ? protectRunning.phase : i < protectDone ? "green" : "todo";
+                  return (
+                    <li key={t.useCase} data-state={state}>
+                      <span className="run-mark" aria-hidden="true" />
+                      <span className="run-title">
+                        UC{i + 1}. {t.useCase} <span className="verify">→ {t.boundary}</span>
                       </span>
                       {state !== "todo" && (
-                        <code className="run-output">
-                          {m.verify === "test" ? (state === "red" ? "✗ " : "✓ ") : ""}
-                          {m.output}
-                        </code>
+                        <code className="run-output">{state === "red" ? `✗ ${t.red}` : `✓ ${t.green}`}</code>
                       )}
                       <span className="sr-only">
                         {state === "red" ? "failing" : state === "green" ? "passing" : "not run"}
@@ -343,29 +462,38 @@ export function Tutorial() {
                   );
                 })}
               </ul>
-              {done < list.length ? (
-                <div className="choices row">
-                  <button type="button" className="primary" disabled={running !== null} onClick={() => runMissions(1)}>
-                    Run mission {done + 1}
-                  </button>
-                  <button type="button" disabled={running !== null} onClick={() => runMissions(list.length - done)}>
-                    Run the rest
-                  </button>
-                </div>
-              ) : (
+              {!protectStarted ? (
+                <>
+                  <Turn who="agent">
+                    Skipped: the pause button&apos;s rendering. Nothing a customer would notice breaks if it changes.
+                  </Turn>
+                  <div className="choices">
+                    <button
+                      type="button"
+                      className="primary"
+                      onClick={() => {
+                        setProtectStarted(true);
+                        play(0, tests.length, true, setProtectRunning, setProtectDone);
+                      }}
+                    >
+                      Protect these
+                    </button>
+                  </div>
+                </>
+              ) : protectDone === tests.length ? (
                 <Turn who="agent">
-                  All five missions are green, each in its own commit. The full suite runs once at the end: 219 tests
-                  pass.
+                  Each test was seen failing: I broke the behaviour on purpose, watched it go red, then restored the code.
+                  A test you never saw fail protects nothing.
                 </Turn>
-              )}
+              ) : null}
             </>
           )}
 
-          {step === 5 && (
+          {step === 6 && (
             <>
               <Turn who="agent">
-                Now three critics read the finished diff, each looking for one kind of problem. A fourth checks whether
-                the docs know about everything the diff added.
+                Three critics read the finished diff, each looking for one kind of problem. A fourth checks whether the
+                docs, seam docs included, know about everything the diff added.
               </Turn>
               {!reviewRun ? (
                 <div className="choices">
@@ -384,7 +512,7 @@ export function Tutorial() {
                   <Critic name="reusability-inspector" result="Nothing to report." />
                   <Critic
                     name="sync-architecture"
-                    result="POST /subscriptions/:id/pause wasn't documented. Added it to the backend API doc."
+                    result="The billing seam doc now lists the pause skip, and POST /subscriptions/:id/pause is in the API doc."
                     fixed
                   />
                 </ul>
@@ -392,22 +520,43 @@ export function Tutorial() {
             </>
           )}
 
-          {step === 6 && (
+          {step === 7 && (
             <>
               <Turn who="agent">
-                Last, the change map: where the task actually landed, compared with where the plan said it would.
+                The change map compared the plan with the diff. One drift: mission 2 reached{" "}
+                <strong>Notifications</strong> to send a pause confirmation email, which nobody planned for. It&apos;s a
+                real requirement, so it stays, on record.
               </Turn>
               <Turn who="agent">
-                One drift. Mission 2 reached <strong>Notifications</strong> to send a pause confirmation email, which
-                nobody planned for. It was a real requirement, so it stays, and it&apos;s on record.
+                I pushed the branch and opened a draft pull request. Its body shows the change, the evidence from the
+                protect step, and how risky it is to merge.
               </Turn>
-              <div className="finish">
-                <p>That&apos;s the whole loop. Run it on your own problem:</p>
-                <code className="inline-cmd">npx ab-method</code>
-                <button type="button" className="text-button" onClick={reset}>
-                  Start the tutorial again
-                </button>
-              </div>
+              {!prReviewed ? (
+                <div className="choices">
+                  <button type="button" className="primary" onClick={() => setPrReviewed(true)}>
+                    Run the final review
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <ul className="critics">
+                    <Critic name="review-pr · seams" result="Nothing to report. Every charge goes through BillingSchedule." />
+                    <Critic
+                      name="review-pr · rules"
+                      result="A comment repeated the three-month limit instead of naming MAX_PAUSE_MONTHS. Fixed and pushed."
+                      fixed
+                    />
+                  </ul>
+                  <Turn who="agent">Both reviewers started from a fresh context. PR #42 is marked ready for review.</Turn>
+                  <div className="finish">
+                    <p>That&apos;s the whole loop. Run it on your own problem:</p>
+                    <code className="inline-cmd">npx ab-method</code>
+                    <button type="button" className="text-button" onClick={reset}>
+                      Start the tutorial again
+                    </button>
+                  </div>
+                </>
+              )}
             </>
           )}
 
@@ -446,12 +595,24 @@ export function Tutorial() {
               <div className="file-body" role="tabpanel">
                 <p className="file-path">{filePath(activeFile)}</p>
                 {activeFile === "progress-tracker.md" && (
-                  <Tracker q1={q1} q2={q2} step={step} critique={critique} list={list} done={done} reviewRun={reviewRun} />
+                  <Tracker
+                    q1={q1}
+                    q2={q2}
+                    step={step}
+                    critique={critique}
+                    list={list}
+                    done={done}
+                    tests={tests}
+                    protectDone={protectDone}
+                    reviewRun={reviewRun}
+                  />
                 )}
                 {activeFile === "CONTEXT.md" && <ContextDoc />}
                 {activeFile === "unresolved-questions.md" && <UnresolvedDoc />}
-                {activeFile === "change-map.md" && <ChangeMap actual={step >= 6} />}
-                {activeFile === "review.md" && <ReviewDoc />}
+                {activeFile === "seams/billing.md" && <SeamDoc synced={reviewRun} />}
+                {activeFile === "change-map.md" && <ChangeMap actual={step >= 7} />}
+                {activeFile === "review.md" && <ReviewDoc prReviewed={prReviewed} />}
+                {activeFile === "pr-body.md" && <PrBody tests={tests} />}
               </div>
             </>
           )}
@@ -465,16 +626,19 @@ function sessionTitle(step: number) {
   return [
     "You describe the problem in a sentence.",
     "The agent asks until nothing is ambiguous.",
-    "The answers become missions.",
+    "The answers become a plan, refactors first.",
     "A critic checks the plan before any code.",
-    "Missions run red, then green.",
+    "Missions build to the plan.",
+    "Tests protect what must not break.",
     "Critics check the finished change.",
-    "The plan is measured against the diff.",
+    "It ships as a reviewed pull request.",
   ][step];
 }
 
 function filePath(f: FileName) {
-  return f === "CONTEXT.md" ? "CONTEXT.md" : `docs/tasks/pause-subscription/${f}`;
+  if (f === "CONTEXT.md") return "CONTEXT.md";
+  if (f === "seams/billing.md") return "docs/seams/billing.md";
+  return `docs/tasks/pause-subscription/${f}`;
 }
 
 function Turn({
@@ -513,6 +677,8 @@ function Tracker({
   critique,
   list,
   done,
+  tests,
+  protectDone,
   reviewRun,
 }: {
   q1: Q1;
@@ -521,6 +687,8 @@ function Tracker({
   critique: Critique;
   list: Mission[];
   done: number;
+  tests: Protected[];
+  protectDone: number;
   reviewRun: boolean;
 }) {
   const decided = q1 === "new" || q2 !== null;
@@ -546,13 +714,13 @@ function Tracker({
           <h4>Placement</h4>
           <ul>
             <li>
-              Date math: <em>extract</em> <code>addCalendarMonths</code> from <code>trial.ts</code>
+              Date math: <em>deepen</em>, one <code>addCalendarMonths</code> in the billing module
             </li>
             <li>
-              Pause rules: <em>new</em> <code>subscription/pause.ts</code>
+              Pause rules: <em>extend</em> Subscription, <code>subscription/pause.ts</code>
             </li>
             <li>
-              Charge schedule: <em>extend</em> <code>BillingSchedule</code>
+              Charges while paused: <em>extend</em> the billing seam, <code>BillingSchedule</code>
             </li>
             <li>
               Billing page: <em>extend</em> <code>BillingPanel</code>
@@ -567,14 +735,18 @@ function Tracker({
                   {i < done ? "✓" : ""}
                 </span>
                 <span className="sr-only">{i < done ? "Done: " : "To do: "}</span>
-                <span
-                  className="mission-title"
-                  data-flagged={i === 2 && step === 3 && critique === null ? "" : undefined}
-                >
-                  {m.title}
-                </span>
-                <code className="verify">verify: {m.verify}</code>
-                {m.uq && <span className="uq">UQ-1</span>}
+                <span className="mission-title">{m.title}</span>
+                <code className="verify">verify: build</code>
+                <ul className="mission-steps">
+                  {m.steps.map((s) => (
+                    <li key={s.text}>
+                      <span data-flagged={s.flagged && step === 3 && critique === null ? "" : undefined} className="mission-title">
+                        {s.text}
+                      </span>
+                      {s.uq && <span className="uq">UQ-1</span>}
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>
@@ -583,6 +755,18 @@ function Tracker({
 
       {critique === "dismiss" && (
         <p className="note">Plan critique dismissed with a reason. Draft: ADR-0012 supersedes ADR-0007.</p>
+      )}
+      {protectDone > 0 && (
+        <>
+          <h4>Protected</h4>
+          <ul>
+            {tests.slice(0, protectDone).map((t, i) => (
+              <li key={t.useCase}>
+                UC{i + 1} {t.useCase} → {t.boundary}. Seen red, then green.
+              </li>
+            ))}
+          </ul>
+        </>
       )}
       {reviewRun && (
         <>
@@ -642,9 +826,50 @@ function UnresolvedDoc() {
   );
 }
 
+function SeamDoc({ synced }: { synced: boolean }) {
+  return (
+    <article className="doc">
+      <h3>Billing schedule</h3>
+      <dl className="fields">
+        <div>
+          <dt>Interface</dt>
+          <dd>
+            <code>BillingSchedule.next(subscription)</code> decides every charge and returns a Charge or a Skip.
+          </dd>
+        </div>
+        {synced && (
+          <div data-added="">
+            <dt>Skips</dt>
+            <dd>A paused subscription returns Skip(paused), logged to the ledger.</dd>
+          </div>
+        )}
+        <div>
+          <dt>Callers never</dt>
+          <dd>create a charge or write to the ledger directly.</dd>
+        </div>
+        <div>
+          <dt>Check</dt>
+          <dd>
+            <code>grep -rn &quot;ledger.insert&quot; src --exclude-dir=billing</code>
+          </dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd>settled · see ADR-0007</dd>
+        </div>
+      </dl>
+      <p className="note">
+        {synced
+          ? "The highlighted entry was added by sync-architecture after the review."
+          : "Read before placement: the pause goes through this seam, never around it."}
+      </p>
+    </article>
+  );
+}
+
 const MAP_ROWS: { module: string; planned: string; actual: string }[] = [
-  { module: "Shared date utils", planned: "extracted", actual: "extracted" },
-  { module: "Subscription", planned: "new", actual: "new" },
+  { module: "Billing date math", planned: "deepened", actual: "deepened" },
+  { module: "Subscription", planned: "extended", actual: "extended" },
   { module: "Billing schedule", planned: "extended", actual: "extended" },
   { module: "Billing page", planned: "extended", actual: "extended" },
   { module: "Notifications", planned: "", actual: "touched" },
@@ -687,7 +912,7 @@ function ChangeMap({ actual }: { actual: boolean }) {
   );
 }
 
-function ReviewDoc() {
+function ReviewDoc({ prReviewed }: { prReviewed: boolean }) {
   return (
     <article className="doc">
       <h3>Review</h3>
@@ -696,12 +921,49 @@ function ReviewDoc() {
         <li>
           Inlined <code>PauseService.pause()</code>, a wrapper that only forwarded a call.
         </li>
-        <li>
-          Documented <code>POST /subscriptions/:id/pause</code> in the backend API doc.
-        </li>
+        <li>Billing seam doc and API doc updated for the pause.</li>
+        {prReviewed && (
+          <li>
+            PR review: named <code>MAX_PAUSE_MONTHS</code> instead of repeating the limit in a comment.
+          </li>
+        )}
       </ul>
       <h4>Open</h4>
-      <p>Nothing. The other two critics found no problems.</p>
+      <p>Nothing. The other critics found no problems.</p>
+    </article>
+  );
+}
+
+function PrBody({ tests }: { tests: Protected[] }) {
+  return (
+    <article className="doc">
+      <h3>Pause a subscription</h3>
+      <h4>Summary</h4>
+      <pre className="code-block">
+        <code>{` BillingSchedule.next(subscription)
++  if paused → Skip(paused), logged
+ BillingPanel
++  <PauseButton />`}</code>
+      </pre>
+      <h4>Evidence</h4>
+      <ul>
+        {tests.map((t, i) => (
+          <li key={t.useCase}>
+            UC{i + 1}: before, {t.red}; after, {t.green}.
+          </li>
+        ))}
+      </ul>
+      <h4>Merge danger</h4>
+      <dl className="fields">
+        <div>
+          <dt>Door</dt>
+          <dd>Two-way. One additive column; rolling back leaves it unused.</dd>
+        </div>
+        <div>
+          <dt>Blast radius</dt>
+          <dd>Billing. Every charge passes the new pause check.</dd>
+        </div>
+      </dl>
     </article>
   );
 }

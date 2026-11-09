@@ -7,7 +7,7 @@ const sizes = [
   {
     command: "/create-task",
     name: "A task",
-    body: "One feature or fix, split into missions. You run them one at a time and stay in the loop, or hand the whole task to /start-task and review the commits afterwards.",
+    body: "One feature or fix: the code it lands in deepened first, then composed missions. Stay in the loop with /resume-task, or hand it to /start-task and review the pull request it opens.",
   },
   {
     command: "/create-goal",
@@ -26,7 +26,7 @@ const commandGroups = [
     title: "Plan",
     commands: [
       ["/mastermind", "Not sure where to start? Describe it and get routed."],
-      ["/create-task", "Grill a problem into a task with test-driven missions."],
+      ["/create-task", "Grill a problem into a plan that deepens the code it touches."],
       ["/create-goal", "Write the prompt for an autonomous /goal loop."],
       ["/create-roadmap", "Split a bigger idea into ordered tasks."],
       ["/extend-task", "Add missions to a task that already exists."],
@@ -36,15 +36,14 @@ const commandGroups = [
     title: "Build",
     commands: [
       ["/resume-task", "Pick a task up where its tracker left off."],
-      ["/start-task", "Run every remaining mission unattended, one commit each."],
+      ["/start-task", "Run the task unattended and open a reviewed pull request. Add inline to skip subagents."],
       ["/start-roadmap", "Run a planned roadmap in dependency order."],
-      ["/test-mission", "Add tests to code that wasn't written test-first."],
     ],
   },
   {
     title: "Keep docs current",
     commands: [
-      ["/analyze-project", "Write the domain glossary, context and pattern docs."],
+      ["/analyze-project", "Write the domain glossary, context, pattern and seam docs."],
       ["/update-architecture", "Refresh those docs after a big change."],
       ["/ab-cleanup", "Compact docs back to budget and clear task leftovers."],
     ],
@@ -79,8 +78,8 @@ export default function Home() {
           <div className="hero-body">
             <p className="lead">
               AB Method is a workflow for Claude Code and Codex. Before any code is written, it questions your problem
-              until the plan is sharp. Then it builds that plan one tested mission at a time, and puts critics on both
-              sides of the change.
+              until the plan is sharp and deepens the code the change lands in. Then it builds, protects what must not
+              break, and ships a pull request reviewed against your seams.
             </p>
             <div className="hero-actions">
               <CopyCommand command="npx ab-method" />
@@ -89,13 +88,13 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <figure className="signal" aria-label="Five missions, each failing its test before it passes">
+          <figure className="signal" aria-label="Five tests, each seen failing before it is trusted">
             <div className="signal-cells" aria-hidden="true">
               {[0, 1, 2, 3, 4].map((i) => (
                 <span key={i} style={{ "--i": i } as React.CSSProperties} />
               ))}
             </div>
-            <figcaption>Every mission fails its test before it passes.</figcaption>
+            <figcaption>Every test is seen failing before it&apos;s trusted.</figcaption>
           </figure>
         </section>
 
