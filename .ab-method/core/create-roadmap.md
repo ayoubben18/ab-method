@@ -65,6 +65,10 @@ The goal of this grill is to answer:
   done before A can run.
 - Which tasks are **independent** (share no edge, touch disjoint areas)?
   Those are the parallelization candidates at execution time.
+- Which tasks are mostly a **solved problem** (a rich-text editor, auth,
+  payments, search)? Note it on the task's scope line ("likely adopt").
+  Its `/create-task` runs `adopt-or-build`, and a task a library covers
+  whole shrinks to integrating it.
 
 Read `UBIQUITOUS_LANGUAGE.md` / `CONTEXT.md` so task slugs and scopes use
 canonical domain terms. This is the only grill that happens in the main

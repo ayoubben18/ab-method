@@ -182,7 +182,8 @@ Read these before starting, and again whenever unsure. Paths come from
 - `docs/seams/index.md`, then the seams this goal crosses — go
   through them, never around them
 - `.ab-method/rules/code.md` — placement (reuse / extend / extract /
-  introduce before adding inline), write less, interface comments on
+  adopt / introduce before adding inline; adopt only a library that passes
+  `adopt-or-build`'s health checks), write less, interface comments on
   seams, otherwise comments only for the why
 - `docs/adr/` — prior decisions; do not contradict without flagging
 [Plus any existing-code anchors: "mirror src/auth/UserForm.tsx".]

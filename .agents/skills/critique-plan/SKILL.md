@@ -20,7 +20,7 @@ with `npx ab-method`), read the bundled default: `../../../.ab-method/structure/
 `SKILL.md`. Either way, every path the index names is relative to the **project root**, never to the folder the
 bundled file lives in.
 
-"The plan" is the drafted **mission list** (from create-task), the **task DAG** (from create-roadmap), or
+"The plan" is the drafted **mission list** together with the tracker's `## Placement` and `## Adopt or Build` sections (from create-task), the **task DAG** (from create-roadmap), or
 whatever the user pastes in (standalone).
 
 ## Process
@@ -53,6 +53,10 @@ out of the planning context. Its brief:
   it (direct `fetch` beside the data-fetching seam), or changes a seam's interface without an `introduce`
   placement or a pass through the seam design gate (`create-task` § 3). Cite the seam doc and its
   **Callers never** line.
+- **Unvetted dependency** — a mission installs or newly imports a package (including one only in the
+  lockfile) with no `adopt`, `covered` or `adopt (override: …)` row for it in `## Adopt or Build`, a
+  mission that installs a different version than the row checked, or a row checked more than 30 days ago.
+  This is the one check not anchored in the domain model. Cite the mission and the package.
 
 For each, return **What** (the mission/task/decision), **Conflicts with** (the exact term / `CONTEXT.md`
 section / `ADR-NNNN` / `docs/seams/<slug>.md`), **Why it matters** (concrete cost, not taste), **Suggested resolution**.

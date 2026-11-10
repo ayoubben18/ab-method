@@ -17,7 +17,10 @@ Before adding a capability, decide where it lives:
 - **Reuse** — something in the codebase already does it. Call it.
 - **Extend** — a module owns this concern. Add to it, behind its existing interface.
 - **Extract** — the logic exists inline in one or more places, or the new code would be its second copy. Move it into one module first, point the existing callers at it, then build on it.
-- **Introduce** — no module owns the concern and the task brings a new one (a library, a cross-cutting layer, a new seam). Design its interface before writing it; the seam design gate in `create-task` does this.
+- **Adopt** — nothing in the codebase owns it, and a healthy open-source library already solves it: actively maintained, current with the project's framework majors, and compatible with its exact versions, runtime, module format and types. The `adopt-or-build` skill decides, with evidence. The library sits behind a seam, never imported all over.
+- **Introduce** — no module owns the concern and the task brings a new one (a cross-cutting layer, a new seam, or the seam an adopted library sits behind). Design its interface before writing it; the seam design gate in `create-task` does this.
+
+Check adopt before building anything large or already solved by others (parsing a standard format, retries, rich text, auth flows, charts). Never adopt a library for domain logic, or for what a short function covers.
 
 Never add a second inline copy of logic that already exists. Extraction, deepening and introduction are their own steps done first: make the change easy, then make the easy change.
 

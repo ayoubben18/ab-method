@@ -44,7 +44,8 @@ Clear description → draft the missions. Vague → `grill-with-docs` first (it 
 Apply the same planning steps as `/create-task` § 3–5, scoped to the new work. Read `docs/seams/index.md` and the seams the new work touches first.
 
 - **Deepening scan** — over the new work's blast radius (the modules it touches, their callers, the seams they cross), with the `codebase-design` red flags. Each finding becomes a refactor mission placed **before** the missions that build on it, `verify: build`.
-- **Placement** — for each new capability, decide reuse / extend / extract / introduce (`.ab-method/rules/code.md`) and add a line to `## Placement`. Extractions are refactor missions placed first, like deepenings.
+- **Placement** — for each new capability, decide reuse / extend / extract / adopt / introduce (`.ab-method/rules/code.md`) and add a line to `## Placement`. Extractions are refactor missions placed first, like deepenings.
+- **Adopt or build** — a new capability that is large or a known solved problem runs the `adopt-or-build` skill whatever its placement, exactly as `create-task.md` § 3b does; its table is appended to `## Adopt or Build`.
 - **Seam design gate** — an **introduce**, or a change to a documented seam's interface, runs `create-task.md` § 3c before the missions are written.
 - **Tests** — no test plan. New missions are `verify: build`; a bug fix is `verify: repro`. The protect step picks the tests once the new code exists.
 - **Composed missions** — one headline per capability with its steps indented under it, split only at real boundaries (`create-task.md` § 6).
@@ -95,7 +96,7 @@ Invoke `change-map`'s planned pass for the new missions and append a dated block
 
 ## Remember
 - Missions go in `progress-tracker.md`, numbered sequentially, each with a `verify:` tag
-- The deepening scan, placement (incl. introduce and the seam design gate), composed missions and (for new UI) the prototype gate apply to extensions too
+- The deepening scan, placement (incl. adopt-or-build, introduce and the seam design gate), composed missions and (for new UI) the prototype gate apply to extensions too
 - Extension change maps are dated blocks; the original `## Planned` is never edited
 - `/extend-task` is where a parked `UQ-n` gets answered — never resolve one the user didn't answer
 - `[pp-x]` only with the user's explicit yes

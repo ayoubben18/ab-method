@@ -14,7 +14,7 @@ Loads and executes the workflow in `.ab-method/core/create-task.md`:
 1. Roadmap check, then `grill-with-docs` (short when the request is already specific)
 2. Read domain docs, tech-stack, `docs/seams/` and only the pattern topics the task touches
 3. **Deepening scan** over the blast radius (book red flags); every finding becomes a refactor mission placed first
-4. **Placement**: reuse / extend / extract / introduce per capability
+4. **Placement**: reuse / extend / extract / adopt / introduce per capability; a large or already-solved capability runs `adopt-or-build` first (adopt only a maintained library that fits the exact stack)
 5. **Seam design gate** (introduce, or a seam's interface changing): Design It Twice, your pick becomes `docs/seams/<slug>.md` before any code
 6. **New UI**: `prototype-ui` builds disposable HTML variants; your pick becomes the `## UI Spec`
 7. Composed missions, tagged `verify: build` (typecheck / lint / build) or `verify: repro` (bug fix, test first through `tdd`)

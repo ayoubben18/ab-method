@@ -20,12 +20,15 @@ A duplication finding is only credible once you've found the thing being duplica
   `frontend-patterns.md` / `backend-patterns.md`) when it, or a near-identical sibling in the codebase,
   already fits. Point at the sibling.
 - **Ignored placement decisions** — the task's `progress-tracker.md` `## Placement` recorded *reuse X*,
-  *extend Y* or *extract Z*, and the diff did something else: wrote a fresh copy instead of reusing,
+  *extend Y*, *extract Z* or *adopt L*, and the diff did something else: wrote a fresh copy instead of reusing,
+  hand-rolled what the adopted library does, imported the library around the seam it was placed behind,
   bolted onto a different module, or added the logic inline instead of extracting it first. Name the
   placement line it contradicts.
 - **Inline growth where extraction was due** — no placement line covers it, but the diff adds a second
   inline copy of logic that already exists elsewhere (`.ab-method/rules/code.md` § Placement). Propose the
   extraction and the callers it should serve.
+- **Unvetted dependency** — the diff adds a package to the manifest that the tracker's `## Adopt or Build`
+  never vetted, or installs a different version than the one checked. Name the package and the missing line.
 - **Internal copy-paste** — the same block repeated across files or missions in the diff, begging to be a
   shared function or a loop.
 - **Reinvented types** — a new interface/DTO that restates an existing type instead of importing or

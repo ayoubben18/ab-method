@@ -33,6 +33,8 @@ Before the first question, skim `CONTEXT.md`, `docs/seams/index.md` and the code
 
 Run the `grill-with-docs` skill on every invocation. When the user was already specific, it confirms and probes edges instead of re-asking, so it stays short. Before exiting it must cover: problem framing, scope (in/out), behavior (flow, data, validation, errors), constraints, and existing-code anchors.
 
+**Solved problems.** When part of the request is a problem others have already solved (a standard file format, a well-known widget, an auth flow), name it in the grill: "reading .xlsx is a solved problem; § 3b checks libraries for it". Settle the behaviour, but leave choices a library would decide (where parsing runs, which formats and limits are supported) open until § 3b, or record them as constraints the library must meet.
+
 - **Tangents** that deserve their own task: capture with the `handoff` skill under `docs/handoffs/`, tell the user `resume with /create-task-from-handoff <slug>`, return to the grill.
 - **Questions the user genuinely can't answer yet** (rare): the skill parks them in `unresolved-questions.md` with an agreed placeholder behind a `TODO(UQ-n)` seam. Never park on the user's behalf; anything with a sane default is a default noted in Constraints. Parking is an open decision inside this task; a handoff is a separate task.
 
@@ -71,7 +73,16 @@ For every capability the task adds, decide where it lives per `rules/code.md`:
 - **reuse** an existing module or component,
 - **extend** the module that owns the concern, behind its interface,
 - **extract** logic that exists inline (or would get a second copy) into one module, and point existing callers at it, or
-- **introduce** a new module when nothing owns the concern (a library, a cross-cutting layer, a new seam).
+- **adopt** a healthy open-source library when nothing in the repo owns the concern and one already solves it, or
+- **introduce** a new module when nothing owns the concern (a cross-cutting layer, a new seam).
+
+**Adopt or build.** Invoke the `adopt-or-build` skill for every capability that is large or a known solved problem (its § When it runs), **whatever placement you are leaning towards**. Reusing a library the repo already has counts: the skill health-checks installed libraries too. Every package the plan installs or newly imports must come out of this skill. Skip it only for domain logic and for what a short function covers; parsing a standard format is never "a short function" (delimiters, encodings, quoting). The skill checks every candidate with real numbers, including that each is actively maintained and fits the project's exact versions and runtime, and returns a verdict per piece. The user picks.
+
+- Paste its table into the tracker under `## Adopt or Build`, losing candidates included, so the evidence outlives the session.
+- Each verdict's `## Placement` line carries the pinned version, the seam and the check date (example in § 6).
+- It goes behind a seam: the existing seam that owns the concern (**extend**), or a new one through the gate below. Callers use the seam, never the library.
+- Offer an ADR when it carries lock-in.
+- Installing it is a step of the first mission that needs it, pinned to the checked version. Nothing is installed during planning. If that mission runs more than 30 days after the check date, re-run the skill's health check on the package before installing.
 
 Record each decision, and each deepening from 3a, in the tracker's `## Placement`. Extractions and deepenings become refactor missions placed first, `verify: build`: behaviour is preserved, so the existing tests stay green (see **Existing tests** in § 10). Be ambitious. If the right move is to pull a concern into its own module before building on it, plan that rather than adding the feature inline.
 
@@ -134,6 +145,10 @@ Only the non-obvious ones from the grill. Omit when empty.
 - refund calc → extract `src/billing/refund.ts` from checkout + admin (mission 1)
 - deepen: `OrderTotals` is a pass-through over `billing` → merge into the billing seam (mission 1)
 - refund button → reuse `ui/ConfirmButton`
+- <piece> → adopt <package>@<exact version> behind the <seam> seam (checked YYYY-MM-DD, see ## Adopt or Build)
+
+## Adopt or Build
+(The adopt-or-build table, checked YYYY-MM-DD, losing candidates included. Omit when the skill did not run.)
 
 ## UI Spec
 Picked "Dense": inline row action, no modal. Reference: docs/tasks/admin-partial-refunds/prototype/
@@ -250,6 +265,7 @@ Open `UQ-n` entries don't block completion; they ship as recorded placeholders. 
 
 - `index.yaml` first; rules files for talk and code; seam docs before placement.
 - Deepening scan over the blast radius; every finding in it is a refactor mission placed first.
+- Large or already-solved capability → `adopt-or-build`, whatever the placement (installed libraries included); adopt only a maintained library that fits the exact stack, behind a seam. No package enters the plan without it.
 - Introduce or change a seam → design gate before missions; the seam doc is written before the code.
 - Missions are composed slices, split only at real boundaries.
 - Tests come after the code (protect step), except bug fixes (`verify: repro`); full suite once at the end.

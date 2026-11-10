@@ -106,7 +106,7 @@ grounded in the actual files, not from memory:
 2. **Sharpen** — `domain-model` grills the language, captures ADRs.
 3. **Build** — `create-task` grills, scans the task's blast radius for
    modules to deepen, decides placement (reuse / extend / extract /
-   introduce), designs any new seam before code (seam design gate),
+   adopt / introduce; `adopt-or-build` vets any library), designs any new seam before code (seam design gate),
    prototypes new UI as disposable HTML, then runs composed missions —
    bug fixes test-first (`verify: repro`), the rest `verify: build`.
    After coding, the protect step tests what must not break, through the
@@ -125,7 +125,7 @@ Keep it short. Point them at `/ab-master` for the full workflow menu.
 - **Park, never guess** — the rare question the user genuinely can't answer
   yet becomes a recorded black box (`unresolved-questions.md` + a
   `TODO(UQ-n)` seam), not a silent invented decision.
-- **Place before you code** — reuse, extend, extract or introduce first;
+- **Place before you code** — reuse, extend, extract, adopt or introduce first;
   never a second inline copy; go through documented seams, never around
   them (`.ab-method/rules/code.md`).
 - **Tests where they earn their keep** — written after coding by the

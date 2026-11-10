@@ -4,7 +4,7 @@
 # Rules every workflow and skill follows. Read the ones that apply before acting.
 rules:
   - .ab-method/rules/communication.md   # how to talk to the user: answer first, no recaps
-  - .ab-method/rules/code.md            # strategic programming, seams first, placement (reuse / extend / extract / introduce), write less, comments, obviousness
+  - .ab-method/rules/code.md            # strategic programming, seams first, placement (reuse / extend / extract / adopt / introduce), write less, comments, obviousness
   - .ab-method/rules/docs.md            # what docs may hold, edit in place, the check-docs gate
 
 # Word budgets for the domain + architecture docs. First matching glob wins.
@@ -200,7 +200,7 @@ workflow_outputs:
     - docs/handoffs/                         # handoffs already turned into tasks removed
                         # Runs on its own branch, commits per phase, never pushes
   mastermind: []   # router only — explains the method and delegates to a workflow; writes nothing
-  create-task:   # deepening scan over the blast radius → placement → seam design gate → critique-plan
+  create-task:   # deepening scan over the blast radius → placement (adopt-or-build for large or solved capabilities) → seam design gate → critique-plan
                  # (advisory) → change-map PLANNED pass → validate → missions → protect → review-implementation
                  # + sync-architecture + change-map ACTUAL pass → optional PR (pr + review-pr)
     - docs/tasks/[task-name]/progress-tracker.md
@@ -209,6 +209,10 @@ workflow_outputs:
   grill-with-docs: docs/tasks/[task-name]/unresolved-questions.md   # ONLY when the grill had to park a
                           # question the user genuinely can't answer yet; the file is absent otherwise.
                           # Also updates CONTEXT.md / docs/adr/ inline as decisions crystallise.
+  adopt-or-build: []   # read-only; writes nothing itself. Per piece of a large or already-solved capability:
+                       # covered / adopt / build, with health evidence (maintained, current, exact fit
+                       # with the stack's versions and runtime). Verdicts land in the tracker's ## Placement
+                       # via create-task / extend-task; installs happen only inside a mission
   critique-plan: []   # pre-implementation critic; read-only, surfaces domain-model pushbacks only (may prompt an ADR under docs/adr/ on a load-bearing dismissal). Invoked by create-task / create-roadmap, or standalone
   review-implementation: docs/tasks/[task-name]/review.md   # post-implementation review; three critics on the task diff. Writes review.md on autonomous runs; interactive runs present findings instead
   change-map: docs/tasks/[task-name]/change-map.md   # the task's blast radius, drawn twice. PLANNED pass
