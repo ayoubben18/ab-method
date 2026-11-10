@@ -1,3 +1,9 @@
+## [5.1.0](https://github.com/ayoubben18/ab-method/compare/v5.0.0...v5.1.0) (2026-11-10)
+
+### ✨ Features
+
+* vet open-source libraries before building (adopt-or-build) ([7fb1e1a](https://github.com/ayoubben18/ab-method/commit/7fb1e1a7cc74de85023260e22f49a67671cc5bb2))
+
 ## [5.0.0](https://github.com/ayoubben18/ab-method/compare/v4.1.0...v5.0.0) (2026-11-09)
 
 ### ⚠ BREAKING CHANGES
