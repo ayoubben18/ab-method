@@ -6,6 +6,14 @@ Rules for writing code inside any AB Method workflow. Applied while writing, not
 
 Working code isn't enough. Each change leaves the design a little better than it found it: deepen the module you touch, fix the leak you route around. A shortcut taken on purpose is named in the mission summary, never left silent.
 
+## Scope follows the problem
+
+Size a change by what the feature needs, not by how much code it moves. Agents write the code, so lines changed, files touched and "it's a big refactor" are not costs. A design that makes a feature bend around it is a cost, and it is paid on every change after this one.
+
+- When a feature needs special cases, flags, adapters or a second path to get past the current design, change the design. `create-task` § 3a decides fit or reshape.
+- Don't stage what can ship: no "simple version now, the rest later" unless a real boundary forces the split.
+- What does count: risk to persisted data, breaking an external contract, reversing an ADR, and decisions that can't be undone. These shape how you migrate. They don't argue for keeping a design that doesn't fit.
+
 ## Seams first
 
 Read `docs/seams/index.md` (path from `.ab-method/structure/index.yaml`) before placing code. A capability a seam owns goes **through** that seam, never around it: no `fetch` beside the data-fetching seam, no `process.env` beside the configuration seam. If the seam's interface can't express what you need, change the interface (that is a seam change: it goes through the seam design gate), don't bypass it.
@@ -30,7 +38,7 @@ Never add a second inline copy of logic that already exists. Extraction, deepeni
 - **No speculative generality.** No options, generics, factories or extension points with a single caller.
 - **Pull complexity down.** Compute a sensible default inside the module rather than adding a parameter every caller must set.
 - **No defensive checks for impossible states.** Validate at trust boundaries only.
-- **Match the surrounding code.** Its naming, structure and idioms win over your preferences. Consistency is what lets a reader guess right.
+- **Match the surrounding code.** Its naming, style and idioms win over your preferences. Consistency is what lets a reader guess right. This is about how code reads, not about architecture: an existing design that doesn't fit the feature is reshaped (Scope follows the problem), not copied.
 
 ## Comments
 

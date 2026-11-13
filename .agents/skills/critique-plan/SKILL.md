@@ -1,6 +1,6 @@
 ---
 name: critique-plan
-description: Pre-implementation critic. Spins up a read-only domain critic that challenges a drafted plan — a task's missions or a roadmap's task graph — against the ubiquitous language, CONTEXT.md, ADRs and the documented seams, and pushes back ONLY on genuine conflicts. Silent when the plan is sound. Use before implementing (from create-task / create-roadmap) or standalone to stress-test a plan against the project's domain model.
+description: Pre-implementation critic. Spins up a read-only domain critic that challenges a drafted plan — a task's missions or a roadmap's task graph — against the ubiquitous language, CONTEXT.md, ADRs and the documented seams, flags plans that bend a feature around a design it should reshape, and pushes back ONLY on genuine conflicts. Silent when the plan is sound. Use before implementing (from create-task / create-roadmap) or standalone to stress-test a plan against the project's domain model.
 ---
 
 # Critique Plan (pre-implementation)
@@ -53,10 +53,16 @@ out of the planning context. Its brief:
   it (direct `fetch` beside the data-fetching seam), or changes a seam's interface without an `introduce`
   placement or a pass through the seam design gate (`create-task` § 3). Cite the seam doc and its
   **Callers never** line.
+- **Fits around a design it should reshape** — a mission adds a special case, flag, adapter or second
+  path to get past the current design, cuts or stages a capability the task's `## Outcome` asks for, or
+  defers part of it to "later" with no real boundary forcing the split, while the tracker's `## Architecture`
+  says fit or is missing (`create-task` § 3a). Cite the mission and the workaround, and sketch the reshape
+  that removes it. Effort is not a reason to keep the fit; a real constraint (an ADR, an external
+  contract, persisted data) is, so don't fire when `## Architecture` names one.
 - **Unvetted dependency** — a mission installs or newly imports a package (including one only in the
   lockfile) with no `adopt`, `covered` or `adopt (override: …)` row for it in `## Adopt or Build`, a
   mission that installs a different version than the row checked, or a row checked more than 30 days ago.
-  This is the one check not anchored in the domain model. Cite the mission and the package.
+  This and the reshape check are the two not anchored in the domain model. Cite the mission and the package.
 
 For each, return **What** (the mission/task/decision), **Conflicts with** (the exact term / `CONTEXT.md`
 section / `ADR-NNNN` / `docs/seams/<slug>.md`), **Why it matters** (concrete cost, not taste), **Suggested resolution**.

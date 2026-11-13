@@ -2,9 +2,9 @@
 
 ## Purpose
 
-Turn a problem into one holistic task: a grilled problem statement, a deepening scan of the code it touches, a placement decision, and a short list of composed missions, then run them. Tests are decided after the code exists, by the protect step.
+Turn a problem into one holistic task: a grilled problem statement, a zoom-out that decides whether the feature fits the current architecture or needs a reshape, a deepening scan of the code it touches, a placement decision, and a short list of composed missions, then run them. Tests are decided after the code exists, by the protect step.
 
-Tasks are run by agents, so size is not the constraint: a task refactors and deepens what it touches instead of leaving that for later (`rules/code.md`, Strategic, not tactical).
+Tasks are run by agents, so size is not the constraint. A task refactors and deepens what it touches instead of leaving that for later, and when the feature doesn't fit the current design, it re-architects the area rather than bending the feature around it (`rules/code.md`, Strategic, not tactical, and Scope follows the problem).
 
 **Read `.ab-method/structure/index.yaml` FIRST.** It says where every doc this workflow reads and writes lives, and how tasks link to roadmaps. Paths are user-configurable; never hardcode them.
 
@@ -33,7 +33,9 @@ Before the first question, skim `CONTEXT.md`, `docs/seams/index.md` and the code
 
 Run the `grill-with-docs` skill on every invocation. When the user was already specific, it confirms and probes edges instead of re-asking, so it stays short. Before exiting it must cover: problem framing, scope (in/out), behavior (flow, data, validation, errors), constraints, and existing-code anchors.
 
-**Solved problems.** When part of the request is a problem others have already solved (a standard file format, a well-known widget, an auth flow), name it in the grill: "reading .xlsx is a solved problem; § 3b checks libraries for it". Settle the behaviour, but leave choices a library would decide (where parsing runs, which formats and limits are supported) open until § 3b, or record them as constraints the library must meet.
+**Scope follows the problem, not the code.** Settle scope from what the user needs, never from what the current code makes easy. Don't propose "a small version now, the rest later", and don't cut a capability because the current design can't hold it; that is what § 3a is for. Existing-code anchors tell you what's there, not what the feature is allowed to be.
+
+**Solved problems.** When part of the request is a problem others have already solved (a standard file format, a well-known widget, an auth flow), name it in the grill: "reading .xlsx is a solved problem; § 3c checks libraries for it". Settle the behaviour, but leave choices a library would decide (where parsing runs, which formats and limits are supported) open until § 3c, or record them as constraints the library must meet.
 
 - **Tangents** that deserve their own task: capture with the `handoff` skill under `docs/handoffs/`, tell the user `resume with /create-task-from-handoff <slug>`, return to the grill.
 - **Questions the user genuinely can't answer yet** (rare): the skill parks them in `unresolved-questions.md` with an agreed placeholder behind a `TODO(UQ-n)` seam. Never park on the user's behalf; anything with a sane default is a default noted in Constraints. Parking is an open decision inside this task; a handoff is a separate task.
@@ -52,13 +54,32 @@ Read, using the paths from `index.yaml`:
 
 Then search the code: similar implementations to mirror, modules that already own this concern, types and services to reuse, inline logic the task would duplicate.
 
-### 3. Deepening scan, placement, seam design
+### 3. Zoom out, deepening scan, placement, seam design
 
-#### 3a. Deepening scan
+#### 3a. Zoom out: fit or reshape
+
+Agents tend to fit a feature into the code that's there: the smallest diff, the existing pattern, "start with the simple version". For an agent, writing code is cheap. A design that fights the feature costs something on every change after it. So before judging single modules, judge the shape of the area.
+
+Example: an assistant that answers questions in a chat is asked to orchestrate several agents.
+- **Fit:** add a "create a task and assign it" tool and let a project board carry the plan. It ships a scripted path the user outgrows on the first goal that isn't a board.
+- **Reshape:** the assistant becomes a stored run that sleeps between steps and is woken by events. Messaging an agent, waiting for its reply and asking the user become tools of that loop. That shape is what the feature actually is. It also makes background work and resuming after a restart possible, which nobody asked for yet.
+
+1. **Sketch the target.** Describe the design you'd build if this area were written today with this feature, and the features it obviously leads to, as requirements. Name the modules, who owns what, and how data and control flow. Keep it to a short paragraph or a small diagram.
+2. **Compare it with what's there.** For each difference, find why the current design is the way it is. A real constraint is an ADR, an external or public contract, the shape of persisted data, or a platform limit. Anything else is history, and history is not a reason to keep a design.
+3. **Decide.**
+   - **Fit**: the current shape serves the feature and the differences are cosmetic. Carry on to § 3b. This is a normal outcome; never invent a reshape.
+   - **Reshape**: the feature would bend around the current design. Plan the target architecture and the migration to it as missions in this task.
+4. **Signs it's a reshape:** the plan needs special cases, flags or adapters to get past the current design. A second path would do a job an existing path already does. The feature needs a concept the model has no place for. A capability the user asked for gets cut or staged because the design can't hold it. Several modules change in lockstep for one behaviour.
+5. **Effort is not a cost.** Lines changed, files touched, number of missions and "it's a big refactor" never argue for fit. The costs that count are risk to persisted data, breaking an external contract, reversing an ADR and decisions that can't be undone. They shape the migration (a backfill, a compatibility window, an ADR). They don't decide against the reshape by themselves.
+6. **Don't stage what can ship.** "Do layer 1 now and layer 2 later" is a split only when a real boundary forces it, such as a gated dependency or an open decision. Otherwise the whole capability is built in this task. If it is truly more than one task, propose `/create-roadmap` with the target architecture as its objective, not a cut-down task.
+7. **Push for it.** On a reshape, lead with it as the recommendation. Show current and target side by side, what the reshape unlocks beyond the ask (one line each, as offers the user can fold in), and the migration. Fit is the alternative, not the default. If the user leans towards fit to save effort, name once the concrete workaround it will force (from point 4). Then the user decides, and you go with it.
+8. **Record it** in the tracker's `## Architecture`: the verdict, the target sketch and the reason (example in § 6). On a reshape, the target sets the blast radius for § 3b, every new or changed seam goes through § 3d, and the migration missions come before the features that build on the target.
+
+#### 3b. Deepening scan
 
 Before deciding where new code goes, judge the code it will land in. Invoke the `codebase-design` skill for the vocabulary and read its `RED-FLAGS.md`.
 
-- **Scope: the blast radius.** The modules the task touches, their callers, and the seams they cross. Not the rest of the repo.
+- **Scope: the blast radius.** The modules the task touches, their callers, and the seams they cross, measured against the target from § 3a when it reshapes. Not the rest of the repo.
 - **Read the drift.** `docs/tasks/*/change-map.md` rows marked unplanned across several tasks point at a module changes keep leaking into.
 - **Judge each module** with the deletion test and the red flags. A finding names the module, the flag, and the symptom it causes (change amplification, cognitive load, unknown unknowns).
 - **Every finding in the blast radius becomes a refactor mission**, placed before the missions that build on it, `verify: build`. Don't defer it: the task is about to change this code, so this is when deepening pays.
@@ -66,7 +87,7 @@ Before deciding where new code goes, judge the code it will land in. Invoke the 
 
 No findings is a normal outcome. Never invent work to fill the scan.
 
-#### 3b. Placement
+#### 3c. Placement
 
 For every capability the task adds, decide where it lives per `rules/code.md`:
 
@@ -84,9 +105,9 @@ For every capability the task adds, decide where it lives per `rules/code.md`:
 - Offer an ADR when it carries lock-in.
 - Installing it is a step of the first mission that needs it, pinned to the checked version. Nothing is installed during planning. If that mission runs more than 30 days after the check date, re-run the skill's health check on the package before installing.
 
-Record each decision, and each deepening from 3a, in the tracker's `## Placement`. Extractions and deepenings become refactor missions placed first, `verify: build`: behaviour is preserved, so the existing tests stay green (see **Existing tests** in § 10). Be ambitious. If the right move is to pull a concern into its own module before building on it, plan that rather than adding the feature inline.
+Record each decision, and each deepening from 3b, in the tracker's `## Placement`. Extractions and deepenings become refactor missions placed first, `verify: build`: behaviour is preserved, so the existing tests stay green (see **Existing tests** in § 10). Be ambitious. If the right move is to pull a concern into its own module before building on it, plan that rather than adding the feature inline.
 
-#### 3c. Seam design gate
+#### 3d. Seam design gate
 
 Runs when a placement is **introduce**, or when the task changes a documented seam's interface. Skip it otherwise.
 
@@ -141,6 +162,10 @@ Only the non-obvious ones from the grill. Omit when empty.
 ⚠️ UQ-1 — refund window fixed or per-merchant? Placeholder: fixed 30 days. See unresolved-questions.md
 (Omit the section when nothing was parked — the common case.)
 
+## Architecture
+Fit: refunds are one more operation on the billing module; the current shape holds them.
+(Or, on a reshape: `Reshape:` the target sketch, what it replaces and why, what it unlocks beyond the ask, and the migration. One short paragraph or diagram.)
+
 ## Placement
 - refund calc → extract `src/billing/refund.ts` from checkout + admin (mission 1)
 - deepen: `OrderTotals` is a pass-through over `billing` → merge into the billing seam (mission 1)
@@ -172,8 +197,8 @@ _Filled in by the protect step after the last mission._
 
 Mission rules:
 - **A mission is a composed slice**: one headline that delivers a whole capability, in domain terms, then `— verify: build` or `— verify: repro`, and its steps as indented sub-bullets. Steps span layers freely (backend, frontend, wiring) when they deliver one capability.
-- **Split only at a real boundary**: a deepening or new seam that must land first, a dependency the next part needs to exist, or a bug fix (its own `verify: repro` mission). Most tasks have one to three missions. Never split by layer alone.
-- Order: deepenings and extractions first, then the seam work (pin → build → migrate → delete), then the features that build on them.
+- **Split only at a real boundary**: a reshape or deepening, or a new seam, that must land first, a dependency the next part needs to exist, or a bug fix (its own `verify: repro` mission). Most fit tasks have one to three missions; a reshape adds its migration. Never split by layer alone, and never to defer part of the capability.
+- Order: the reshape's migration, deepenings and extractions first, then the seam work (pin → build → migrate → delete), then the features that build on them.
 - Missions building on a parked question carry `⚠️ UQ-n`.
 - No mission docs and no empty placeholder sections.
 
@@ -194,7 +219,7 @@ If some missions are independent (disjoint files, no shared types, none consumes
 
 ### 9. Confirm
 
-Show, briefly: the missions with their `verify:` tags and steps, the placement (deepenings included), any seam doc the gate wrote, the blast radius ("6 modules, 1 new"), and any placeholders with the missions that build on them. Ask to validate. On yes, set status `Validated` and commit the plan (tracker, `change-map.md`, any seam doc or ADR the gate wrote) as `docs(<task>): plan`. The task's commit range starts after it, so the actual change map and the reviews see only the work.
+Show, briefly: the architecture verdict (on a reshape, current and target side by side), the missions with their `verify:` tags and steps, the placement (deepenings included), any seam doc the gate wrote, the blast radius ("6 modules, 1 new"), and any placeholders with the missions that build on them. Ask to validate. On yes, set status `Validated` and commit the plan (tracker, `change-map.md`, any seam doc or ADR the gate wrote) as `docs(<task>): plan`. The task's commit range starts after it, so the actual change map and the reviews see only the work.
 
 ### 10. Execute missions
 
@@ -264,6 +289,7 @@ Open `UQ-n` entries don't block completion; they ship as recorded placeholders. 
 ## Remember
 
 - `index.yaml` first; rules files for talk and code; seam docs before placement.
+- Zoom out before placing anything: fit or reshape. Effort never argues for fit; a feature bending around the design does argue for a reshape. When it's a reshape, recommend it; the user decides.
 - Deepening scan over the blast radius; every finding in it is a refactor mission placed first.
 - Large or already-solved capability → `adopt-or-build`, whatever the placement (installed libraries included); adopt only a maintained library that fits the exact stack, behind a seam. No package enters the plan without it.
 - Introduce or change a seam → design gate before missions; the seam doc is written before the code.

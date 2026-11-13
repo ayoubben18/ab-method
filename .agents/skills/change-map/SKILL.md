@@ -131,7 +131,7 @@ drift to look thorough.
 
 | Drift pattern | What it means | Route to |
 |---|---|---|
-| The same unplanned module keeps appearing across tasks | Changes keep leaking there — a locality problem | The next task's deepening scan (`create-task` § 3a), or `/improve-codebase-architecture` for a repo-wide look |
+| The same unplanned module keeps appearing across tasks | Changes keep leaking there — a locality problem | The next task's deepening scan (`create-task` § 3b), or `/improve-codebase-architecture` for a repo-wide look |
 | An unplanned row crosses a bounded context | The boundary in `CONTEXT.md` may be drawn in the wrong place | `/domain-model` |
 | A predicted-untouched row whose mission claimed it | The mission may not have done what its summary says | Re-read that mission before setting the task `Completed` |
 | Wide drift on almost every task | Missions are being drafted without reading the code | `/create-task` § 2 — the project-analysis step is being skipped |
