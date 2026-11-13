@@ -1,3 +1,9 @@
+## [5.2.0](https://github.com/ayoubben18/ab-method/compare/v5.1.0...v5.2.0) (2026-11-13)
+
+### ✨ Features
+
+* zoom out before planning — fit or reshape ([7bfebf0](https://github.com/ayoubben18/ab-method/commit/7bfebf0c3a792fa257c7b396cd347ad6f2b8f9ed))
+
 ## [5.1.0](https://github.com/ayoubben18/ab-method/compare/v5.0.0...v5.1.0) (2026-11-10)
 
 ### ✨ Features
